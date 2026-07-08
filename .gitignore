@@ -1,0 +1,12 @@
+node_modules/
+dist/
+tmp/
+.vscode/
+.idea/
+*.local
+.env
+.DS_Store
+*.log
+pgdata/
+.nx
+.angular

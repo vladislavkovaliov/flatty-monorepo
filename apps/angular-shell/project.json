@@ -1,0 +1,24 @@
+{
+  "name": "angular-shell",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/angular-shell/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ng build",
+        "cwd": "apps/angular-shell"
+      },
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ng serve --port 4200",
+        "cwd": "apps/angular-shell"
+      }
+    }
+  },
+  "tags": ["scope:frontend", "type:shell"]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "flatty-budget-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "nx run-many --target=serve --all --parallel=5",
+    "dev:frontend": "nx run-many --target=serve --projects=react-launcher,react-settings,angular-shell --parallel=3",
+    "dev:backend": "nx run-many --target=serve --projects=go-api,nest-graphql --parallel=2",
+    "build": "nx run-many --target=build --all",
+    "test": "nx run-many --target=test --all",
+    "lint": "nx run-many --target=lint --all",
+    "graph": "nx graph"
+  },
+  "devDependencies": {
+    "@nx-go/nx-go": "^4.1.1",
+    "@nx/devkit": "^23.0.1",
+    "@nx/eslint": "^23.0.1",
+    "@nx/jest": "^23.0.1",
+    "@nx/js": "^23.0.1",
+    "@nx/nest": "^23.0.1",
+    "@nx/vite": "^23.0.1",
+    "@nx/webpack": "^23.0.1",
+    "nx": "^23.0.1"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

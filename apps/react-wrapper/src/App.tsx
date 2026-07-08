@@ -13,7 +13,7 @@ import {
   Box,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconHome, IconInfoCircle, IconSettings } from "@tabler/icons-react";
+import { IconHome, IconSettings } from "@tabler/icons-react";
 
 import { SingleTabManagerWrapper } from "./components/single-tab-manager";
 

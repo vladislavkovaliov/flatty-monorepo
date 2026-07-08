@@ -1,0 +1,1 @@
+export {SingleTabManagerWrapper} from './single-tab-manager';

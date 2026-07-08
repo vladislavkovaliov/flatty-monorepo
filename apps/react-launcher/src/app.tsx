@@ -1,26 +1,61 @@
-import { MicrofrontendHost } from './components/MicrofrontendHost';
-import { reactSettings } from './applications/react-app';
-import { angularApp } from './applications/angular-app';
+import { Outlet } from "react-router-dom";
+import {
+  SingleTabManager,
+  type SingleTabManagerOptions,
+} from "single-active-browser-tab";
 
-const settingsConfig = reactSettings();
-const angularConfig = angularApp();
+import {
+  MantineProvider,
+  createTheme,
+} from "@mantine/core";
+import { useEffect, useRef, useState } from "react";
 
-export function App() {
+import "@mantine/core/styles.css";
+
+const theme = createTheme({
+  primaryColor: "cyan",
+  fontFamily: "system-ui, sans-serif",
+});
+
+export default function App() {
+  const [isActive, setIsActive] = useState<boolean | null>(null);
+
+  const managerRef = useRef<SingleTabManager | null>(null);
+
+  useEffect(() => {
+    const singleTabManager = new SingleTabManager("broadcast", {
+      onActive: () => {
+        setIsActive(true);
+      },
+      onBlocked: () => {
+        setIsActive(false);
+      },
+      logLevel: "log",
+    } satisfies SingleTabManagerOptions);
+
+    managerRef.current = singleTabManager;
+
+    singleTabManager.start();
+
+    return () => {
+      singleTabManager.stop();
+      managerRef.current = null;
+    };
+  }, []);
+
+  const handleReloadCallback = () => {
+    managerRef.current?.takeover();
+  };
+
   return (
-    <div>
-      <h1>Flatty Budget — Launcher</h1>
-      <div style={{ display: 'flex', gap: 16 }}>
-        <MicrofrontendHost
-          bundleName={settingsConfig.bundleName}
-          remoteOrigin={settingsConfig.remoteOrigin}
-          proxyBasePath={settingsConfig.proxyBasePath}
-        />
-        <MicrofrontendHost
-          bundleName={angularConfig.bundleName}
-          remoteOrigin={angularConfig.remoteOrigin}
-          proxyBasePath={angularConfig.proxyBasePath}
-        />
-      </div>
-    </div>
+    <MantineProvider theme={theme} defaultColorScheme="dark">
+      {isActive && <Outlet />}
+      {isActive === false && (
+        <div>
+          <p>Application is already opened in other tabs.</p>
+          <button onClick={handleReloadCallback}>Reload</button>
+        </div>
+      )}
+    </MantineProvider>
   );
 }

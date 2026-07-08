@@ -1,38 +1,21 @@
 {
-  "name": "react-launcher",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "react-launcher",
   "projectType": "application",
   "sourceRoot": "apps/react-launcher/src",
+  "tags": [],
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "nx:run-script",
       "options": {
-        "command": "vite build",
-        "cwd": "apps/react-launcher"
-      },
-      "outputs": ["{projectRoot}/dist"]
+        "script": "build:vite"
+      }
     },
     "serve": {
-      "executor": "nx:run-commands",
+      "executor": "nx:run-script",
       "options": {
-        "command": "vite --port 5175",
-        "cwd": "apps/react-launcher"
-      }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "vitest run",
-        "cwd": "apps/react-launcher"
-      }
-    },
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "eslint .",
-        "cwd": "apps/react-launcher"
+        "script": "start"
       }
     }
-  },
-  "tags": ["scope:frontend", "type:shell"]
+  }
 }

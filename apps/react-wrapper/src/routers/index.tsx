@@ -1,0 +1,50 @@
+import { createBrowserRouter } from "react-router-dom";
+import { HomePage } from "../pages/HomePage.tsx";
+import App from "../App";
+
+import * as microApps from "../applications";
+import { MicrofrontendHost } from "../core/micro-frontend-host";
+
+type MicroAppConfig = {
+  bundleName: string;
+  cssBundleName?: string;
+  remoteOrigin?: string;
+  basePath?: string;
+  proxyBasePath?: string;
+};
+
+type MicroAppFactory = () => MicroAppConfig;
+
+type AppFactories = typeof microApps;
+type AppConfigUnion = ReturnType<AppFactories[keyof AppFactories]>;
+type BundleName = AppConfigUnion["bundleName"];
+type AvailableConfigs = {
+  [K in BundleName]: Extract<AppConfigUnion, { bundleName: K }>;
+};
+
+const availableConfigs = Object.fromEntries(
+  Object.values(microApps).map((factory) => {
+    const cfg = (factory as MicroAppFactory)();
+    return [cfg.bundleName, cfg] as const;
+  }),
+) as AvailableConfigs;
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path: "/",
+        element: <HomePage />,
+      },
+      {
+        path: "/settings/*",
+        element: (
+          <MicrofrontendHost basePath="/settings" {...availableConfigs.settings} />
+        ),
+      },
+    ],
+  },
+  
+]);

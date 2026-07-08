@@ -1,8 +1,15 @@
+import '@mantine/core/styles.css';
+
+import { QueryProvider } from './app/providers/query-provider';
+import { ThemeProvider } from './app/providers/theme-provider';
+import { UserSettingsPage } from './pages/user-settings';
+
 export function App() {
   return (
-    <div>
-      <h2>Settings (React Micro-frontend)</h2>
-      <p>This is loaded via script injection at runtime.</p>
-    </div>
+    <QueryProvider>
+      <ThemeProvider>
+        <UserSettingsPage />
+      </ThemeProvider>
+    </QueryProvider>
   );
 }

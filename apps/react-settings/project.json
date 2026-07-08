@@ -15,7 +15,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "webpack serve --port 5174",
+        "command": "npm run dev",
         "cwd": "apps/react-settings"
       }
     }

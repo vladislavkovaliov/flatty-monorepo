@@ -1,20 +1,18 @@
-export interface IResidentCreate {
+export interface IUser {
   fullName: string;
   email: string;
   phone: string;
-  dateOfBirth: string;
+  dateOfBirth: string | null;
+}
+
+export interface IResident {
   country: string;
   city: string;
+  apartment: string;
+  house: string;
+  street: string;
+  postalCode: string;
   address: string;
 }
 
-export interface IResidentLocation {
-  id: number;
-  country: string;
-  city: string;
-}
-
-export interface IResidentLocationResponse {
-  data: IResidentLocation[];
-  total: number;
-}
+export type ResidentCreate = IUser & IResident;

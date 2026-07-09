@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => {
           rewrite: (path) => path.replace(/^\/external-resident/, ""),
         },
          "/api": { target: "http://localhost:8080" },
+         "/graphql": { target: "http://localhost:3000" },
       },
     },
     define: {

@@ -39,7 +39,7 @@ export function Launcher() {
     localStorage.removeItem("react-applications");
     window.location.reload();
   };
-
+  console.log(config)
   const renderConfigContent = () => {
     if (!config) {
       return <Text c="dimmed">No configuration set</Text>;

@@ -16,4 +16,11 @@ export class ResidentLocationRepository {
     async count(): Promise<number> {
         return this.residentLocationRepository.count();
     }
+
+    async list(limit = 10, offset = 0): Promise<[ResidentLocation[], number]> {
+        return this.residentLocationRepository.findAndCount({
+            skip: offset,
+            take: limit,
+        });
+    }
 }

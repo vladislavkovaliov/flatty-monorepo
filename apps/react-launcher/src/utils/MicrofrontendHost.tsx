@@ -83,8 +83,13 @@ export function MicrofrontendHost({
         return Promise.resolve();
       }
 
-      const commonChunks = [`${remoteOrigin}/${APPS_VENDORS_CHUNK_NAME}`];
+      if (bundleName === APPLICATION_BUNDLE_NAME.RESIDENT) {
+        // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
+        return Promise.resolve();
+      }
 
+      const commonChunks = [`${remoteOrigin}/${APPS_VENDORS_CHUNK_NAME}`];
+      console.log(commonChunks)
       return Promise.all(
         commonChunks.map((src) =>
           LoaderUtils.loadScript({
@@ -103,6 +108,12 @@ export function MicrofrontendHost({
       }
 
       if (bundleName === APPLICATION_BUNDLE_NAME.SETTINGS) {
+        const baseUrl = `${window.location.origin}${proxyBasePath}`;
+
+        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js` });
+      }
+
+       if (bundleName === APPLICATION_BUNDLE_NAME.RESIDENT) {
         const baseUrl = `${window.location.origin}${proxyBasePath}`;
 
         return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js` });
@@ -159,6 +170,6 @@ export function MicrofrontendHost({
 
   return createElement("app-external", {
     ref: setHostEl,
-    style: { height: "100%", display: "flex", flexDirection: "column" },
+    style: { height: "100%", flexDirection: "column" },
   });
 }

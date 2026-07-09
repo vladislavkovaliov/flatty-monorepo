@@ -16,6 +16,58 @@ definitions:
     required:
     - status
     type: object
+  flatty-budget_go-api_http_dto.ListResidentLocationResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/flatty-budget_go-api_http_dto.ResidentLocationResponse'
+        type: array
+      total:
+        type: integer
+    required:
+    - data
+    - total
+    type: object
+  flatty-budget_go-api_http_dto.ResidentLocationResponse:
+    properties:
+      apartment:
+        example: "2"
+        type: string
+      city:
+        example: Warsaw
+        type: string
+      country:
+        example: Poland
+        type: string
+      created_at:
+        example: "2026-07-09 08:34:05.796617"
+        type: string
+      house:
+        example: "1"
+        type: string
+      id:
+        example: 123
+        type: integer
+      postal_code:
+        example: 00-945
+        type: string
+      street:
+        example: Bobr
+        type: string
+      updated_at:
+        example: "2026-07-09 08:34:05.796617"
+        type: string
+    required:
+    - apartment
+    - city
+    - country
+    - created_at
+    - house
+    - id
+    - postal_code
+    - street
+    - updated_at
+    type: object
 info:
   contact: {}
   description: TBD
@@ -35,6 +87,28 @@ paths:
       summary: Information about health status
       tags:
       - health
+  /resident-location:
+    get:
+      description: Returns all resident location from the database
+      parameters:
+      - description: Number of products to return (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Number of products to skip (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/flatty-budget_go-api_http_dto.ListResidentLocationResponse'
+      summary: List all resident location
+      tags:
+      - resident_location
   /resident-location/count:
     get:
       description: Returns count resident location from the database

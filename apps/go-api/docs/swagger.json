@@ -28,6 +28,40 @@
                 }
             }
         },
+        "/resident-location": {
+            "get": {
+                "description": "Returns all resident location from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resident_location"
+                ],
+                "summary": "List all resident location",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of products to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of products to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/flatty-budget_go-api_http_dto.ListResidentLocationResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/resident-location/count": {
             "get": {
                 "description": "Returns count resident location from the database",
@@ -71,6 +105,76 @@
                 "status": {
                     "type": "string",
                     "example": "ok"
+                }
+            }
+        },
+        "flatty-budget_go-api_http_dto.ListResidentLocationResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/flatty-budget_go-api_http_dto.ResidentLocationResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "flatty-budget_go-api_http_dto.ResidentLocationResponse": {
+            "type": "object",
+            "required": [
+                "apartment",
+                "city",
+                "country",
+                "created_at",
+                "house",
+                "id",
+                "postal_code",
+                "street",
+                "updated_at"
+            ],
+            "properties": {
+                "apartment": {
+                    "type": "string",
+                    "example": "2"
+                },
+                "city": {
+                    "type": "string",
+                    "example": "Warsaw"
+                },
+                "country": {
+                    "type": "string",
+                    "example": "Poland"
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-07-09 08:34:05.796617"
+                },
+                "house": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 123
+                },
+                "postal_code": {
+                    "type": "string",
+                    "example": "00-945"
+                },
+                "street": {
+                    "type": "string",
+                    "example": "Bobr"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-07-09 08:34:05.796617"
                 }
             }
         }

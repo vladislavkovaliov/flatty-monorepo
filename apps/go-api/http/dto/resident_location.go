@@ -17,3 +17,8 @@ type ResidentLocationResponse struct {
 	CreatedAt  time.Time `json:"created_at,omitempty" example:"2026-07-09 08:34:05.796617" binding:"required"`
 	UpdatedAt  time.Time `json:"updated_at,omitempty" example:"2026-07-09 08:34:05.796617" binding:"required"`
 }
+
+type ListResidentLocationResponse struct {
+	Data  []ResidentLocationResponse `json:"data,omitempty" binding:"required"`
+	Total int                        `json:"total,omitempty" binding:"required"`
+}

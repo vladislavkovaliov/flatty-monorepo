@@ -17,16 +17,17 @@ export default defineConfig(({ mode }) => {
     server: {
       port: port,
       proxy: {
-        // "/external-app": {
-        //   target: "http://localhost:8080",
-        //   changeOrigin: true,
-        //   rewrite: (path) => path.replace(/^\/external-app/, ""),
-        // },
         "/external-settings": {
           target: "http://localhost:8081",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/external-settings/, ""),
         },
+        "/external-resident": {
+          target: "http://localhost:8082",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/external-resident/, ""),
+        },
+         "/api": { target: "http://localhost:8080" },
       },
     },
     define: {

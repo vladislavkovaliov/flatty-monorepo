@@ -12,8 +12,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"flatty-budget/go-api/internal/config"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	r := setupRouter()
+	r := setupRouter(pool)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,

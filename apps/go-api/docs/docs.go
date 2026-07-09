@@ -29,7 +29,27 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.HealthResponse"
+                            "$ref": "#/definitions/flatty-budget_go-api_http_dto.HealthResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/resident-location/count": {
+            "get": {
+                "description": "Returns count resident location from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resident_location"
+                ],
+                "summary": "Count all resident location",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/flatty-budget_go-api_http_dto.CountResponse"
                         }
                     }
                 }
@@ -37,7 +57,19 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.HealthResponse": {
+        "flatty-budget_go-api_http_dto.CountResponse": {
+            "type": "object",
+            "required": [
+                "total"
+            ],
+            "properties": {
+                "total": {
+                    "type": "integer",
+                    "example": 138
+                }
+            }
+        },
+        "flatty-budget_go-api_http_dto.HealthResponse": {
             "type": "object",
             "required": [
                 "status"

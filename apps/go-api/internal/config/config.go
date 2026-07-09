@@ -18,7 +18,7 @@ func LoadConfig() *Config {
 
 	return &Config{
 		Port:          getEnv("PORT", "8080"),
-		DatabaseUrl:   getEnv("DATABASE_URL", "postgres://postgres:password@localhost:55000/shop?sslmode=disable"),
+		DatabaseUrl:   getEnv("DATABASE_URL", "postgres://postgres:password@localhost:55000/flatty?sslmode=disable"),
 		KafkaBrockers: getEnv("KAFKA_BROKERS", "localhost:9092"),
 		RABBITMQ_URL:  getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672"),
 	}

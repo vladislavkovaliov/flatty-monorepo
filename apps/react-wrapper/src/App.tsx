@@ -5,15 +5,12 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import {
   MantineProvider,
   createTheme,
-  AppShell,
-  Burger,
-  NavLink,
-  Group,
-  Text,
-  Box,
+  AppShell as MantineAppShell, 
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconHome, IconSettings } from "@tabler/icons-react";
+import { AppShellHeader } from "./components/app-shell-header"
+import { AppShellNavbar } from "./components/app-shell-navbar"
 
 import { SingleTabManagerWrapper } from "./components/single-tab-manager";
 
@@ -32,11 +29,11 @@ export default function App() {
   const location = useLocation();
 
   const isActiveLink = (path: string) => location.pathname === path;
-
+  
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <SingleTabManagerWrapper>
-        <AppShell
+        <MantineAppShell
           header={{ height: 60 }}
           navbar={{
             width: 250,
@@ -45,44 +42,14 @@ export default function App() {
           }}
           padding={0}
         >
-          <AppShell.Header>
-            <Group h="100%" px="md">
-              <Burger
-                opened={opened}
-                onClick={toggle}
-                hiddenFrom="sm"
-                size="sm"
-              />
-              <Text size="xl" fw={700}>
-                React Wrapper
-              </Text>
-            </Group>
-          </AppShell.Header>
-
-          <AppShell.Navbar p="md">
-            <Box mb="md">
-              <Text fw={500} mb="xs">
-                Menu
-              </Text>
-              {MENU_ITEMS.map((item) => (
-                <NavLink
-                  key={item.path}
-                  label={item.label}
-                  leftSection={item.icon}
-                  active={isActiveLink(item.path)}
-                  component={Link}
-                  to={item.path}
-                />
-              ))}
-            </Box>
-          </AppShell.Navbar>
-
-          <AppShell.Main
+          <AppShellHeader opened={opened} toggle={toggle} />
+          <AppShellNavbar items={MENU_ITEMS} isActiveFn={isActiveLink} />
+          <MantineAppShell.Main
             style={{ height: "100%", display: "flex", flexDirection: "column" }}
           >
             <Outlet />
-          </AppShell.Main>
-        </AppShell>
+          </MantineAppShell.Main>
+        </MantineAppShell>
       </SingleTabManagerWrapper>
     </MantineProvider>
   );

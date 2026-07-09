@@ -1,6 +1,14 @@
 basePath: /api
 definitions:
-  dto.HealthResponse:
+  flatty-budget_go-api_http_dto.CountResponse:
+    properties:
+      total:
+        example: 138
+        type: integer
+    required:
+    - total
+    type: object
+  flatty-budget_go-api_http_dto.HealthResponse:
     properties:
       status:
         example: ok
@@ -23,8 +31,21 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.HealthResponse'
+            $ref: '#/definitions/flatty-budget_go-api_http_dto.HealthResponse'
       summary: Information about health status
       tags:
       - health
+  /resident-location/count:
+    get:
+      description: Returns count resident location from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/flatty-budget_go-api_http_dto.CountResponse'
+      summary: Count all resident location
+      tags:
+      - resident_location
 swagger: "2.0"

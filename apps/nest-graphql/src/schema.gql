@@ -32,3 +32,16 @@ type Query {
   count: ResidentLocationCountResponse!
   list(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
 }
+
+type Mutation {
+  create(residentLocatoinData: ResidentLocationInput!): ResidentLocation!
+}
+
+input ResidentLocationInput {
+  country: String!
+  city: String!
+  postalCode: String!
+  street: String!
+  house: String!
+  apartment: String!
+}

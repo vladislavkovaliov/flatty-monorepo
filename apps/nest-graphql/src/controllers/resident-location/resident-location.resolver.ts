@@ -1,8 +1,9 @@
-import { Args, Int, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ResidentLocation } from './entities/resident-location.entity';
 import { ResidentLocationCountResponse } from './dto/resident-location-count-response';
 import { ResidentLocationService } from './resident-location.service';
 import { ListResidentLocationResponse } from './dto/list-resident-location-response';
+import { ResidentLocationInput } from './entities/resident-location-input.entity';
 
 @Resolver(() => ResidentLocation)
 export class ResidentLocationResolver {
@@ -23,5 +24,12 @@ export class ResidentLocationResolver {
         @Args('offset', { type: () => Int, defaultValue: 0 }) offset: number,
     ): Promise<ListResidentLocationResponse> {
         return await this.residentLocationService.list(limit, offset);
+    }
+
+    @Mutation(() => ResidentLocation)
+    async create(
+        @Args('residentLocatoinData') residentLocatoinData: ResidentLocationInput,
+    ): Promise<ResidentLocation> {
+        return await this.residentLocationService.create(residentLocatoinData);
     }
 }

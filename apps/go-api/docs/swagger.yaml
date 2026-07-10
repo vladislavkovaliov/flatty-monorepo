@@ -1,6 +1,6 @@
 basePath: /api
 definitions:
-  flatty-budget_go-api_http_dto.CountResponse:
+  dto.CountResponse:
     properties:
       total:
         example: 138
@@ -8,7 +8,35 @@ definitions:
     required:
     - total
     type: object
-  flatty-budget_go-api_http_dto.HealthResponse:
+  dto.CreateResidentLocationRequest:
+    properties:
+      apartment:
+        example: "2"
+        type: string
+      city:
+        example: Warsaw
+        type: string
+      country:
+        example: Poland
+        type: string
+      house:
+        example: "1"
+        type: string
+      postal_code:
+        example: 00-945
+        type: string
+      street:
+        example: Bobr
+        type: string
+    required:
+    - apartment
+    - city
+    - country
+    - house
+    - postal_code
+    - street
+    type: object
+  dto.HealthResponse:
     properties:
       status:
         example: ok
@@ -16,11 +44,11 @@ definitions:
     required:
     - status
     type: object
-  flatty-budget_go-api_http_dto.ListResidentLocationResponse:
+  dto.ListResidentLocationResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/flatty-budget_go-api_http_dto.ResidentLocationResponse'
+          $ref: '#/definitions/dto.ResidentLocationResponse'
         type: array
       total:
         type: integer
@@ -28,7 +56,7 @@ definitions:
     - data
     - total
     type: object
-  flatty-budget_go-api_http_dto.ResidentLocationResponse:
+  dto.ResidentLocationResponse:
     properties:
       apartment:
         example: "2"
@@ -83,7 +111,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/flatty-budget_go-api_http_dto.HealthResponse'
+            $ref: '#/definitions/dto.HealthResponse'
       summary: Information about health status
       tags:
       - health
@@ -105,8 +133,35 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/flatty-budget_go-api_http_dto.ListResidentLocationResponse'
+            $ref: '#/definitions/dto.ListResidentLocationResponse'
       summary: List all resident location
+      tags:
+      - resident_location
+    post:
+      consumes:
+      - application/json
+      description: Add a new resident location to the database
+      parameters:
+      - description: Resident Location data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateResidentLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ResidentLocationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a resident location
       tags:
       - resident_location
   /resident-location/count:
@@ -118,7 +173,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/flatty-budget_go-api_http_dto.CountResponse'
+            $ref: '#/definitions/dto.CountResponse'
       summary: Count all resident location
       tags:
       - resident_location

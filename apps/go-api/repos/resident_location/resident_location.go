@@ -67,3 +67,47 @@ func (r *PgxRepository) List(ctx context.Context, limit, offset int) ([]*residen
 
 	return residentLocations, err
 }
+
+func (r *PgxRepository) Create(ctx context.Context, input *residentlocationdomain.ResidentLocationInput) (*residentlocationdomain.ResidentLocation, error) {
+	var id int64
+	var country string
+	var city string
+	var postalCode string
+	var street string
+	var house string
+	var apartment string
+	var createdAt time.Time
+	var updatedAt time.Time
+
+	err := r.pool.QueryRow(ctx, `
+		INSERT INTO resident_locations (country, city, postal_code, street, house, apartment) 
+		VALUES ($1, $2, $3, $4, $5, $6) 
+		RETURNING id, country, city, postal_code, street, house, apartment, created_at, updated_at
+	`, input.Country(), input.City(), input.PostalCode(), input.Street(), input.House(), input.Apartment()).Scan(
+		&id,
+		&country,
+		&city,
+		&postalCode,
+		&street,
+		&house,
+		&apartment,
+		&createdAt,
+		&updatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return residentlocationdomain.NewResidentLocation(
+		id,
+		country,
+		city,
+		postalCode,
+		street,
+		house,
+		apartment,
+		createdAt,
+		updatedAt,
+	), nil
+}

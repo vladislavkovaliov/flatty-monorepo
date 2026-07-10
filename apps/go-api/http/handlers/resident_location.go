@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"flatty-budget/go-api/domains/resident_location"
 	"flatty-budget/go-api/http/dto"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -98,5 +100,55 @@ func (h *ResidentLocationHandler) List(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.ListResidentLocationResponse{
 		Data:  res,
 		Total: total,
+	})
+}
+
+// CreateResidentLocation godoc
+//
+//	@Summary		Create a resident location
+//	@Description	Add a new resident location to the database
+//	@Tags			resident_location
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body	dto.CreateResidentLocationRequest	true	"Resident Location data"
+//	@Success		201		{object}	dto.ResidentLocationResponse
+//	@Failure		400		{object}	map[string]string
+//	@Router			/resident-location [post]
+func (h *ResidentLocationHandler) Create(c *gin.Context) {
+	var req dto.CreateResidentLocationRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	residentLocation, err := h.service.Create(ctx, resident_location.NewResidentLocationInput(
+		req.Country,
+		req.City,
+		req.PostalCode,
+		req.Street,
+		req.House,
+		req.Apartment,
+	))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	fmt.Println(residentLocation)
+	c.JSON(http.StatusCreated, dto.ResidentLocationResponse{
+		ID:         residentLocation.ID(),
+		Country:    residentLocation.Country(),
+		City:       residentLocation.City(),
+		PostalCode: residentLocation.PostalCode(),
+		Street:     residentLocation.Street(),
+		House:      residentLocation.House(),
+		Apartment:  residentLocation.Apartment(),
+		CreatedAt:  residentLocation.CreatedAt(),
+		UpdatedAt:  residentLocation.UpdatedAt(),
 	})
 }

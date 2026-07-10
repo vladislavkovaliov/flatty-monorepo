@@ -40,3 +40,7 @@ func (s *Service) List(ctx context.Context, limit, offset int) ([]*residentlocat
 
 	return items, total, err
 }
+
+func (s *Service) Create(ctx context.Context, input *residentlocationdomain.ResidentLocationInput) (*residentlocationdomain.ResidentLocation, error) {
+	return s.repo.Create(ctx, input)
+}

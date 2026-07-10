@@ -29,7 +29,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/flatty-budget_go-api_http_dto.HealthResponse"
+                            "$ref": "#/definitions/dto.HealthResponse"
                         }
                     }
                 }
@@ -63,7 +63,48 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/flatty-budget_go-api_http_dto.ListResidentLocationResponse"
+                            "$ref": "#/definitions/dto.ListResidentLocationResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a new resident location to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resident_location"
+                ],
+                "summary": "Create a resident location",
+                "parameters": [
+                    {
+                        "description": "Resident Location data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateResidentLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResidentLocationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -83,7 +124,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/flatty-budget_go-api_http_dto.CountResponse"
+                            "$ref": "#/definitions/dto.CountResponse"
                         }
                     }
                 }
@@ -91,7 +132,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "flatty-budget_go-api_http_dto.CountResponse": {
+        "dto.CountResponse": {
             "type": "object",
             "required": [
                 "total"
@@ -103,7 +144,44 @@ const docTemplate = `{
                 }
             }
         },
-        "flatty-budget_go-api_http_dto.HealthResponse": {
+        "dto.CreateResidentLocationRequest": {
+            "type": "object",
+            "required": [
+                "apartment",
+                "city",
+                "country",
+                "house",
+                "postal_code",
+                "street"
+            ],
+            "properties": {
+                "apartment": {
+                    "type": "string",
+                    "example": "2"
+                },
+                "city": {
+                    "type": "string",
+                    "example": "Warsaw"
+                },
+                "country": {
+                    "type": "string",
+                    "example": "Poland"
+                },
+                "house": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "postal_code": {
+                    "type": "string",
+                    "example": "00-945"
+                },
+                "street": {
+                    "type": "string",
+                    "example": "Bobr"
+                }
+            }
+        },
+        "dto.HealthResponse": {
             "type": "object",
             "required": [
                 "status"
@@ -115,7 +193,7 @@ const docTemplate = `{
                 }
             }
         },
-        "flatty-budget_go-api_http_dto.ListResidentLocationResponse": {
+        "dto.ListResidentLocationResponse": {
             "type": "object",
             "required": [
                 "data",
@@ -125,7 +203,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/flatty-budget_go-api_http_dto.ResidentLocationResponse"
+                        "$ref": "#/definitions/dto.ResidentLocationResponse"
                     }
                 },
                 "total": {
@@ -133,7 +211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "flatty-budget_go-api_http_dto.ResidentLocationResponse": {
+        "dto.ResidentLocationResponse": {
             "type": "object",
             "required": [
                 "apartment",

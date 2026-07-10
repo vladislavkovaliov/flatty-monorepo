@@ -41,5 +41,6 @@ func wireResidentLocation(rg *gin.RouterGroup, pool *pgxpool.Pool) {
 	h := handlers.NewResidentLocationHandler(svc)
 
 	rg.GET("/resident-location", h.List)
+	rg.POST("/resident-location", h.Create)
 	rg.GET("/resident-location/count", h.Count)
 }

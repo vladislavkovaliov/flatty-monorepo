@@ -54,13 +54,14 @@ func (r *ResidentLocation) UpdatedAt() time.Time {
 
 func NewResidentLocation(id int64, country, city, postalCode, street, house, apartment string, createdAt, updatedAt time.Time) *ResidentLocation {
 	return &ResidentLocation{
-		id:        id,
-		country:   country,
-		city:      city,
-		street:    street,
-		house:     house,
-		apartment: apartment,
-		createdAt: createdAt,
-		updatedAt: updatedAt,
+		id:         id,
+		country:    country,
+		city:       city,
+		street:     street,
+		postalCode: postalCode,
+		house:      house,
+		apartment:  apartment,
+		createdAt:  createdAt,
+		updatedAt:  updatedAt,
 	}
 }

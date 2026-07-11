@@ -122,6 +122,95 @@
                     }
                 }
             }
+        },
+        "/resident-location/{id}": {
+            "put": {
+                "description": "Update a new resident location to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resident_location"
+                ],
+                "summary": "Update a resident location",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resident Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Resident Location data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateResidentLocationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResidentLocationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a new resident location to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "resident_location"
+                ],
+                "summary": "Delete a resident location",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resident Location ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteResidentLocationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -171,6 +260,18 @@
                 "street": {
                     "type": "string",
                     "example": "Bobr"
+                }
+            }
+        },
+        "dto.DeleteResidentLocationResponse": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -253,6 +354,43 @@
                 "updated_at": {
                     "type": "string",
                     "example": "2026-07-09 08:34:05.796617"
+                }
+            }
+        },
+        "dto.UpdateResidentLocationRequest": {
+            "type": "object",
+            "required": [
+                "apartment",
+                "city",
+                "country",
+                "house",
+                "postal_code",
+                "street"
+            ],
+            "properties": {
+                "apartment": {
+                    "type": "string",
+                    "example": "2"
+                },
+                "city": {
+                    "type": "string",
+                    "example": "Warsaw"
+                },
+                "country": {
+                    "type": "string",
+                    "example": "Poland"
+                },
+                "house": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "postal_code": {
+                    "type": "string",
+                    "example": "00-945"
+                },
+                "street": {
+                    "type": "string",
+                    "example": "Bobr"
                 }
             }
         }

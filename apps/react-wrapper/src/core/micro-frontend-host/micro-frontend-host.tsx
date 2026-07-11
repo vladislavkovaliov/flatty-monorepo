@@ -82,6 +82,11 @@ export function MicrofrontendHost({
         // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
         return Promise.resolve();
       }
+      
+      if (bundleName === APPLICATION_BUNDLE_NAME.RESIDENT) {
+        // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
+        return Promise.resolve();
+      }
 
       const commonChunks = [`${remoteOrigin}/${APPS_VENDORS_CHUNK_NAME}`];
 
@@ -103,6 +108,12 @@ export function MicrofrontendHost({
       }
 
       if (bundleName === APPLICATION_BUNDLE_NAME.SETTINGS) {
+        const baseUrl = `${window.location.origin}${proxyBasePath}`;
+
+        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js` });
+      }
+
+      if (bundleName === APPLICATION_BUNDLE_NAME.RESIDENT) {
         const baseUrl = `${window.location.origin}${proxyBasePath}`;
 
         return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js` });

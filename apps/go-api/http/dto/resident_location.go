@@ -31,3 +31,16 @@ type CreateResidentLocationRequest struct {
 	House      string `json:"house,omitempty" example:"1" binding:"required"`
 	Apartment  string `json:"apartment,omitempty" example:"2" binding:"required"`
 }
+
+type UpdateResidentLocationRequest struct {
+	Country    string `json:"country,omitempty" example:"Poland" binding:"required"`
+	City       string `json:"city,omitempty" example:"Warsaw" binding:"required"`
+	PostalCode string `json:"postal_code,omitempty" example:"00-945" binding:"required"`
+	Street     string `json:"street,omitempty" example:"Bobr" binding:"required"`
+	House      string `json:"house,omitempty" example:"1" binding:"required"`
+	Apartment  string `json:"apartment,omitempty" example:"2" binding:"required"`
+}
+
+type DeleteResidentLocationResponse struct {
+	Data int64 `json:"data" example:"1" binding:"required"`
+}

@@ -44,3 +44,11 @@ func (s *Service) List(ctx context.Context, limit, offset int) ([]*residentlocat
 func (s *Service) Create(ctx context.Context, input *residentlocationdomain.ResidentLocationInput) (*residentlocationdomain.ResidentLocation, error) {
 	return s.repo.Create(ctx, input)
 }
+
+func (s *Service) Update(ctx context.Context, id int64, input *residentlocationdomain.ResidentLocationInput) (*residentlocationdomain.ResidentLocation, error) {
+	return s.repo.Update(ctx, id, input)
+}
+
+func (s *Service) Delete(ctx context.Context, id int64) (int64, error) {
+	return s.repo.Delete(ctx, id)
+}

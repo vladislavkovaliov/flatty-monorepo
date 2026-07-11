@@ -36,6 +36,14 @@ definitions:
     - postal_code
     - street
     type: object
+  dto.DeleteResidentLocationResponse:
+    properties:
+      data:
+        example: 1
+        type: integer
+    required:
+    - data
+    type: object
   dto.HealthResponse:
     properties:
       status:
@@ -95,6 +103,34 @@ definitions:
     - postal_code
     - street
     - updated_at
+    type: object
+  dto.UpdateResidentLocationRequest:
+    properties:
+      apartment:
+        example: "2"
+        type: string
+      city:
+        example: Warsaw
+        type: string
+      country:
+        example: Poland
+        type: string
+      house:
+        example: "1"
+        type: string
+      postal_code:
+        example: 00-945
+        type: string
+      street:
+        example: Bobr
+        type: string
+    required:
+    - apartment
+    - city
+    - country
+    - house
+    - postal_code
+    - street
     type: object
 info:
   contact: {}
@@ -162,6 +198,65 @@ paths:
               type: string
             type: object
       summary: Create a resident location
+      tags:
+      - resident_location
+  /resident-location/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a new resident location to the database
+      parameters:
+      - description: Resident Location ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.DeleteResidentLocationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a resident location
+      tags:
+      - resident_location
+    put:
+      consumes:
+      - application/json
+      description: Update a new resident location to the database
+      parameters:
+      - description: Resident Location ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Resident Location data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateResidentLocationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ResidentLocationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a resident location
       tags:
       - resident_location
   /resident-location/count:

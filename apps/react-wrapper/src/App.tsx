@@ -8,7 +8,7 @@ import {
   AppShell as MantineAppShell, 
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconHome, IconSettings } from "@tabler/icons-react";
+import { IconHome, IconSettings, IconHome2 } from "@tabler/icons-react";
 import { AppShellHeader } from "./components/app-shell-header"
 import { AppShellNavbar } from "./components/app-shell-navbar"
 
@@ -21,7 +21,7 @@ const theme = createTheme({
 
 const MENU_ITEMS = [
   { label: "Home", path: "/", icon: <IconHome size={16} stroke={1.5} /> },
-  { label: "Settings", path: "/settings", icon: <IconSettings size={16} stroke={1.5} /> },
+  { label: "Resident", path: "/resident", icon: <IconHome2 size={16} stroke={1.5} /> },
 ];
 
 export default function App() {

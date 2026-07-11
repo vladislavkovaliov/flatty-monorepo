@@ -29,8 +29,6 @@ const availableConfigs = Object.fromEntries(
   }),
 ) as AvailableConfigs;
 
-console.log(availableConfigs)
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -41,9 +39,9 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "/settings/*",
+        path: "/resident/*",
         element: (
-          <MicrofrontendHost {...availableConfigs.settings} />
+          <MicrofrontendHost {...availableConfigs.resident} />
         ),
       },
     ],

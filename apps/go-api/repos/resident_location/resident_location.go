@@ -2,8 +2,11 @@ package residentlocation
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	residentlocationdomain "flatty-budget/go-api/domains/resident_location"
@@ -110,4 +113,80 @@ func (r *PgxRepository) Create(ctx context.Context, input *residentlocationdomai
 		createdAt,
 		updatedAt,
 	), nil
+}
+
+func (r *PgxRepository) Update(ctx context.Context, id int64, input *residentlocationdomain.ResidentLocationInput) (*residentlocationdomain.ResidentLocation, error) {
+	var returningId int64
+	var country string
+	var city string
+	var postalCode string
+	var street string
+	var house string
+	var apartment string
+	var createdAt time.Time
+	var updatedAt time.Time
+
+	err := r.pool.QueryRow(ctx, `
+		UPDATE resident_locations
+		SET
+			country = $1,
+			city = $2, 
+			postal_code = $3, 
+			street = $4, 
+			house = $5, 
+			apartment = $6,
+			updated_at = NOW() 
+		WHERE id = $7 
+		RETURNING id, country, city, postal_code, street, house, apartment, created_at, updated_at
+	`, input.Country(), input.City(), input.PostalCode(), input.Street(), input.House(), input.Apartment(), id).Scan(
+		&returningId,
+		&country,
+		&city,
+		&postalCode,
+		&street,
+		&house,
+		&apartment,
+		&createdAt,
+		&updatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("resident location with id %d not found: %w", id, pgx.ErrNoRows)
+		}
+
+		return nil, err
+	}
+
+	return residentlocationdomain.NewResidentLocation(
+		returningId,
+		country,
+		city,
+		postalCode,
+		street,
+		house,
+		apartment,
+		createdAt,
+		updatedAt,
+	), nil
+}
+
+func (r *PgxRepository) Delete(ctx context.Context, id int64) (int64, error) {
+	var returningId int64
+
+	err := r.pool.QueryRow(ctx, `
+		DELETE FROM resident_locations
+		WHERE id = $1
+		RETURNING id
+	`, id).Scan(&returningId)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return -1, fmt.Errorf("resident location with id %d not found: %w", id, pgx.ErrNoRows)
+		}
+
+		return -1, err
+	}
+
+	return returningId, err
 }

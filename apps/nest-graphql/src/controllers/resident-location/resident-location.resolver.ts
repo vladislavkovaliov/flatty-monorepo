@@ -4,6 +4,7 @@ import { ResidentLocationCountResponse } from './dto/resident-location-count-res
 import { ResidentLocationService } from './resident-location.service';
 import { ListResidentLocationResponse } from './dto/list-resident-location-response';
 import { ResidentLocationInput } from './entities/resident-location-input.entity';
+import { DeleteResidentLocationResponse } from './dto/delete-resident-location-response';
 
 @Resolver(() => ResidentLocation)
 export class ResidentLocationResolver {
@@ -31,5 +32,20 @@ export class ResidentLocationResolver {
         @Args('residentLocatoinData') residentLocatoinData: ResidentLocationInput,
     ): Promise<ResidentLocation> {
         return await this.residentLocationService.create(residentLocatoinData);
+    }
+
+    @Mutation(() => ResidentLocation)
+    async update(
+        @Args('id', { type: () => Int }) id: number,
+        @Args('residentLocatoinData') residentLocatoinData: ResidentLocationInput,
+    ): Promise<ResidentLocation> {
+        return await this.residentLocationService.update(id, residentLocatoinData);
+    }
+
+    @Mutation(() => DeleteResidentLocationResponse)
+    async delete(
+        @Args('id', { type: () => Int }) id: number,
+    ): Promise<DeleteResidentLocationResponse> {
+        return this.residentLocationService.delete(id);
     }
 }

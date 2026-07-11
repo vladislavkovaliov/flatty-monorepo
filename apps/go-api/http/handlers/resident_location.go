@@ -2,15 +2,16 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"flatty-budget/go-api/domains/resident_location"
 	"flatty-budget/go-api/http/dto"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 )
 
 type ResidentLocationHandler struct {
@@ -139,7 +140,6 @@ func (h *ResidentLocationHandler) Create(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(residentLocation)
 	c.JSON(http.StatusCreated, dto.ResidentLocationResponse{
 		ID:         residentLocation.ID(),
 		Country:    residentLocation.Country(),
@@ -150,5 +150,108 @@ func (h *ResidentLocationHandler) Create(c *gin.Context) {
 		Apartment:  residentLocation.Apartment(),
 		CreatedAt:  residentLocation.CreatedAt(),
 		UpdatedAt:  residentLocation.UpdatedAt(),
+	})
+}
+
+// UpdateResidentLocation godoc
+//
+//	@Summary		Update a resident location
+//	@Description	Update a new resident location to the database
+//	@Tags			resident_location
+//	@Accept			json
+//	@Produce		json
+//	@Param          id      path        int     true    "Resident Location ID"
+//	@Param			body	body	    dto.UpdateResidentLocationRequest	true	"Resident Location data"
+//	@Success		201		{object}	dto.ResidentLocationResponse
+//	@Failure		400		{object}	map[string]string
+//	@Router			/resident-location/{id} [put]
+func (h *ResidentLocationHandler) Update(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.ParseInt(idParam, 10, 64)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var req dto.CreateResidentLocationRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	residentLocation, err := h.service.Update(ctx, id, resident_location.NewResidentLocationInput(
+		req.Country,
+		req.City,
+		req.PostalCode,
+		req.Street,
+		req.House,
+		req.Apartment,
+	))
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		internalError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, dto.ResidentLocationResponse{
+		ID:         residentLocation.ID(),
+		Country:    residentLocation.Country(),
+		City:       residentLocation.City(),
+		PostalCode: residentLocation.PostalCode(),
+		Street:     residentLocation.Street(),
+		House:      residentLocation.House(),
+		Apartment:  residentLocation.Apartment(),
+		CreatedAt:  residentLocation.CreatedAt(),
+		UpdatedAt:  residentLocation.UpdatedAt(),
+	})
+}
+
+// DeleteResidentLocation godoc
+//
+//	@Summary		Delete a resident location
+//	@Description	Delete a new resident location to the database
+//	@Tags			resident_location
+//	@Accept			json
+//	@Produce		json
+//	@Param          id      path        int     true    "Resident Location ID"
+//	@Success		201		{object}	dto.DeleteResidentLocationResponse
+//	@Failure		400		{object}	map[string]string
+//	@Router			/resident-location/{id} [delete]
+func (h *ResidentLocationHandler) Delete(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.ParseInt(idParam, 10, 64)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	returningId, err := h.service.Delete(ctx, id)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		internalError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.DeleteResidentLocationResponse{
+		Data: returningId,
 	})
 }

@@ -22,9 +22,6 @@ export function AppShellNavbar({items, isActiveFn}: IAppShellNavbarProps) {
   return (
     <MantineAppShell.Navbar p="md">
       <MantineBox mb="md">
-        <MantineText fw={500} mb="xs">
-          Menu
-        </MantineText>
         {items.map((item) => (
           <MantinveNavLink
             key={item.path}

@@ -28,6 +28,10 @@ type ListResidentLocationResponse {
   data: [ResidentLocation!]!
 }
 
+type DeleteResidentLocationResponse {
+  data: Int!
+}
+
 type Query {
   count: ResidentLocationCountResponse!
   list(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
@@ -35,6 +39,8 @@ type Query {
 
 type Mutation {
   create(residentLocatoinData: ResidentLocationInput!): ResidentLocation!
+  update(id: Int!, residentLocatoinData: ResidentLocationInput!): ResidentLocation!
+  delete(id: Int!): DeleteResidentLocationResponse!
 }
 
 input ResidentLocationInput {

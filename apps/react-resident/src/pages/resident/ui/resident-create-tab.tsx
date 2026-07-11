@@ -1,9 +1,12 @@
 import { Box, Button, Group, SimpleGrid, Stack, TextInput, Title } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
+import { useCreateResidentLocation } from '../api/resident-location.queries';
 import type { ResidentCreate } from '../model/types';
 
 export function ResidentCreateTab() {
+  const createMutation = useCreateResidentLocation();
+
   const form = useForm<ResidentCreate>({
     initialValues: {
       fullName: '',
@@ -25,12 +28,15 @@ export function ResidentCreateTab() {
   });
 
   const handleSubmit = (values: ResidentCreate) => {
-    console.log('Resident created:', values);
+    const { country, city, apartment, house, street, postalCode } = values;
+    createMutation.mutate({ country, city, apartment, house, street, postalCode }, {
+      onSuccess: () => form.reset(),
+    });
   };
 
   return (
     <Box maw={800} mx="auto">
-      <Box mb="lg">
+      <Box mb="sm">
         <Title order={3}>
           Create Resident
         </Title>
@@ -129,7 +135,7 @@ export function ResidentCreateTab() {
               <Button variant="default" onClick={() => form.reset()}>
                 Reset
               </Button>
-              <Button type="submit">Create</Button>
+              <Button type="submit" loading={createMutation.isPending}>Create</Button>
             </Group>
           </Box>
         </Stack>

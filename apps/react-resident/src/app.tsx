@@ -1,4 +1,5 @@
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 
 import { QueryProvider } from './app/providers/query-provider';
 import { ThemeProvider } from './app/providers/theme-provider';

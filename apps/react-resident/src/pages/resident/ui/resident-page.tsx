@@ -7,9 +7,9 @@ export function ResidentPage() {
   
   return (
     <>
-      <Box py="xl">
+      <Box py="sm">
         <Container fluid>
-          <Box mb="lg">
+          <Box mb="sm">
             <Title order={2}>
               Resident
             </Title>
@@ -23,11 +23,11 @@ export function ResidentPage() {
           <Tabs.Tab value="resident-create">Create</Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="resident-table" pt="lg">
+        <Tabs.Panel value="resident-table" pt="md">
           <ResidentTableTab />
         </Tabs.Panel>
 
-        <Tabs.Panel value="resident-create" pt="lg">
+        <Tabs.Panel value="resident-create" pt="md">
           <ResidentCreateTab />
         </Tabs.Panel>
       

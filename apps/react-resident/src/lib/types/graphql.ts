@@ -11,10 +11,38 @@ export type Scalars = {
   DateTime: { input: unknown; output: unknown; }
 };
 
+export type DeleteResidentLocationResponse = {
+  __typename?: 'DeleteResidentLocationResponse';
+  data: Scalars['Int']['output'];
+};
+
 export type ListResidentLocationResponse = {
   __typename?: 'ListResidentLocationResponse';
   data: Array<ResidentLocation>;
   total: Scalars['Int']['output'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  create: ResidentLocation;
+  delete: DeleteResidentLocationResponse;
+  update: ResidentLocation;
+};
+
+
+export type MutationCreateArgs = {
+  residentLocatoinData: ResidentLocationInput;
+};
+
+
+export type MutationDeleteArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdateArgs = {
+  id: Scalars['Int']['input'];
+  residentLocatoinData: ResidentLocationInput;
 };
 
 export type Query = {
@@ -45,4 +73,13 @@ export type ResidentLocation = {
 export type ResidentLocationCountResponse = {
   __typename?: 'ResidentLocationCountResponse';
   total: Scalars['Int']['output'];
+};
+
+export type ResidentLocationInput = {
+  apartment: Scalars['String']['input'];
+  city: Scalars['String']['input'];
+  country: Scalars['String']['input'];
+  house: Scalars['String']['input'];
+  postalCode: Scalars['String']['input'];
+  street: Scalars['String']['input'];
 };

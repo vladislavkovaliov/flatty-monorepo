@@ -10,9 +10,29 @@
  * ---------------------------------------------------------------
  */
 
+export interface DtoCategoryResponse {
+  /** @example "2026-07-09 08:34:05.796617" */
+  created_at: string;
+  /** @example "Коммунальные платежи" */
+  description: string;
+  /** @example 1 */
+  id: number;
+  /** @example "utilities" */
+  name: string;
+  /** @example "2026-07-09 08:34:05.796617" */
+  updated_at: string;
+}
+
 export interface DtoCountResponse {
   /** @example 138 */
   total: number;
+}
+
+export interface DtoCreateCategoryRequest {
+  /** @example "Коммунальные платежи" */
+  description: string;
+  /** @example "utilities" */
+  name: string;
 }
 
 export interface DtoCreateResidentLocationRequest {
@@ -30,6 +50,11 @@ export interface DtoCreateResidentLocationRequest {
   street: string;
 }
 
+export interface DtoDeleteCategoryResponse {
+  /** @example 1 */
+  data: number;
+}
+
 export interface DtoDeleteResidentLocationResponse {
   /** @example 1 */
   data: number;
@@ -38,6 +63,11 @@ export interface DtoDeleteResidentLocationResponse {
 export interface DtoHealthResponse {
   /** @example "ok" */
   status: string;
+}
+
+export interface DtoListCategoryResponse {
+  data: DtoCategoryResponse[];
+  total: number;
 }
 
 export interface DtoListResidentLocationResponse {
@@ -66,6 +96,13 @@ export interface DtoResidentLocationResponse {
   updated_at: string;
 }
 
+export interface DtoUpdateCategoryRequest {
+  /** @example "Коммунальные платежи" */
+  description: string;
+  /** @example "utilities" */
+  name: string;
+}
+
 export interface DtoUpdateResidentLocationRequest {
   /** @example "2" */
   apartment: string;
@@ -81,6 +118,33 @@ export interface DtoUpdateResidentLocationRequest {
   street: string;
 }
 
+export interface CategoriesListParams {
+  /** Number of products to return (default 10) */
+  limit?: number;
+  /** Number of products to skip (default 0) */
+  offset?: number;
+}
+
+export type CategoriesListData = DtoListCategoryResponse;
+
+export type CategoriesCreateData = DtoCategoryResponse;
+
+export type CountListData = DtoCountResponse;
+
+export interface CategoriesUpdateParams {
+  /** Category ID */
+  id: number;
+}
+
+export type CategoriesUpdateData = DtoCategoryResponse;
+
+export interface CategoriesDeleteParams {
+  /** Category ID */
+  id: number;
+}
+
+export type CategoriesDeleteData = DtoDeleteCategoryResponse;
+
 export type HealthListData = DtoHealthResponse;
 
 export interface ResidentLocationListParams {
@@ -94,7 +158,7 @@ export type ResidentLocationListData = DtoListResidentLocationResponse;
 
 export type ResidentLocationCreateData = DtoResidentLocationResponse;
 
-export type CountListData = DtoCountResponse;
+export type CountListResult = DtoCountResponse;
 
 export interface ResidentLocationUpdateParams {
   /** Resident Location ID */

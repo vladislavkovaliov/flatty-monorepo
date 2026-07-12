@@ -32,15 +32,41 @@ type DeleteResidentLocationResponse {
   data: Int!
 }
 
+type Category {
+  id: Int!
+  name: String!
+  description: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type CategoryCountResponse {
+  total: Int!
+}
+
+type ListCategoryResponse {
+  total: Int!
+  data: [Category!]!
+}
+
+type DeleteCategoryResponse {
+  data: Int!
+}
+
 type Query {
-  count: ResidentLocationCountResponse!
-  list(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
+  residentLocationCount: ResidentLocationCountResponse!
+  residentLocationList(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
+  categoryCount: CategoryCountResponse!
+  categoryList(limit: Int! = 10, offset: Int! = 0): ListCategoryResponse!
 }
 
 type Mutation {
-  create(residentLocatoinData: ResidentLocationInput!): ResidentLocation!
-  update(id: Int!, residentLocatoinData: ResidentLocationInput!): ResidentLocation!
-  delete(id: Int!): DeleteResidentLocationResponse!
+  createResidentLocation(residentLocatoinData: ResidentLocationInput!): ResidentLocation!
+  updateResidentLocation(id: Int!, residentLocatoinData: ResidentLocationInput!): ResidentLocation!
+  deleteResidentLocation(id: Int!): DeleteResidentLocationResponse!
+  createCategory(categoryData: CategoryInput!): Category!
+  updateCategory(id: Int!, categoryData: CategoryInput!): Category!
+  deleteCategory(id: Int!): DeleteCategoryResponse!
 }
 
 input ResidentLocationInput {
@@ -50,4 +76,9 @@ input ResidentLocationInput {
   street: String!
   house: String!
   apartment: String!
+}
+
+input CategoryInput {
+  name: String!
+  description: String!
 }

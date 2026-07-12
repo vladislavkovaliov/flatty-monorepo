@@ -9,6 +9,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"flatty-budget/go-api/http/handlers"
+	categoryrepo "flatty-budget/go-api/repos/category"
+	categoryservice "flatty-budget/go-api/services/category"
 	residentlocationrepo "flatty-budget/go-api/repos/resident_location"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
 
@@ -21,6 +23,7 @@ func setupRouter(pool *pgxpool.Pool) *gin.Engine {
 	api := r.Group("/api")
 	wireConfig(api)
 	wireResidentLocation(api, pool)
+	wireCategory(api, pool)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -45,4 +48,18 @@ func wireResidentLocation(rg *gin.RouterGroup, pool *pgxpool.Pool) {
 	rg.PUT("/resident-location/:id", h.Update)
 	rg.DELETE("/resident-location/:id", h.Delete)
 	rg.GET("/resident-location/count", h.Count)
+}
+
+func wireCategory(rg *gin.RouterGroup, pool *pgxpool.Pool) {
+
+	repo := categoryrepo.NewPgxRepository(pool)
+	svc := categoryservice.New(repo)
+
+	h := handlers.NewCategoryHandler(svc)
+
+	rg.GET("/categories", h.List)
+	rg.POST("/categories", h.Create)
+	rg.PUT("/categories/:id", h.Update)
+	rg.DELETE("/categories/:id", h.Delete)
+	rg.GET("/categories/count", h.Count)
 }

@@ -4,6 +4,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigController } from './config/config.controller';
 import { ConfigService } from './config/config.service';
 import { ResidentLocationModule } from './controllers/resident-location/resident-location.module'
+import { CategoriesModule } from './controllers/categories/categories.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
@@ -34,6 +35,7 @@ import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPag
       plugins: [ApolloServerPluginLandingPageLocalDefault()]
     }),
     ResidentLocationModule,
+    CategoriesModule,
   ]
 })
 export class AppModule {}

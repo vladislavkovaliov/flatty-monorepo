@@ -11,9 +11,39 @@ export type Scalars = {
   DateTime: { input: unknown; output: unknown; }
 };
 
+export type Category = {
+  __typename?: 'Category';
+  createdAt: Scalars['DateTime']['output'];
+  description: Scalars['String']['output'];
+  id: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+};
+
+export type CategoryCountResponse = {
+  __typename?: 'CategoryCountResponse';
+  total: Scalars['Int']['output'];
+};
+
+export type CategoryInput = {
+  description: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
+export type DeleteCategoryResponse = {
+  __typename?: 'DeleteCategoryResponse';
+  data: Scalars['Int']['output'];
+};
+
 export type DeleteResidentLocationResponse = {
   __typename?: 'DeleteResidentLocationResponse';
   data: Scalars['Int']['output'];
+};
+
+export type ListCategoryResponse = {
+  __typename?: 'ListCategoryResponse';
+  data: Array<Category>;
+  total: Scalars['Int']['output'];
 };
 
 export type ListResidentLocationResponse = {
@@ -24,35 +54,62 @@ export type ListResidentLocationResponse = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  create: ResidentLocation;
-  delete: DeleteResidentLocationResponse;
-  update: ResidentLocation;
+  createCategory: Category;
+  createResidentLocation: ResidentLocation;
+  deleteCategory: DeleteCategoryResponse;
+  deleteResidentLocation: DeleteResidentLocationResponse;
+  updateCategory: Category;
+  updateResidentLocation: ResidentLocation;
 };
 
 
-export type MutationCreateArgs = {
+export type MutationCreateCategoryArgs = {
+  categoryData: CategoryInput;
+};
+
+
+export type MutationCreateResidentLocationArgs = {
   residentLocatoinData: ResidentLocationInput;
 };
 
 
-export type MutationDeleteArgs = {
+export type MutationDeleteCategoryArgs = {
   id: Scalars['Int']['input'];
 };
 
 
-export type MutationUpdateArgs = {
+export type MutationDeleteResidentLocationArgs = {
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdateCategoryArgs = {
+  categoryData: CategoryInput;
+  id: Scalars['Int']['input'];
+};
+
+
+export type MutationUpdateResidentLocationArgs = {
   id: Scalars['Int']['input'];
   residentLocatoinData: ResidentLocationInput;
 };
 
 export type Query = {
   __typename?: 'Query';
-  count: ResidentLocationCountResponse;
-  list: ListResidentLocationResponse;
+  categoryCount: CategoryCountResponse;
+  categoryList: ListCategoryResponse;
+  residentLocationCount: ResidentLocationCountResponse;
+  residentLocationList: ListResidentLocationResponse;
 };
 
 
-export type QueryListArgs = {
+export type QueryCategoryListArgs = {
+  limit?: Scalars['Int']['input'];
+  offset?: Scalars['Int']['input'];
+};
+
+
+export type QueryResidentLocationListArgs = {
   limit?: Scalars['Int']['input'];
   offset?: Scalars['Int']['input'];
 };

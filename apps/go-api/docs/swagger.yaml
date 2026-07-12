@@ -1,5 +1,29 @@
 basePath: /api
 definitions:
+  dto.CategoryResponse:
+    properties:
+      created_at:
+        example: "2026-07-09 08:34:05.796617"
+        type: string
+      description:
+        example: Коммунальные платежи
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: utilities
+        type: string
+      updated_at:
+        example: "2026-07-09 08:34:05.796617"
+        type: string
+    required:
+    - created_at
+    - description
+    - id
+    - name
+    - updated_at
+    type: object
   dto.CountResponse:
     properties:
       total:
@@ -7,6 +31,18 @@ definitions:
         type: integer
     required:
     - total
+    type: object
+  dto.CreateCategoryRequest:
+    properties:
+      description:
+        example: Коммунальные платежи
+        type: string
+      name:
+        example: utilities
+        type: string
+    required:
+    - description
+    - name
     type: object
   dto.CreateResidentLocationRequest:
     properties:
@@ -36,6 +72,14 @@ definitions:
     - postal_code
     - street
     type: object
+  dto.DeleteCategoryResponse:
+    properties:
+      data:
+        example: 1
+        type: integer
+    required:
+    - data
+    type: object
   dto.DeleteResidentLocationResponse:
     properties:
       data:
@@ -51,6 +95,18 @@ definitions:
         type: string
     required:
     - status
+    type: object
+  dto.ListCategoryResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.CategoryResponse'
+        type: array
+      total:
+        type: integer
+    required:
+    - data
+    - total
     type: object
   dto.ListResidentLocationResponse:
     properties:
@@ -104,6 +160,18 @@ definitions:
     - street
     - updated_at
     type: object
+  dto.UpdateCategoryRequest:
+    properties:
+      description:
+        example: Коммунальные платежи
+        type: string
+      name:
+        example: utilities
+        type: string
+    required:
+    - description
+    - name
+    type: object
   dto.UpdateResidentLocationRequest:
     properties:
       apartment:
@@ -138,6 +206,127 @@ info:
   title: GO API
   version: "1.0"
 paths:
+  /categories:
+    get:
+      description: Returns all categories from the database
+      parameters:
+      - description: Number of products to return (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Number of products to skip (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListCategoryResponse'
+      summary: List all categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Add a new category to the database
+      parameters:
+      - description: Category data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a category
+      tags:
+      - categories
+  /categories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a category to the database
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.DeleteCategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a category
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Update a category to the database
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Category data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.CategoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a category
+      tags:
+      - categories
+  /categories/count:
+    get:
+      description: Returns count categories from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CountResponse'
+      summary: Count all categories
+      tags:
+      - categories
   /health:
     get:
       description: Returns health check status

@@ -46,7 +46,7 @@ func GetStagedDiff(workDir, pathFilter string, exts ...string) (*DiffResult, err
 		log.Printf("    • %s", f)
 	}
 
-	cmd2 := exec.Command("git", append([]string{"diff", "--cached", "--"}, files...)...)
+	cmd2 := exec.Command("git", append([]string{"diff", "--cached", "-U10", "--"}, files...)...)
 	cmd2.Dir = workDir
 	diffOut, err := cmd2.Output()
 	if err != nil {

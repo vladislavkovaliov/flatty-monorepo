@@ -109,14 +109,31 @@ func buildPrompt(diff, language string) string {
 		prompt += "## Git diff\n```diff\n" + diff + "\n```\n\n"
 	}
 
-	prompt += fmt.Sprintf(`Analyze:
-1. Logic errors or bugs
-2. %s best practices violations
-3. %s type safety issues
-4. Potential runtime errors
+	prompt += fmt.Sprintf(`Analyze the changes and categorize issues:
 
-For each issue: file:line, severity (critical/major/minor), explanation, suggested fix.
-If no issues, say "✅ No issues found."`, language, language)
+1. **Security**:
+   - SQL injection, XSS, data leaks
+   - Secrets/tokens in code
+   - Missing input validation
+
+2. **Logic and bugs**:
+   - Race conditions, deadlocks, goroutine leaks
+   - Incorrect error handling
+   - Context cancellation not respected
+
+3. **Code style** (best practices):
+   - Naming, Go idioms
+   - Unused code, dead code
+   - Missing error handling
+
+Output format — markdown table:
+
+| Severity | File:Line | Issue | Fix |
+|----------|-----------|-------|-----|
+
+Severity: critical / major / minor
+
+If no issues: "✅ No issues found."`)
 
 	return prompt
 }

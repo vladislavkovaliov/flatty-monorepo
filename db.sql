@@ -75,9 +75,9 @@ INSERT INTO categories (name, description) VALUES
 ('additional',      'Дополнительные платежи'),
 ('electricity',     'Электроэнергия'),
 ('internet_tv',     'ZALA, byfly, Умный дом, пакеты (A1)'),
-('mts_1',           'МТС (292015787)'),
-('mts_2',           'МТС (336615060)'),
-('parking_milya',   'Парковка Михаила Миля 16А'),
+('mts_1',           'МТС (292915789)'),
+('mts_2',           'МТС (336615860)'),
+('parking_milya',   'Парковка Михаила'),
 ('parking_kamova',  'Парковка Камова д5');
 
 

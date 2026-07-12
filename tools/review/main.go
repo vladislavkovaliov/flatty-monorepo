@@ -17,7 +17,7 @@ type Config struct {
 const (
 	defaultModel     = "deepseek-coder:6.7b"
 	defaultOllamaURL = "http://192.168.1.85:11434"
-	defaultDirectory = "shop-graphql-nestjs/"
+	defaultDirectory = "apps/"
 	defaultLanguage  = "TypeScript"
 )
 

@@ -7,7 +7,9 @@
     "start": "vite --port 5174",
     "build:vite": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "api": "npx dotenv -e .env -- sh -c 'npx swagger-typescript-api generate -p \"${PUBLIC_PROTOCOL}://${PUBLIC_URL}:${PUBLIC_PORT}/${PUBLIC_PATH}\" -o src/lib/types -n api.ts --no-client --extract-request-params --extract-response-body'",
+    "graphql:codegen": "npx graphql-codegen --config src/codegen.ts"
   },
   "dependencies": {
     "@mantine/core": "^9.1.0",

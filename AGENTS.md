@@ -2,7 +2,28 @@
 
 Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 
-## Frontend
+## Projects
+
+| App | Role | Stack | Port | AGENT.md |
+|-----|------|-------|------|----------|
+| react-launcher | Shell host (Vite) | React, Mantine v9 | 9000 | [→](apps/react-launcher/AGENTS.md) |
+| react-wrapper | Shell host (Vite) | React | 5174 | [→](apps/react-wrapper/AGENTS.md) |
+| react-settings | Remote MF (Webpack) | React | 8081 | [→](apps/react-settings/AGENTS.md) |
+| react-resident | Remote MF (Webpack) | React, Mantine v8 | 8082 | [→](apps/react-resident/AGENTS.md) |
+| go-api | REST API | Go + Gin | 8080 | [→](apps/go-api/AGENTS.md) |
+| nest-graphql | GraphQL API | NestJS | 3000 | [→](apps/nest-graphql/AGENTS.md) |
+| nginx-proxy | Reverse proxy | Nginx | 80 | [→](apps/nginx-proxy/AGENTS.md) |
+
+## Tools
+
+| Tool | Purpose | AGENT.md |
+|------|---------|----------|
+| review | Code review via Ollama | [→](tools/review/AGENTS.md) |
+| sql | Find duplicate SQL | [→](tools/sql/AGENTS.md) |
+
+## Shared Frontend Conventions
+
+Apply to all React apps (react-launcher, react-wrapper, react-settings, react-resident).
 
 Use:
 - React
@@ -58,28 +79,10 @@ Documentation:
 
 docs/tanstack.txt
 
+## Commands
 
-## Structure
-
-```
-apps/
-├── react-launcher/     # Vite, shell-хост для MF (port 5175)
-├── react-settings/     # Webpack UMD, remote MF (port 5174)
-├── react-wrapper/      # Vite, shell-хост для MF (port 5174)
-├── go-api/             # Go + Gin (port 8080)
-├── nest-graphql/       # NestJS + auth guard + config (port 3000)
-└── nginx-proxy/        # Nginx config
-packages/
-└── shared/             # @flatty-budget/shared — общие типы (IAppConfig, IAppComponent)
-tools/
-├── review/             # Go CLI — code review через Ollama
-└── sql/                # Go CLI — поиск дубликатов SQL
-```
-
-## Команды
-
-| Команда | Описание |
-|---------|----------|
+| Command | Description |
+|---------|-------------|
 | `npm run dev` | Запустить всё параллельно |
 | `npm run dev:frontend` | Только фронт (launcher + settings + wrapper) |
 | `npm run dev:backend` | Только бек (go-api + nest-graphql) |
@@ -88,7 +91,7 @@ tools/
 
 ## Микрофронты (custom script-injection)
 
-- Remote-ы (react-settings) собираются как UMD: `window.ext-apps.settings`
+- Remote-ы (react-settings, react-resident) собираются как UMD: `window.ext-apps.settings`, `window.ext-apps.resident`
 - Shell-ы (react-launcher, react-wrapper) загружают их через `<script>` в runtime
 - Типы: `IAppConfig`, `IAppComponent` — в `@flatty-budget/shared`
 
@@ -99,33 +102,6 @@ docker compose up postgres redpanda rabbitmq
 ```
 
 Приложения в dev запускаются на хосте через Nx. Docker — только для инфраструктуры.
-
-## Interval tools
-
-### tools/review
-
-Go CLI for code review. See `tools/review/main.go` for details.
-
-```bash
-cd tools/review
-go build -o review .
-./review                  # review staged changes (default: shop-graphql-nestjs/)
-./review --dir apps/      # review staged changes in apps/
-./review --lang go        # review Go code (default: TypeScript)
-./review --help           # flags: --dir, --lang, --model, --ollama-url
-```
-
-### tools/sql
-
-Go CLI for finding duplicate SQL between Go and NestJS.
-
-```bash
-cd tools/sql
-go build -o sql .
-./sql                     # find duplicate SQL
-./sql --help              # flags: --model, --ollama-url
-```
-
 
 ## Documentation
 

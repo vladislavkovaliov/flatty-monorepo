@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os/signal"
@@ -19,6 +20,7 @@ import (
 
 func main() {
 	cfg := config.LoadConfig()
+	fmt.Println(3)
 
 	pool, err := pgxpool.New(context.Background(), cfg.DatabaseUrl)
 

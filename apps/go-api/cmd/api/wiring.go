@@ -11,6 +11,8 @@ import (
 	"flatty-budget/go-api/http/handlers"
 	categoryrepo "flatty-budget/go-api/repos/category"
 	categoryservice "flatty-budget/go-api/services/category"
+	expensesrepo "flatty-budget/go-api/repos/expenses"
+	expensesservice "flatty-budget/go-api/services/expenses"
 	residentlocationrepo "flatty-budget/go-api/repos/resident_location"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
 
@@ -24,6 +26,7 @@ func setupRouter(pool *pgxpool.Pool) *gin.Engine {
 	wireConfig(api)
 	wireResidentLocation(api, pool)
 	wireCategory(api, pool)
+	wireExpenses(api, pool)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -62,4 +65,18 @@ func wireCategory(rg *gin.RouterGroup, pool *pgxpool.Pool) {
 	rg.PUT("/categories/:id", h.Update)
 	rg.DELETE("/categories/:id", h.Delete)
 	rg.GET("/categories/count", h.Count)
+}
+
+func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool) {
+
+	repo := expensesrepo.NewPgxRepository(pool)
+	svc := expensesservice.New(repo)
+
+	h := handlers.NewExpenseHandler(svc)
+
+	rg.GET("/expenses", h.List)
+	rg.POST("/expenses", h.Create)
+	rg.PUT("/expenses/:id", h.Update)
+	rg.DELETE("/expenses/:id", h.Delete)
+	rg.GET("/expenses/count", h.Count)
 }

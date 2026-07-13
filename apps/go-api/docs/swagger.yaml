@@ -44,6 +44,30 @@ definitions:
     - description
     - name
     type: object
+  dto.CreateExpenseRequest:
+    properties:
+      amount:
+        example: 150.5
+        type: number
+      category_id:
+        example: 1
+        type: integer
+      month:
+        example: 7
+        type: integer
+      resident_location_id:
+        example: 1
+        type: integer
+      year:
+        example: 2026
+        type: integer
+    required:
+    - amount
+    - category_id
+    - month
+    - resident_location_id
+    - year
+    type: object
   dto.CreateResidentLocationRequest:
     properties:
       apartment:
@@ -80,6 +104,14 @@ definitions:
     required:
     - data
     type: object
+  dto.DeleteExpenseResponse:
+    properties:
+      data:
+        example: 1
+        type: integer
+    required:
+    - data
+    type: object
   dto.DeleteResidentLocationResponse:
     properties:
       data:
@@ -87,6 +119,42 @@ definitions:
         type: integer
     required:
     - data
+    type: object
+  dto.ExpenseResponse:
+    properties:
+      amount:
+        example: 150.5
+        type: number
+      category_id:
+        example: 1
+        type: integer
+      created_at:
+        example: "2026-07-13T12:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      month:
+        example: 7
+        type: integer
+      resident_location_id:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2026-07-13T12:00:00Z"
+        type: string
+      year:
+        example: 2026
+        type: integer
+    required:
+    - amount
+    - category_id
+    - created_at
+    - id
+    - month
+    - resident_location_id
+    - updated_at
+    - year
     type: object
   dto.HealthResponse:
     properties:
@@ -101,6 +169,18 @@ definitions:
       data:
         items:
           $ref: '#/definitions/dto.CategoryResponse'
+        type: array
+      total:
+        type: integer
+    required:
+    - data
+    - total
+    type: object
+  dto.ListExpenseResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.ExpenseResponse'
         type: array
       total:
         type: integer
@@ -171,6 +251,30 @@ definitions:
     required:
     - description
     - name
+    type: object
+  dto.UpdateExpenseRequest:
+    properties:
+      amount:
+        example: 150.5
+        type: number
+      category_id:
+        example: 1
+        type: integer
+      month:
+        example: 7
+        type: integer
+      resident_location_id:
+        example: 1
+        type: integer
+      year:
+        example: 2026
+        type: integer
+    required:
+    - amount
+    - category_id
+    - month
+    - resident_location_id
+    - year
     type: object
   dto.UpdateResidentLocationRequest:
     properties:
@@ -327,6 +431,127 @@ paths:
       summary: Count all categories
       tags:
       - categories
+  /expenses:
+    get:
+      description: Returns all expenses from the database
+      parameters:
+      - description: Number of items to return (default 10)
+        in: query
+        name: limit
+        type: integer
+      - description: Number of items to skip (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListExpenseResponse'
+      summary: List all expenses
+      tags:
+      - expenses
+    post:
+      consumes:
+      - application/json
+      description: Add a new expense to the database
+      parameters:
+      - description: Expense data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ExpenseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an expense
+      tags:
+      - expenses
+  /expenses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an expense from the database
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DeleteExpenseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an expense
+      tags:
+      - expenses
+    put:
+      consumes:
+      - application/json
+      description: Update an expense in the database
+      parameters:
+      - description: Expense ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Expense data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ExpenseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an expense
+      tags:
+      - expenses
+  /expenses/count:
+    get:
+      description: Returns count of expenses from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CountResponse'
+      summary: Count all expenses
+      tags:
+      - expenses
   /health:
     get:
       description: Returns health check status

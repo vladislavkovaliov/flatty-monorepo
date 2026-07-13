@@ -53,11 +53,37 @@ type DeleteCategoryResponse {
   data: Int!
 }
 
+type Expense {
+  id: Int!
+  residentLocationId: Int!
+  categoryId: Int!
+  amount: Float!
+  month: Int!
+  year: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ExpenseCountResponse {
+  total: Int!
+}
+
+type DeleteExpenseResponse {
+  data: Int!
+}
+
+type ListExpenseResponse {
+  total: Int!
+  data: [Expense!]!
+}
+
 type Query {
   residentLocationCount: ResidentLocationCountResponse!
   residentLocationList(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
   categoryCount: CategoryCountResponse!
   categoryList(limit: Int! = 10, offset: Int! = 0): ListCategoryResponse!
+  expenseCount: ExpenseCountResponse!
+  expenseList(limit: Int! = 10, offset: Int! = 0): ListExpenseResponse!
 }
 
 type Mutation {
@@ -67,6 +93,9 @@ type Mutation {
   createCategory(categoryData: CategoryInput!): Category!
   updateCategory(id: Int!, categoryData: CategoryInput!): Category!
   deleteCategory(id: Int!): DeleteCategoryResponse!
+  createExpense(expenseData: ExpenseInput!): Expense!
+  updateExpense(id: Int!, expenseData: ExpenseInput!): Expense!
+  deleteExpense(id: Int!): DeleteExpenseResponse!
 }
 
 input ResidentLocationInput {
@@ -81,4 +110,12 @@ input ResidentLocationInput {
 input CategoryInput {
   name: String!
   description: String!
+}
+
+input ExpenseInput {
+  residentLocationId: Int!
+  categoryId: Int!
+  amount: Float!
+  month: Int!
+  year: Int!
 }

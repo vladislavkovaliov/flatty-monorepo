@@ -199,6 +199,190 @@ const docTemplate = `{
                 }
             }
         },
+        "/expenses": {
+            "get": {
+                "description": "Returns all expenses from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "List all expenses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of items to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListExpenseResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a new expense to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Create an expense",
+                "parameters": [
+                    {
+                        "description": "Expense data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/count": {
+            "get": {
+                "description": "Returns count of expenses from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Count all expenses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CountResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/{id}": {
+            "put": {
+                "description": "Update an expense in the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Update an expense",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Expense data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an expense from the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Delete an expense",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Expense ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteExpenseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Returns health check status",
@@ -466,6 +650,38 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateExpenseRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "month",
+                "resident_location_id",
+                "year"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 150.5
+                },
+                "category_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "month": {
+                    "type": "integer",
+                    "example": 7
+                },
+                "resident_location_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2026
+                }
+            }
+        },
         "dto.CreateResidentLocationRequest": {
             "type": "object",
             "required": [
@@ -515,6 +731,18 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.DeleteExpenseResponse": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
         "dto.DeleteResidentLocationResponse": {
             "type": "object",
             "required": [
@@ -524,6 +752,53 @@ const docTemplate = `{
                 "data": {
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "dto.ExpenseResponse": {
+            "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "created_at",
+                "id",
+                "month",
+                "resident_location_id",
+                "updated_at",
+                "year"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 150.5
+                },
+                "category_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-07-13T12:00:00Z"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "month": {
+                    "type": "integer",
+                    "example": 7
+                },
+                "resident_location_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-07-13T12:00:00Z"
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2026
                 }
             }
         },
@@ -550,6 +825,24 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.CategoryResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListExpenseResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ExpenseResponse"
                     }
                 },
                 "total": {
@@ -641,6 +934,38 @@ const docTemplate = `{
                 "name": {
                     "type": "string",
                     "example": "utilities"
+                }
+            }
+        },
+        "dto.UpdateExpenseRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "category_id",
+                "month",
+                "resident_location_id",
+                "year"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 150.5
+                },
+                "category_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "month": {
+                    "type": "integer",
+                    "example": 7
+                },
+                "resident_location_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2026
                 }
             }
         },

@@ -1,5 +1,5 @@
 import { Box, Button, Container, Group, Pagination, Table } from "@mantine/core";
-import { useResidentLocation, useDeleteResidentLocation } from "../api/resident-location.queries";
+import { useResidentLocation, useDeleteResidentLocation } from "@flatty-budget/sdk";
 
 export function ResidentTableTab() {
     const {data} = useResidentLocation()

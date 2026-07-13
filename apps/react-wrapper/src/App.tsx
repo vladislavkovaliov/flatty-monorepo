@@ -1,56 +1,43 @@
 import "@mantine/core/styles.css";
+import "@mantine/spotlight/styles.css";
 
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 import {
   MantineProvider,
   createTheme,
-  AppShell as MantineAppShell, 
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { IconHome, IconSettings, IconHome2 } from "@tabler/icons-react";
-import { AppShellHeader } from "./components/app-shell-header"
-import { AppShellNavbar } from "./components/app-shell-navbar"
+import { Spotlight } from "@mantine/spotlight";
 
 import { SingleTabManagerWrapper } from "./components/single-tab-manager";
+import { APPS } from "./shared/config/apps";
+import { buildSpotlightActions } from "./features/spotlight";
 
 const theme = createTheme({
   primaryColor: "cyan",
   fontFamily: "system-ui, sans-serif",
 });
 
-const MENU_ITEMS = [
-  { label: "Home", path: "/", icon: <IconHome size={16} stroke={1.5} /> },
-  { label: "Resident", path: "/resident", icon: <IconHome2 size={16} stroke={1.5} /> },
-];
-
 export default function App() {
-  const [opened, { toggle }] = useDisclosure(true);
-  const location = useLocation();
+  const navigate = useNavigate();
 
-  const isActiveLink = (path: string) => location.pathname === path;
+  const spotlightActions = buildSpotlightActions(APPS, navigate);
   
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <SingleTabManagerWrapper>
-        <MantineAppShell
-          header={{ height: 60 }}
-          navbar={{
-            width: 250,
-            breakpoint: "sm",
-            collapsed: { mobile: !opened },
-          }}
-          padding={0}
-        >
-          <AppShellHeader opened={opened} toggle={toggle} />
-          <AppShellNavbar items={MENU_ITEMS} isActiveFn={isActiveLink} />
-          <MantineAppShell.Main
-            style={{ height: "100%", display: "flex", flexDirection: "column" }}
-          >
-            <Outlet />
-          </MantineAppShell.Main>
-        </MantineAppShell>
+        <Outlet />
       </SingleTabManagerWrapper>
+
+      <Spotlight
+        shortcut="mod + K"
+        actions={spotlightActions}
+        nothingFound="Nothing found..."
+        highlightQuery
+        searchProps={{
+          placeholder: "Search applications...",
+        }}
+      />
     </MantineProvider>
   );
 }

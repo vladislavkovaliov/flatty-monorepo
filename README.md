@@ -41,23 +41,21 @@ npm run dev
 
 ## Code Generation
 
-### Swagger TypeScript types (REST)
+### REST types (Swagger)
 
 ```bash
-cd apps/react-resident
-npm run api
+npm run api -w @flatty-budget/sdk
 ```
 
-Generates `src/lib/types/api.ts` from the running Go API's Swagger spec.
+Generates `packages/sdk/src/types/api.ts` from the running Go API's Swagger spec.
 
 ### GraphQL types
 
 ```bash
-cd apps/react-resident
-npm run graphql:codegen
+npm run graphql:codegen -w @flatty-budget/sdk
 ```
 
-Generates `src/lib/types/graphql.ts` from the NestJS GraphQL schema.
+Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 
 ## Architecture
 
@@ -113,6 +111,7 @@ Generates `src/lib/types/graphql.ts` from the NestJS GraphQL schema.
 | `apps/go-api` | 8080 | Go + Gin | REST API (PostgreSQL, pgx) |
 | `apps/nest-graphql` | 3000 | NestJS + TypeORM | GraphQL API (PostgreSQL) |
 | `apps/nginx-proxy` | 80 | Nginx | Reverse proxy for containerized deployments |
+| `packages/sdk` | — | TypeScript | Shared API client + generated types (REST + GraphQL) |
 
 Dev servers run on the host via Nx. Docker is used only for infrastructure (PostgreSQL, Redpanda, RabbitMQ).
 
@@ -135,7 +134,7 @@ go build -o review .
 ./review                          # review staged changes in shop-graphql-nestjs/
 ./review --dir apps/react-launcher # review staged changes in a specific directory
 ./review --lang go                 # review Go code (default: TypeScript)
-./review --model deepseek-coder:6.7b
+./review --model qwen2.5-coder:14b
 ./review --ollama-url http://192.168.1.85:11434
 ./review --help
 ```

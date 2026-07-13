@@ -11,14 +11,15 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "test:run": "vitest run",
-    "api": "npx dotenv -e .env -- sh -c 'npx swagger-typescript-api generate -p \"${PUBLIC_PROTOCOL}://${PUBLIC_URL}:${PUBLIC_PORT}/${PUBLIC_PATH}\" -o src/lib/types -n api.ts --no-client --extract-request-params --extract-response-body'",
-    "graphql:codegen": "npx graphql-codegen --config src/codegen.ts"
+    "api": "npm run api -w @flatty-budget/sdk",
+    "graphql:codegen": "npm run graphql:codegen -w @flatty-budget/sdk"
   },
   "dependencies": {
     "@mantine/core": "^8.0.0",
     "@mantine/dates": "^8.3.18",
     "@mantine/form": "^8.0.0",
     "@mantine/hooks": "^8.0.0",
+    "@flatty-budget/sdk": "*",
     "@tanstack/react-query": "^5.0.0",
     "dotenv": "^17.4.2",
     "react": "^19.0.0",

@@ -5,11 +5,17 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 
 import {router} from './routers'
+import { QueryProvider } from './app/providers/query-provider';
+import { ThemeProvider } from './app/providers/theme-provider';
 
 export const BootstrapApp = () => {
     return (
         <StrictMode>
-            <RouterProvider router={router} />
+            <QueryProvider>
+                <ThemeProvider>
+                    <RouterProvider router={router} />
+                </ThemeProvider>
+            </QueryProvider>
         </StrictMode>
     )
 };

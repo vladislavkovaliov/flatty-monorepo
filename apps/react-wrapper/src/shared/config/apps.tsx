@@ -1,0 +1,34 @@
+import type { ReactNode } from 'react';
+import { IconHome, IconHome2, IconCategory2 } from '@tabler/icons-react';
+
+export interface AppDefinition {
+  id: string;
+  label: string;
+  description: string;
+  path: string;
+  icon: ReactNode;
+}
+
+export const APPS: AppDefinition[] = [
+  {
+    id: 'home',
+    label: 'Home',
+    description: 'Go back to home page',
+    path: '/',
+    icon: <IconHome size={24} stroke={1.5} />,
+  },
+  {
+    id: 'resident',
+    label: 'Resident',
+    description: 'Manage residents',
+    path: '/resident',
+    icon: <IconHome2 size={24} stroke={1.5} />,
+  },
+   {
+    id: 'categories',
+    label: 'Categories',
+    description: 'Manage categories',
+    path: '/categories',
+    icon: <IconCategory2 size={24} stroke={1.5} />,
+  },
+];

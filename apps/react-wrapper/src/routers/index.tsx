@@ -1,9 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
-import { HomePage } from "../pages/HomePage.tsx";
+import { HomePage } from "../pages/home";
+import { CategoriesPage } from "../pages/categories";
 import App from "../App";
 
 import * as microApps from "../applications";
 import { MicrofrontendHost } from "../core/micro-frontend-host";
+import { CreateCategoryPage } from "../pages/create-category";
 
 type MicroAppConfig = {
   bundleName: string;
@@ -42,6 +44,18 @@ export const router = createBrowserRouter([
         path: "/resident/*",
         element: (
           <MicrofrontendHost {...availableConfigs.resident} />
+        ),
+      },
+      {
+        path: "/categories",
+        element: (
+          <CategoriesPage />
+        ),
+      },
+      {
+        path: "/categories/create",
+        element: (
+          <CreateCategoryPage />
         ),
       },
     ],

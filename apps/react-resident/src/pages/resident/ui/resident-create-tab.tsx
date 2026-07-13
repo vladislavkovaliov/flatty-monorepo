@@ -1,7 +1,7 @@
 import { Box, Button, Group, SimpleGrid, Stack, TextInput, Title } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
-import { useCreateResidentLocation } from '../api/resident-location.queries';
+import { useCreateResidentLocation } from '@flatty-budget/sdk';
 import type { ResidentCreate } from '../model/types';
 
 export function ResidentCreateTab() {

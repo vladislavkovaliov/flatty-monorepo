@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os/exec"
 	"regexp"
 	"strings"
 	"time"
@@ -12,7 +13,41 @@ import (
 	"github.com/vladislavkovaliov/shop-project/tools/dev/internal/llm"
 )
 
-var fileBlockRe = regexp.MustCompile(`(?s)\[FILE:\s*(.+?)\]\s*\x60{3}\w*\n(.*?)\n?\x60{3}`)
+var codeBlockRe = regexp.MustCompile(`(?s)\x60{3}\w*\n(.*?)\n\x60{3}`)
+
+func parseModifiedFiles(response string) []ModifiedFile {
+	matches := codeBlockRe.FindAllStringSubmatch(response, -1)
+	var result []ModifiedFile
+	for _, m := range matches {
+		content := strings.TrimSpace(m[1])
+		if content == "" {
+			continue
+		}
+		content = cleanContent(content)
+		result = append(result, ModifiedFile{
+			Path:    "",
+			Content: content,
+		})
+	}
+	return result
+}
+
+func cleanContent(content string) string {
+	lines := strings.Split(content, "\n")
+	if len(lines) > 0 {
+		first := strings.TrimSpace(lines[0])
+		if strings.HasPrefix(first, "<file") || strings.HasPrefix(first, "---") {
+			lines = lines[1:]
+		}
+	}
+	if len(lines) > 0 {
+		last := strings.TrimSpace(lines[len(lines)-1])
+		if last == "</file>" || last == "---" {
+			lines = lines[:len(lines)-1]
+		}
+	}
+	return strings.TrimSpace(strings.Join(lines, "\n"))
+}
 
 func runDev(repoRoot string, cfg Config) {
 	log.SetPrefix("")
@@ -42,34 +77,34 @@ func runDev(repoRoot string, cfg Config) {
 	}
 	log.Printf("response received in %v (%d bytes)", time.Since(start).Round(time.Millisecond), len(response))
 
-	modified := parseResponse(response)
+	modified := parseModifiedFiles(response)
 	if len(modified) == 0 {
-		log.Println("no modified files found in response")
-		fmt.Println(response)
 		return
 	}
 
 	var allDiffs []string
-	for _, m := range modified {
-		origContent := findOriginal(files, m.Path)
-		if origContent == "" {
-			log.Printf("warning: file %s not in original list, skipping", m.Path)
-			continue
+	for i, m := range modified {
+		if i >= len(files) {
+			log.Printf("warning: more modified blocks than input files, skipping")
+			break
 		}
+		origFile := files[i]
+		origContent := origFile.Content
+		filePath := origFile.Path
 
 		if origContent == m.Content {
-			log.Printf("  %s: unchanged", m.Path)
+			log.Printf("  %s: unchanged", filePath)
 			continue
 		}
 
-		diff, err := differ.UnifiedDiff(origContent, m.Content, m.Path)
+		diff, err := differ.UnifiedDiff(origContent, m.Content, filePath)
 		if err != nil {
-			log.Printf("  %s: diff error: %v", m.Path, err)
+			log.Printf("  %s: diff error: %v", filePath, err)
 			continue
 		}
 
 		if diff == "" {
-			log.Printf("  %s: no diff (content identical)", m.Path)
+			log.Printf("  %s: no diff (content identical)", filePath)
 			continue
 		}
 
@@ -97,7 +132,7 @@ func runDev(repoRoot string, cfg Config) {
 func buildPrompt(plan, language string, files []context.FileContent) string {
 	var b strings.Builder
 
-	b.WriteString(fmt.Sprintf("You are a code generator for %s.\n\n", language))
+	b.WriteString(fmt.Sprintf("You are an expert %s engineer.\n\n", language))
 	b.WriteString("Plan:\n")
 	b.WriteString(plan)
 	b.WriteString("\n\nFiles:\n\n")
@@ -113,20 +148,11 @@ func buildPrompt(plan, language string, files []context.FileContent) string {
 		b.WriteString("```\n\n")
 	}
 
-	b.WriteString(`Generate the modified version of each file according to the plan.
-Output each modified file in this exact format:
+	b.WriteString(`Output the modified file in a code block. No explanations.
 
-[FILE: relative/path/to/file.tsx]
-` + "```" + `tsx
-entire modified file content
+` + "```" + `go
+modified file content
 ` + "```" + `
-
-Rules:
-- Output EVERY file from the input, even if unchanged.
-- oldString and newString must match the indentation and style of the original.
-- Make MINIMAL changes — only what the plan requires.
-- Preserve ALL existing code, imports, and formatting.
-- Do NOT add explanations outside the blocks.
 `)
 
 	return b.String()
@@ -137,33 +163,14 @@ type ModifiedFile struct {
 	Content string
 }
 
-func parseResponse(response string) []ModifiedFile {
-	matches := fileBlockRe.FindAllStringSubmatch(response, -1)
-	var result []ModifiedFile
-	for _, m := range matches {
-		path := strings.TrimSpace(m[1])
-		content := m[2]
-		if path == "" {
-			continue
-		}
-		result = append(result, ModifiedFile{
-			Path:    path,
-			Content: content,
-		})
-	}
-	return result
-}
-
-func findOriginal(files []context.FileContent, path string) string {
-	for _, f := range files {
-		if f.Path == path {
-			return f.Content
-		}
-	}
-	return ""
-}
-
 func applyDiff(repoRoot, diff string) error {
+	cmd := exec.Command("git", "apply")
+	cmd.Dir = repoRoot
+	cmd.Stdin = strings.NewReader(diff)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("git apply failed: %w\n%s", err, string(out))
+	}
 	return nil
 }
 
@@ -171,8 +178,11 @@ func languageForPath(path string) string {
 	if strings.HasSuffix(path, ".go") {
 		return "go"
 	}
-	if strings.HasSuffix(path, ".ts") || strings.HasSuffix(path, ".tsx") {
+	if strings.HasSuffix(path, ".tsx") {
 		return "tsx"
+	}
+	if strings.HasSuffix(path, ".ts") {
+		return "ts"
 	}
 	if strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".jsx") {
 		return "jsx"

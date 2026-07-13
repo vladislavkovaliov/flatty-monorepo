@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
-import { IconHome, IconHome2, IconCategory2 } from '@tabler/icons-react';
+import { IconHome, IconHome2, IconCategory2, IconCoin } from '@tabler/icons-react';
 
-export interface AppDefinition {
+export interface AppDefinition  {
   id: string;
   label: string;
   description: string;
@@ -24,11 +24,18 @@ export const APPS: AppDefinition[] = [
     path: '/resident',
     icon: <IconHome2 size={24} stroke={1.5} />,
   },
-   {
+  {
     id: 'categories',
     label: 'Categories',
     description: 'Manage categories',
     path: '/categories',
     icon: <IconCategory2 size={24} stroke={1.5} />,
+  },
+  {
+    id: 'expenses',
+    label: 'Expenses',
+    description: 'Manage expenses',
+    path: '/expenses',
+    icon: <IconCoin size={24} stroke={1.5} />,
   },
 ];

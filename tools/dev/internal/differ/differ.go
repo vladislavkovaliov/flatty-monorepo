@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 func UnifiedDiff(original, modified, filePath string) (string, error) {
@@ -24,10 +25,13 @@ func UnifiedDiff(original, modified, filePath string) (string, error) {
 		return "", fmt.Errorf("write mod: %w", err)
 	}
 
-	cmd := exec.Command("diff", "-u", origPath, modPath)
+	label := strings.TrimPrefix(filePath, "/")
+	cmd := exec.Command("diff", "-u",
+		"--label", fmt.Sprintf("a/%s", label),
+		"--label", fmt.Sprintf("b/%s", label),
+		origPath, modPath)
 	out, err := cmd.Output()
 	if err != nil {
-		// diff exits 1 when files differ — that's expected
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if exitErr.ExitCode() != 1 {
 				return "", fmt.Errorf("diff failed: %w", err)
@@ -41,46 +45,5 @@ func UnifiedDiff(original, modified, filePath string) (string, error) {
 		return "", nil
 	}
 
-	diff := string(out)
-	diff = replacePath(diff, "orig", filePath)
-	diff = replacePath(diff, "mod", filePath)
-
-	return diff, nil
-}
-
-func replacePath(diff, old, new string) string {
-	oldA := fmt.Sprintf("--- %s", old)
-	newA := fmt.Sprintf("+++ %s", old)
-	oldB := fmt.Sprintf("--- a/%s", old)
-	newB := fmt.Sprintf("+++ b/%s", old)
-
-	result := diff
-	result = replaceLine(result, oldA, fmt.Sprintf("--- a/%s", new))
-	result = replaceLine(result, newA, fmt.Sprintf("+++ b/%s", new))
-	result = replaceLine(result, oldB, fmt.Sprintf("--- a/%s", new))
-	result = replaceLine(result, newB, fmt.Sprintf("+++ b/%s", new))
-
-	return result
-}
-
-func replaceLine(s, old, new string) string {
-	lines := []byte(s)
-	oldB := []byte(old + "\n")
-	newB := []byte(new + "\n")
-	result := make([]byte, 0, len(s))
-
-	i := 0
-	for i <= len(lines) {
-		if i+len(oldB) <= len(lines) && string(lines[i:i+len(oldB)]) == string(oldB) {
-			result = append(result, newB...)
-			i += len(oldB)
-		} else {
-			if i < len(lines) {
-				result = append(result, lines[i])
-			}
-			i++
-		}
-	}
-
-	return string(result)
+	return string(out), nil
 }

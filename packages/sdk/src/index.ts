@@ -31,6 +31,13 @@ export type {
   ResidentLocationUpdateData,
   ResidentLocationDeleteParams,
   ResidentLocationDeleteData,
+
+  // New types for expenses
+  DtoExpenseResponse,
+  DtoListExpenseResponse,
+  ExpensesListData,
+  ExpensesDeleteData,
+  ExpensesDeleteParams
 } from './types/api';
 
 // Generated GraphQL types
@@ -42,8 +49,12 @@ export type {
   CategoryCountResponse,
   CategoryInput,
   DeleteCategoryResponse,
+  DeleteExpenseResponse,
   DeleteResidentLocationResponse,
+  Expense,
+  ExpenseInput,
   ListCategoryResponse,
+  ListExpenseResponse,
   ListResidentLocationResponse,
   Mutation,
   Query,
@@ -71,6 +82,12 @@ export {
 } from './queries/categories.queries';
 export type { CategoriesForm } from './queries/categories.queries';
 
+export {
+  EXPENSES_QUERIES,
+  useExpenses,
+  useDeleteExpense,
+} from './queries/expenses.queries';
+
 // GraphQL queries
 export {
   RESIDENT_LOCATION_GRAPHQL_QUERIES,
@@ -87,3 +104,11 @@ export {
   useUpdateCategoryGraphql,
   useDeleteCategoryGraphql,
 } from './queries/categories.graphql';
+
+export {
+  EXPENSES_GRAPHQL_QUERIES,
+  useExpensesGraphql,
+  useCreateExpensesGraphql,
+  useUpdateExpensesGraphql,
+  useDeleteExpensesGraphql,
+} from './queries/expenses.graphql';

@@ -1,7 +1,16 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
-    
+    "api-whisperer": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "tools/api-whisperer/bin/api-whisperer",
+        "--mcp",
+        "--openapi", "apps/go-api/docs/swagger.json",
+        "--graphql", "apps/nest-graphql/src/schema.gql"
+      ]
+    }
 	},
 	"permission": {
 		"task": "allow"

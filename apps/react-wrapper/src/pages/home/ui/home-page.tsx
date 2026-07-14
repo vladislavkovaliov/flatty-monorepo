@@ -6,7 +6,6 @@ export function HomePage() {
   const navigate = useNavigate();
 
   const handleNavigateCallback = (app: AppDefinition) => () => {
-
     const backendServices = ['openapi', 'graphql'];
 
      if (backendServices.includes(app.id)) {
@@ -24,15 +23,15 @@ export function HomePage() {
         Applications
       </Text>
 
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+      <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg">
         {APPS.map((app) => (
           <Card
             key={app.id}
             shadow="sm"
-            padding="xl"
+            padding="sm"
             radius="md"
             withBorder
-            style={{ cursor: 'pointer', minWidth: 200 }}
+            style={{ cursor: 'pointer', minWidth: 100 }}
             onClick={handleNavigateCallback(app)}
           >
             <Center>

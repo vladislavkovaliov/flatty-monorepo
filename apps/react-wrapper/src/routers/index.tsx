@@ -1,36 +1,34 @@
 import { createBrowserRouter } from "react-router-dom";
-import { HomePage } from "../pages/home";
-import { CategoriesPage } from "../pages/categories";
-import App from "../App";
 
-import * as microApps from "../applications";
-import { MicrofrontendHost } from "../core/micro-frontend-host";
-import { CreateCategoryPage } from "../pages/create-category";
-import { ExpensesPage, CreateExpensePage } from "../pages/expenses";
+import App from "#/App";
 
-type MicroAppConfig = {
-  bundleName: string;
-  cssBundleName?: string;
-  remoteOrigin?: string;
-  basePath?: string;
-  proxyBasePath?: string;
-};
+import { lazyLoad } from "#/shared/ui/lazy-load"
+import { availableConfigs } from "./constants";
 
-type MicroAppFactory = () => MicroAppConfig;
 
-type AppFactories = typeof microApps;
-type AppConfigUnion = ReturnType<AppFactories[keyof AppFactories]>;
-type BundleName = AppConfigUnion["bundleName"];
-type AvailableConfigs = {
-  [K in BundleName]: Extract<AppConfigUnion, { bundleName: K }>;
-};
+const ExpensesPage = lazyLoad(() =>
+  import('#/pages/expenses').then(m => ({ default: m.ExpensesPage }))
+);
 
-const availableConfigs = Object.fromEntries(
-  Object.values(microApps).map((factory) => {
-    const cfg = (factory as MicroAppFactory)();
-    return [cfg.bundleName, cfg] as const;
-  }),
-) as AvailableConfigs;
+const CreateExpensePage = lazyLoad(() =>
+  import('#/pages/expenses').then(m => ({ default: m.CreateExpensePage }))
+);
+
+const CreateCategoryPage = lazyLoad(() =>
+  import('#/pages/create-category').then(m => ({ default: m.CreateCategoryPage }))
+);
+
+const CategoriesPage = lazyLoad(() =>
+  import('#/pages/categories').then(m => ({ default: m.CategoriesPage }))
+);
+
+const HomePage = lazyLoad(() =>
+  import('#/pages/home').then(m => ({ default: m.HomePage }))
+);
+
+const MicrofrontendHost = lazyLoad(() =>
+  import('#/core/micro-frontend-host').then(m => ({ default: m.MicrofrontendHost }))
+);
 
 export const router = createBrowserRouter([
   {

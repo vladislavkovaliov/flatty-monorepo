@@ -12,6 +12,7 @@
     "graphql:codegen": "npm run graphql:codegen -w @flatty-budget/sdk"
   },
   "dependencies": {
+    "@flatty-budget/sdk": "*",
     "@mantine/core": "^9.1.0",
     "@mantine/hooks": "^9.1.0",
     "@mantine/spotlight": "^9.4.1",

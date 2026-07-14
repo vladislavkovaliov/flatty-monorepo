@@ -1,7 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getJson, postJson, putJson, deleteJson } from '../lib/http';
 import type {
-  DtoDeleteResidentLocationResponse,
   CategoriesListData,
   DtoCreateCategoryRequest,
   DtoCategoryResponse,

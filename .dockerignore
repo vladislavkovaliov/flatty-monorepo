@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.git/
+.gitignore
+pgdata/
+*.log
+.nx
+.angular
+.vscode/
+.idea/
+*.local
+.DS_Store
+README.md

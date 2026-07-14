@@ -1,10 +1,23 @@
 import { SimpleGrid, Card, Center, Text, Stack, Kbd } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { APPS } from '../../../shared/config/apps';
+import { APPS, type AppDefinition } from '../../../shared/config/apps';
 
 export function HomePage() {
   const navigate = useNavigate();
 
+  const handleNavigateCallback = (app: AppDefinition) => () => {
+
+    const backendServices = ['openapi', 'graphql'];
+
+     if (backendServices.includes(app.id)) {
+      if (import.meta.env.MODE === 'development') {
+        window.open(app.path, "_blank");
+      }
+    } else {
+      navigate(app.path);
+    }
+  }
+  
   return (
     <Stack align="center" justify="center" h="100%" gap="xl">
       <Text size="xl" fw={700}>
@@ -20,7 +33,7 @@ export function HomePage() {
             radius="md"
             withBorder
             style={{ cursor: 'pointer', minWidth: 200 }}
-            onClick={() => navigate(app.path)}
+            onClick={handleNavigateCallback(app)}
           >
             <Center>
               <Stack align="center" gap="sm">

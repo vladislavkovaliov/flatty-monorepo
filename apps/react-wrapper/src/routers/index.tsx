@@ -46,6 +46,12 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "/settings/*",
+        element: (
+          <MicrofrontendHost {...availableConfigs.settings} />
+        ),
+      },
+      {
         path: "/categories",
         element: (
           <CategoriesPage />

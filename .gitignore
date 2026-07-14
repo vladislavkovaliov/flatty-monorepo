@@ -5,6 +5,8 @@ tmp/
 .idea/
 *.local
 .env
+apps/*/.env
+packages/*/.env
 .DS_Store
 *.log
 pgdata/

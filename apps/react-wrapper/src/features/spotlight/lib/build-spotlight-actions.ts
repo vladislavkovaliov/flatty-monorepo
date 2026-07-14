@@ -13,8 +13,16 @@ export function buildSpotlightActions(
     description: app.description,
     leftSection: app.icon,
     onClick: () => {
-      navigate(app.path);
-      closeSpotlight();
+      const backendServices = ['openapi', 'graphql'];
+
+      if (backendServices.includes(app.id)) {
+        if (import.meta.env.MODE === 'development') {
+          window.open(app.path, "_blank");
+        }
+      } else {
+        navigate(app.path);
+        closeSpotlight();
+      }
     },
   }));
 }

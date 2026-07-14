@@ -10,6 +10,7 @@
     "dev": "nx run-many --target=serve --all --parallel=5",
     "dev:frontend": "nx run-many --target=serve --projects=react-launcher,react-settings,react-resident,react-wrapper --parallel=4",
     "dev:resident": "nx run-many --target=serve --projects=react-launcher,react-resident --parallel=2",
+    "dev:settings": "nx run-many --target=serve --projects=react-launcher,react-settings --parallel=2",
     "dev:launcher": "nx run-many --target=serve --projects=react-launcher --parallel=1",
     "dev:wrapper": "nx run-many --target=serve --projects=react-wrapper --parallel=1",
     "dev:backend": "nx run-many --target=serve --projects=go-api,nest-graphql --parallel=2",

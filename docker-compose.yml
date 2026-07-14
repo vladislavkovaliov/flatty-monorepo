@@ -2,23 +2,119 @@ services:
   postgres:
     image: postgres:latest
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: flatty
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-flatty}
     ports: ["55000:5432"]
-    volumes: [./pgdata:/var/lib/postgresql]
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  init-db:
+    image: postgres:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-flatty}
+    volumes:
+      - ./db.sql:/db.sql
+      - ./scripts/init-db.sh:/init-db.sh
+    command: sh /init-db.sh
+    restart: no
 
   redpanda:
     image: docker.redpanda.com/redpandadata/redpanda:latest
     ports: ["9092:9092", "8081:8081"]
     command:
       - redpanda start --mode dev-container --advertise-kafka-addr redpanda:9092
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:4-management
     ports: ["5672:5672", "15672:15672"]
+    restart: unless-stopped
+
+  react-launcher:
+    build:
+      context: .
+      dockerfile: apps/react-launcher/Dockerfile
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  react-wrapper:
+    build:
+      context: .
+      dockerfile: apps/react-wrapper/Dockerfile
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  react-settings:
+    build:
+      context: .
+      dockerfile: apps/react-settings/Dockerfile
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  react-resident:
+    build:
+      context: .
+      dockerfile: apps/react-resident/Dockerfile
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  go-api:
+    build:
+      context: .
+      dockerfile: apps/go-api/Dockerfile
+    environment:
+      PORT: ${GOAPI_PORT:-8080}
+      DATABASE_URL: ${GOAPI_DATABASE_URL:-postgres://postgres:password@postgres:5432/flatty?sslmode=disable}
+      KAFKA_BROKERS: ${GOAPI_KAFKA_BROKERS:-redpanda:9092}
+      RABBITMQ_URL: ${GOAPI_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672}
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  nest-graphql:
+    build:
+      context: .
+      dockerfile: apps/nest-graphql/Dockerfile
+    environment:
+      PORT: ${NEST_PORT:-3000}
+      DATABASE_URL: ${NEST_DATABASE_URL:-postgres://postgres:password@postgres:5432/flatty}
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  nginx-proxy:
+    build:
+      context: .
+      dockerfile: apps/nginx-proxy/Dockerfile
+    ports: ["80:80"]
+    depends_on:
+      - react-launcher
+      - react-wrapper
+      - react-settings
+      - react-resident
+      - go-api
+      - nest-graphql
+    restart: unless-stopped

@@ -22,7 +22,7 @@ export default function App() {
   const navigate = useNavigate();
 
   const spotlightActions = buildSpotlightActions(APPS, navigate);
-  
+
   return (
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <SingleTabManagerWrapper>

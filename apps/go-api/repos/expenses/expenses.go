@@ -69,6 +69,32 @@ func (r *PgxRepository) List(ctx context.Context, limit, offset int) ([]*expense
 	return expenses, nil
 }
 
+func (r *PgxRepository) GetByID(ctx context.Context, id int64) (*expensedomain.Expense, error) {
+	var expenseID int64
+	var residentLocationID int64
+	var categoryID int64
+	var amount float64
+	var month int
+	var year int
+	var createdAt time.Time
+	var updatedAt time.Time
+
+	err := r.pool.QueryRow(ctx, `
+		SELECT id, resident_location_id, category_id, amount, month, year, created_at, updated_at
+		FROM expenses
+		WHERE id = $1
+	`, id).Scan(&expenseID, &residentLocationID, &categoryID, &amount, &month, &year, &createdAt, &updatedAt)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("expense with id %d not found: %w", id, pgx.ErrNoRows)
+		}
+		return nil, err
+	}
+
+	return expensedomain.NewExpense(expenseID, residentLocationID, categoryID, amount, month, year, createdAt, updatedAt), nil
+}
+
 func (r *PgxRepository) Create(ctx context.Context, input *expensedomain.ExpenseInput) (*expensedomain.Expense, error) {
 	var id int64
 	var residentLocationID int64

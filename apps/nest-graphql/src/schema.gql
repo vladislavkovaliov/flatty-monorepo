@@ -78,6 +78,29 @@ type ListExpenseResponse {
   data: [Expense!]!
 }
 
+type ExpenseMonthlyTotal {
+  month: Int!
+  year: Int!
+  totalSpent: Float!
+  updatedAt: DateTime!
+}
+
+type ExpenseMonthlyAverage {
+  month: Int!
+  year: Int!
+  averageAmount: Float!
+  expenseCount: Int!
+  updatedAt: DateTime!
+}
+
+type ListMonthlyTotalsResponse {
+  data: [ExpenseMonthlyTotal!]!
+}
+
+type ListMonthlyAveragesResponse {
+  data: [ExpenseMonthlyAverage!]!
+}
+
 type Query {
   residentLocationCount: ResidentLocationCountResponse!
   residentLocationList(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
@@ -85,6 +108,8 @@ type Query {
   categoryList(limit: Int! = 10, offset: Int! = 0): ListCategoryResponse!
   expenseCount: ExpenseCountResponse!
   expenseList(limit: Int! = 10, offset: Int! = 0): ListExpenseResponse!
+  expenseMonthlyTotals(month: Int, year: Int): ListMonthlyTotalsResponse!
+  expenseMonthlyAverages(month: Int, year: Int): ListMonthlyAveragesResponse!
 }
 
 type Mutation {

@@ -188,6 +188,20 @@ definitions:
     - data
     - total
     type: object
+  dto.ListMonthlyAverageResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.MonthlyAverageResponse'
+        type: array
+    type: object
+  dto.ListMonthlyTotalResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.MonthlyTotalResponse'
+        type: array
+    type: object
   dto.ListResidentLocationResponse:
     properties:
       data:
@@ -199,6 +213,33 @@ definitions:
     required:
     - data
     - total
+    type: object
+  dto.MonthlyAverageResponse:
+    properties:
+      average_amount:
+        example: 187.5
+        type: number
+      expense_count:
+        example: 8
+        type: integer
+      month:
+        example: 6
+        type: integer
+      year:
+        example: 2026
+        type: integer
+    type: object
+  dto.MonthlyTotalResponse:
+    properties:
+      month:
+        example: 6
+        type: integer
+      total_spent:
+        example: 1500.5
+        type: number
+      year:
+        example: 2026
+        type: integer
     type: object
   dto.ResidentLocationResponse:
     properties:
@@ -552,6 +593,50 @@ paths:
       summary: Count all expenses
       tags:
       - expenses
+  /expenses/stats/averages:
+    get:
+      description: Returns monthly expense averages, optionally filtered by month/year
+      parameters:
+      - description: Month (1-12)
+        in: query
+        name: month
+        type: integer
+      - description: Year (2000+)
+        in: query
+        name: year
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListMonthlyAverageResponse'
+      summary: List monthly averages
+      tags:
+      - expense-stats
+  /expenses/stats/totals:
+    get:
+      description: Returns monthly expense totals, optionally filtered by month/year
+      parameters:
+      - description: Month (1-12)
+        in: query
+        name: month
+        type: integer
+      - description: Year (2000+)
+        in: query
+        name: year
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListMonthlyTotalResponse'
+      summary: List monthly totals
+      tags:
+      - expense-stats
   /health:
     get:
       description: Returns health check status

@@ -11,7 +11,8 @@ import (
 	"flatty-budget/go-api/http/handlers"
 	categoryrepo "flatty-budget/go-api/repos/category"
 	categoryservice "flatty-budget/go-api/services/category"
-	expensesrepo "flatty-budget/go-api/repos/expenses"
+	expensestatsrepo "flatty-budget/go-api/repos/expense_stats"
+	expensestatsservice "flatty-budget/go-api/services/expense_stats"
 	expensesservice "flatty-budget/go-api/services/expenses"
 	residentlocationrepo "flatty-budget/go-api/repos/resident_location"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
@@ -19,14 +20,15 @@ import (
 	_ "flatty-budget/go-api/docs"
 )
 
-func setupRouter(pool *pgxpool.Pool) *gin.Engine {
+func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service) *gin.Engine {
 	r := gin.Default()
 
 	api := r.Group("/api")
 	wireConfig(api)
 	wireResidentLocation(api, pool)
 	wireCategory(api, pool)
-	wireExpenses(api, pool)
+	wireExpenses(api, pool, expenseSvc)
+	wireExpenseStats(api, pool)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -67,11 +69,7 @@ func wireCategory(rg *gin.RouterGroup, pool *pgxpool.Pool) {
 	rg.GET("/categories/count", h.Count)
 }
 
-func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool) {
-
-	repo := expensesrepo.NewPgxRepository(pool)
-	svc := expensesservice.New(repo)
-
+func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool, svc *expensesservice.Service) {
 	h := handlers.NewExpenseHandler(svc)
 
 	rg.GET("/expenses", h.List)
@@ -79,4 +77,17 @@ func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool) {
 	rg.PUT("/expenses/:id", h.Update)
 	rg.DELETE("/expenses/:id", h.Delete)
 	rg.GET("/expenses/count", h.Count)
+}
+
+func wireExpenseStats(rg *gin.RouterGroup, pool *pgxpool.Pool) {
+	totalRepo := expensestatsrepo.NewPgxMonthlyTotalRepository(pool)
+	avgRepo := expensestatsrepo.NewPgxMonthlyAverageRepository(pool)
+
+	totalSvc := expensestatsservice.NewMonthlyTotalService(totalRepo)
+	avgSvc := expensestatsservice.NewMonthlyAverageService(avgRepo)
+
+	h := handlers.NewExpenseStatsHandler(totalSvc, avgSvc)
+
+	rg.GET("/expenses/stats/totals", h.ListTotals)
+	rg.GET("/expenses/stats/averages", h.ListAverages)
 }

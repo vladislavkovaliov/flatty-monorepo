@@ -4,16 +4,20 @@ import (
 	"context"
 	"fmt"
 
+	kafkaclient "flatty-budget/go-api/internal/kafka"
+
 	expensedomain "flatty-budget/go-api/domains/expenses"
 )
 
 type Service struct {
-	repo expensedomain.Repository
+	repo    expensedomain.Repository
+	producer *kafkaclient.Producer
 }
 
-func New(repo expensedomain.Repository) *Service {
+func New(repo expensedomain.Repository, producer *kafkaclient.Producer) *Service {
 	return &Service{
-		repo: repo,
+		repo:     repo,
+		producer: producer,
 	}
 }
 
@@ -45,13 +49,78 @@ func (s *Service) List(ctx context.Context, limit, offset int) ([]*expensedomain
 }
 
 func (s *Service) Create(ctx context.Context, input *expensedomain.ExpenseInput) (*expensedomain.Expense, error) {
-	return s.repo.Create(ctx, input)
+	expense, err := s.repo.Create(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.producer != nil {
+		event := kafkaclient.ExpenseEvent{
+			Action: "created",
+			ID:     expense.ID(),
+			Month:  expense.Month(),
+			Year:   expense.Year(),
+			Amount: expense.Amount(),
+		}
+		if pubErr := s.producer.PublishEvent(ctx, event); pubErr != nil {
+			fmt.Printf("failed to publish created event: %v\n", pubErr)
+		}
+	}
+
+	return expense, nil
 }
 
 func (s *Service) Update(ctx context.Context, id int64, input *expensedomain.ExpenseInput) (*expensedomain.Expense, error) {
-	return s.repo.Update(ctx, id, input)
+	prevExpense, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	expense, err := s.repo.Update(ctx, id, input)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.producer != nil {
+		event := kafkaclient.ExpenseEvent{
+			Action:     "updated",
+			ID:         expense.ID(),
+			Month:      expense.Month(),
+			Year:       expense.Year(),
+			Amount:     expense.Amount(),
+			PrevAmount: prevExpense.Amount(),
+		}
+		if pubErr := s.producer.PublishEvent(ctx, event); pubErr != nil {
+			fmt.Printf("failed to publish updated event: %v\n", pubErr)
+		}
+	}
+
+	return expense, nil
 }
 
 func (s *Service) Delete(ctx context.Context, id int64) (int64, error) {
-	return s.repo.Delete(ctx, id)
+	prevExpense, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+
+	returningID, err := s.repo.Delete(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+
+	if s.producer != nil {
+		event := kafkaclient.ExpenseEvent{
+			Action: "deleted",
+			ID:     prevExpense.ID(),
+			Month:  prevExpense.Month(),
+			Year:   prevExpense.Year(),
+			Amount: prevExpense.Amount(),
+		}
+		if pubErr := s.producer.PublishEvent(ctx, event); pubErr != nil {
+			fmt.Printf("failed to publish deleted event: %v\n", pubErr)
+		}
+	}
+
+	return returningID, nil
 }

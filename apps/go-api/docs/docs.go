@@ -294,6 +294,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/expenses/stats/averages": {
+            "get": {
+                "description": "Returns monthly expense averages, optionally filtered by month/year",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense-stats"
+                ],
+                "summary": "List monthly averages",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Month (1-12)",
+                        "name": "month",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Year (2000+)",
+                        "name": "year",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListMonthlyAverageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/stats/totals": {
+            "get": {
+                "description": "Returns monthly expense totals, optionally filtered by month/year",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expense-stats"
+                ],
+                "summary": "List monthly totals",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Month (1-12)",
+                        "name": "month",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Year (2000+)",
+                        "name": "year",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListMonthlyTotalResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/expenses/{id}": {
             "put": {
                 "description": "Update an expense in the database",
@@ -850,6 +918,28 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ListMonthlyAverageResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.MonthlyAverageResponse"
+                    }
+                }
+            }
+        },
+        "dto.ListMonthlyTotalResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.MonthlyTotalResponse"
+                    }
+                }
+            }
+        },
         "dto.ListResidentLocationResponse": {
             "type": "object",
             "required": [
@@ -865,6 +955,44 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.MonthlyAverageResponse": {
+            "type": "object",
+            "properties": {
+                "average_amount": {
+                    "type": "number",
+                    "example": 187.5
+                },
+                "expense_count": {
+                    "type": "integer",
+                    "example": 8
+                },
+                "month": {
+                    "type": "integer",
+                    "example": 6
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2026
+                }
+            }
+        },
+        "dto.MonthlyTotalResponse": {
+            "type": "object",
+            "properties": {
+                "month": {
+                    "type": "integer",
+                    "example": 6
+                },
+                "total_spent": {
+                    "type": "number",
+                    "example": 1500.5
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2026
                 }
             }
         },

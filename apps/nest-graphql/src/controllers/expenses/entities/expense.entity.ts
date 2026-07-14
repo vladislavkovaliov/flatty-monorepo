@@ -1,5 +1,6 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Category } from '../../categories/entities/category.entity';
 
 @ObjectType()
 @Entity('expenses')
@@ -15,6 +16,11 @@ export class Expense {
   @Field(() => Int)
   @Column({ name: 'category_id' })
   categoryId!: number;
+
+  @Field(() => Category, { nullable: true })
+  @ManyToOne(() => Category)
+  @JoinColumn({ name: 'category_id' })
+  category?: Category;
 
   @Field(() => Float)
   @Column({ type: 'numeric', precision: 12, scale: 2 })

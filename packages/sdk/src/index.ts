@@ -35,7 +35,9 @@ export type {
   // New types for expenses
   DtoExpenseResponse,
   DtoListExpenseResponse,
+  DtoCreateExpenseRequest,
   ExpensesListData,
+  ExpensesCreateData,
   ExpensesDeleteData,
   ExpensesDeleteParams
 } from './types/api';
@@ -85,6 +87,7 @@ export type { CategoriesForm } from './queries/categories.queries';
 export {
   EXPENSES_QUERIES,
   useExpenses,
+  useCreateExpense,
   useDeleteExpense,
 } from './queries/expenses.queries';
 

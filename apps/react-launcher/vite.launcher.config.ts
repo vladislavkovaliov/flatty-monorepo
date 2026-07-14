@@ -10,8 +10,13 @@ export default defineConfig(({ mode }) => {
   const portArgIndex = process.argv.indexOf('--port');
   const port =
       portArgIndex !== -1 ? Number(process.argv[portArgIndex + 1]) : undefined;
-  console.log(mode)
+    console.log(mode)
   return {
+    resolve: {
+      alias: {
+        "#": path.resolve(__dirname, "src"),
+      },
+    },
     base: "./",
     root: path.resolve(__dirname, "."),
     server: {

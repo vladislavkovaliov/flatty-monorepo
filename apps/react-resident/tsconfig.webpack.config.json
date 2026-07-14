@@ -12,7 +12,10 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": false,
     "lib": ["es2016", "dom", "ES2018.Promise"],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "#/*": ["./src/*"]
+    }
   },
   "exclude": ["node_modules"]
 }

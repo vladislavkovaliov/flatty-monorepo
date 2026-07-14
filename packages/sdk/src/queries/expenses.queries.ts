@@ -1,8 +1,10 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getJson, deleteJson } from '../lib/http';
+import { getJson, postJson, deleteJson } from '../lib/http';
 import type {
   ExpensesListData,
   ExpensesDeleteData,
+  ExpensesCreateData,
+  DtoCreateExpenseRequest,
 } from '../types/api';
 
 export const EXPENSES_QUERIES = {
@@ -16,6 +18,16 @@ export const EXPENSES_QUERIES = {
 
 export function useExpenses(limit = 10, offset = 0) {
   return useQuery(EXPENSES_QUERIES.list(limit, offset));
+}
+
+export function useCreateExpense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: DtoCreateExpenseRequest) =>
+      postJson<ExpensesCreateData>('/api/expenses', input),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: EXPENSES_QUERIES.all() }),
+  });
 }
 
 export function useDeleteExpense() {

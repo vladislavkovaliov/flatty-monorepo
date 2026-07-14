@@ -22,6 +22,7 @@ export class ExpenseRepository {
     return this.expenseRepository.findAndCount({
       skip: offset,
       take: limit,
+      relations: { category: true },
     });
   }
 

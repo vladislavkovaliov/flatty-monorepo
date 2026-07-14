@@ -30,6 +30,11 @@ query expenseList($limit: Int, $offset: Int) {
         id
         amount
         categoryId
+        category {
+          id
+          name
+          description
+        }
         month
         year
         residentLocationId

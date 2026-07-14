@@ -57,6 +57,7 @@ type Expense {
   id: Int!
   residentLocationId: Int!
   categoryId: Int!
+  category: Category
   amount: Float!
   month: Int!
   year: Int!

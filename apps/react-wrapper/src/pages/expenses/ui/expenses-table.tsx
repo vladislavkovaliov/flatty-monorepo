@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useExpenses, useDeleteExpense } from "@flatty-budget/sdk";
+import { useExpensesGraphql, useDeleteExpensesGraphql } from "@flatty-budget/sdk";
 import { Table, Button, Box, Container, Pagination } from "@mantine/core";
 import { useSearchParams } from "react-router-dom";
 
@@ -10,10 +10,10 @@ export function ExpensesTable() {
     const page = Number(searchParams.get('page') || '1');
     const offset = (page - 1) * LIMIT;
 
-    const { data } = useExpenses(LIMIT, offset);
-    const deleteMutation = useDeleteExpense()
+    const { data } = useExpensesGraphql(LIMIT, offset);
+    const deleteMutation = useDeleteExpensesGraphql()
 
-    const total = data?.total ?? 0;
+    const total = data?.expenseList?.total ?? 0;
     const totalPages = Math.ceil(total / LIMIT);
 
     useEffect(() => {
@@ -26,11 +26,11 @@ export function ExpensesTable() {
         setSearchParams({ page: String(newPage) });
     };
 
-    const rows = (data?.data || []).map((element) => (
+    const rows = (data?.expenseList?.data || []).map((element) => (
         <Table.Tr key={element.id}>
             <Table.Td>{element.id}</Table.Td>
             <Table.Td>{element.amount}</Table.Td>
-            <Table.Td>{element.category_id}</Table.Td>
+            <Table.Td>{element.category?.description}</Table.Td>
             <Table.Td>{element.month}</Table.Td>
             <Table.Td>{element.year}</Table.Td>
             <Table.Td>
@@ -50,7 +50,7 @@ export function ExpensesTable() {
                     <Table.Tr>
                         <Table.Th>ID</Table.Th>
                         <Table.Th>Amount</Table.Th>
-                        <Table.Th>Category ID</Table.Th>
+                        <Table.Th>Category</Table.Th>
                         <Table.Th>Month</Table.Th>
                         <Table.Th>Year</Table.Th>
                         <Table.Th>Actions</Table.Th>

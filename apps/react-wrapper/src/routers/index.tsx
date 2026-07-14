@@ -6,7 +6,7 @@ import App from "../App";
 import * as microApps from "../applications";
 import { MicrofrontendHost } from "../core/micro-frontend-host";
 import { CreateCategoryPage } from "../pages/create-category";
-import { ExpensesPage } from "../pages/expenses";
+import { ExpensesPage, CreateExpensePage } from "../pages/expenses";
 
 type MicroAppConfig = {
   bundleName: string;
@@ -63,6 +63,12 @@ export const router = createBrowserRouter([
         path: "/expenses",
         element: (
           <ExpensesPage />
+        ),
+      },
+      {
+        path: "/expenses/create",
+        element: (
+          <CreateExpensePage />
         ),
       },
     ],

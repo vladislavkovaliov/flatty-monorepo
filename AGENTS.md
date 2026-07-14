@@ -83,25 +83,25 @@ docs/tanstack.txt
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Запустить всё параллельно |
-| `npm run dev:frontend` | Только фронт (launcher + settings + wrapper) |
-| `npm run dev:backend` | Только бек (go-api + nest-graphql) |
-| `npm run build` | Собрать всё |
-| `npm run graph` | Визуализация графа зависимостей |
+| `npm run dev` | Run everything in parallel |
+| `npm run dev:frontend` | Frontend only (launcher + settings + wrapper) |
+| `npm run dev:backend` | Backend only (go-api + nest-graphql) |
+| `npm run build` | Build everything |
+| `npm run graph` | Visualize dependency graph |
 
-## Микрофронты (custom script-injection)
+## Micro-frontends (custom script-injection)
 
-- Remote-ы (react-settings, react-resident) собираются как UMD: `window.ext-apps.settings`, `window.ext-apps.resident`
-- Shell-ы (react-launcher, react-wrapper) загружают их через `<script>` в runtime
-- Типы: `IAppConfig`, `IAppComponent` — в `@flatty-budget/shared`
+- Remotes (react-settings, react-resident) are built as UMD: `window.ext-apps.settings`, `window.ext-apps.resident`
+- Shells (react-launcher, react-wrapper) load them via `<script>` at runtime
+- Types: `IAppConfig`, `IAppComponent` — in `@flatty-budget/shared`
 
-## Инфраструктура
+## Infrastructure
 
 ```bash
 docker compose up postgres redpanda rabbitmq
 ```
 
-Приложения в dev запускаются на хосте через Nx. Docker — только для инфраструктуры.
+Apps in dev run on host via Nx. Docker is for infrastructure only.
 
 ## Documentation
 

@@ -1,0 +1,1576 @@
+{
+    "schemes": [],
+    "swagger": "2.0",
+    "info": {
+        "description": "Educational SQL workshop backend API",
+        "title": "Shop API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "",
+    "basePath": "/api",
+    "paths": {
+        "/categories": {
+            "get": {
+                "description": "Returns all categories from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "List all categories",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of categories to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of categories to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListCategoryResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/avarage-price": {
+            "get": {
+                "description": "Returns average product price grouped by category",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get average price per category",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListCategoryAvaragePriceResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/revenue": {
+            "get": {
+                "description": "Returns revenue, orders, products and growth per category",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get category revenue stats",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of categories to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of categories to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListCategoryRevenueResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/stats": {
+            "get": {
+                "description": "Returns total categories, total products, and top category by revenue",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get category stats for widgets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.WidgetStatsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all orders from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "List all orders",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of products to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of products to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListOrderResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates an order and publishes order.created event to Kafka",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Create a new order",
+                "parameters": [
+                    {
+                        "description": "Order data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateOrderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/count": {
+            "get": {
+                "description": "Returns count orders from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Count all orders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CountResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/daily-purchases": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all orders from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "List all daily purchases",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListDailyPurchasesResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/daily-stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns daily stats from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "List daily stats",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of products to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of products to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListDailyStatResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns statistics orders from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Statitstics all orders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.StatsOrderResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/trend": {
+            "get": {
+                "description": "Returns orders trend",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get orders trend",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.OrdersTrendResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{orderID}/items": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all items for a given order",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get order items",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "orderID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.OrderItemResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
+            "get": {
+                "description": "Returns all products from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "List all products",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of products to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of products to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListProductResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Add a new product to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Create a product",
+                "parameters": [
+                    {
+                        "description": "Product data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products/cursor": {
+            "get": {
+                "description": "Returns products with cursor-based pagination. Pass the last product ID from the previous response as cursor.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "List products (cursor-based)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of products to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Last product ID from previous page",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CursorProductsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/revenue-report": {
+            "get": {
+                "description": "Returns products sorted by total revenue (SUM of price * quantity per product)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get total revenue per product",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of products to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of products to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListRevenueReportResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/revenue-stats": {
+            "get": {
+                "description": "Returns revenue stasts",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get revenue stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RevenueStatsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all users from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "List all users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of users to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of users to skip (default 0)",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListUserResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates a new user and publishes UserCreated event to Kafka",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/by-most-expensive-product": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns users by the most expensive product",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get users by the most expensive product",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListUserByMostExpensiveProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/count": {
+            "get": {
+                "description": "Returns count users from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Count all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CountResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/cursor": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns users with cursor-based pagination. Pass the last user ID from the previous response as cursor.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "List users (cursor-based)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of users to return (default 10)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Last users ID from previous page",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CursorUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/daily-registrations": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns user registration count for today",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get daily user registration",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DailyUserRegistrationResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users/registration-trend": {
+            "get": {
+                "description": "Returns users trend",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get users trend",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserRegistrationTrendResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/search": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Search users by field (partial match)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Search user by field",
+                "parameters": [
+                    {
+                        "enum": [
+                            "email",
+                            "name"
+                        ],
+                        "type": "string",
+                        "description": "Field to search by",
+                        "name": "field",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Value to search for",
+                        "name": "value",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/top-3-users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns top 3 users with the highest number of total spent",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get top 3 users by total spent",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListUserWithTotalResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.CategoryAveragePrice": {
+            "type": "object",
+            "required": [
+                "avg_price",
+                "category"
+            ],
+            "properties": {
+                "avg_price": {
+                    "type": "number"
+                },
+                "category": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CategoryResponse": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "slug",
+                "title"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2025-01-01T00:00:00Z"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "slug": {
+                    "type": "string",
+                    "example": "keyboard"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Keyboard"
+                }
+            }
+        },
+        "dto.CategoryRevenueResponse": {
+            "type": "object",
+            "required": [
+                "category",
+                "growth",
+                "orders",
+                "products",
+                "revenue"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "growth": {
+                    "$ref": "#/definitions/dto.GrowthResponse"
+                },
+                "orders": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "integer"
+                },
+                "revenue": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.CountResponse": {
+            "type": "object",
+            "required": [
+                "count"
+            ],
+            "properties": {
+                "count": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.CreateOrderItem": {
+            "type": "object",
+            "properties": {
+                "product_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateOrderRequest": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CreateOrderItem"
+                    }
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.CreateOrderResponse": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "items",
+                "user_id"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderItemResponse"
+                    }
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CreateProductRequest": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number",
+                    "example": 150
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Keyboard"
+                }
+            }
+        },
+        "dto.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CursorProductsResponse": {
+            "type": "object",
+            "required": [
+                "next_cursor",
+                "products"
+            ],
+            "properties": {
+                "next_cursor": {
+                    "type": "integer"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProductResponse"
+                    }
+                }
+            }
+        },
+        "dto.CursorUserResponse": {
+            "type": "object",
+            "required": [
+                "next_cursor",
+                "users"
+            ],
+            "properties": {
+                "next_cursor": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserResponse"
+                    }
+                }
+            }
+        },
+        "dto.DailyPurchases": {
+            "type": "object",
+            "required": [
+                "order_date",
+                "purchases"
+            ],
+            "properties": {
+                "order_date": {
+                    "type": "string"
+                },
+                "purchases": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.DailyStatResponse": {
+            "type": "object",
+            "required": [
+                "date",
+                "orders",
+                "revenue"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "2026-05-11 01:45:24.864701"
+                },
+                "orders": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "revenue": {
+                    "type": "number",
+                    "example": 120
+                }
+            }
+        },
+        "dto.DailyUserRegistrationResponse": {
+            "type": "object",
+            "required": [
+                "count",
+                "createdAt"
+            ],
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.GrowthResponse": {
+            "type": "object",
+            "required": [
+                "sign",
+                "value"
+            ],
+            "properties": {
+                "sign": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.ListCategoryAvaragePriceResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CategoryAveragePrice"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListCategoryResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CategoryResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListCategoryRevenueResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.CategoryRevenueResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListDailyPurchasesResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.DailyPurchases"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListDailyStatResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.DailyStatResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListOrderResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.OrderResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListProductResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProductResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListRevenueReportResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RevenueReportResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListUserByMostExpensiveProductResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserByMostExpensiveProduct"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListUserResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ListUserWithTotalResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserWithTotalSpent"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.OrderItemResponse": {
+            "type": "object",
+            "required": [
+                "price",
+                "product_id",
+                "quantity",
+                "title"
+            ],
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OrderResponse": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "user_id"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-05-11 01:45:24.864701"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "dto.OrdersTrendResponse": {
+            "type": "object",
+            "properties": {
+                "currentPeriod": {
+                    "type": "integer"
+                },
+                "growth": {
+                    "$ref": "#/definitions/dto.GrowthResponse"
+                },
+                "previousPeriod": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ProductResponse": {
+            "type": "object",
+            "required": [
+                "category",
+                "id",
+                "price",
+                "title"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "example": "Electoronics"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "price": {
+                    "type": "number",
+                    "example": 150
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Keyboard"
+                }
+            }
+        },
+        "dto.RevenueReportResponse": {
+            "type": "object",
+            "required": [
+                "growth",
+                "revenue",
+                "title"
+            ],
+            "properties": {
+                "growth": {
+                    "$ref": "#/definitions/dto.GrowthResponse"
+                },
+                "revenue": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RevenueStatsResponse": {
+            "type": "object",
+            "required": [
+                "averageOrderValue",
+                "totalProductsSold",
+                "totalRevenue"
+            ],
+            "properties": {
+                "averageOrderValue": {
+                    "type": "number",
+                    "example": 123.123
+                },
+                "totalProductsSold": {
+                    "type": "integer",
+                    "example": 123
+                },
+                "totalRevenue": {
+                    "type": "number",
+                    "example": 123.123
+                }
+            }
+        },
+        "dto.StatsOrderResponse": {
+            "type": "object",
+            "required": [
+                "averageCheck",
+                "total",
+                "totalThisMonth"
+            ],
+            "properties": {
+                "averageCheck": {
+                    "type": "number",
+                    "example": 1.3
+                },
+                "total": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "totalThisMonth": {
+                    "type": "number",
+                    "example": 4.2
+                }
+            }
+        },
+        "dto.TopCategoryResponse": {
+            "type": "object",
+            "properties": {
+                "revenue": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserByMostExpensiveProduct": {
+            "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "text@gmail.com"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
+        "dto.UserRegistrationTrendResponse": {
+            "type": "object",
+            "properties": {
+                "currentPeriod": {
+                    "type": "integer"
+                },
+                "growth": {
+                    "$ref": "#/definitions/dto.GrowthResponse"
+                },
+                "previousPeriod": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UserResponse": {
+            "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "text@gmail.com"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "username"
+                }
+            }
+        },
+        "dto.UserWithTotalSpent": {
+            "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name",
+                "totalSpent"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "text@gmail.com"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "username"
+                },
+                "totalSpent": {
+                    "type": "number",
+                    "example": 123.123
+                }
+            }
+        },
+        "dto.WidgetStatsResponse": {
+            "type": "object",
+            "properties": {
+                "topCategory": {
+                    "$ref": "#/definitions/dto.TopCategoryResponse"
+                },
+                "totalCategories": {
+                    "type": "integer"
+                },
+                "totalProducts": {
+                    "type": "integer"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

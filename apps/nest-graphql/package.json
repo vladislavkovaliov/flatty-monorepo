@@ -16,7 +16,11 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/graphql": "^13.4.2",
     "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.4.5",
     "@nestjs/typeorm": "^11.0.3",
+    "better-auth": "^1.6.23",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.2.1",
     "graphql": "^16.14.2",
     "pg": "^8.22.0",
     "reflect-metadata": "^0.2.0",
@@ -26,8 +30,10 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.20.0",
     "typescript": "^5.7.0"
   }
 }

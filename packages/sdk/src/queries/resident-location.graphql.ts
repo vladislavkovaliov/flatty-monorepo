@@ -10,6 +10,7 @@ async function graphqlRequest<T>(query: string, variables: Record<string, unknow
   const response = await fetch('/graphql', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ query, variables }),
   });
 

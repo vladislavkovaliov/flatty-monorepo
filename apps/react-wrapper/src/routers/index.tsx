@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 
 import App from "#/App";
 
+import { AuthGuard } from "#/features/auth/guard/auth-guard";
 import { lazyLoad } from "#/shared/ui/lazy-load"
 import { availableConfigs } from "./constants";
 
@@ -30,10 +31,26 @@ const MicrofrontendHost = lazyLoad(() =>
   import('#/core/micro-frontend-host').then(m => ({ default: m.MicrofrontendHost }))
 );
 
+const LoginPage = lazyLoad(() =>
+  import('#/pages/auth').then(m => ({ default: m.LoginPage }))
+);
+
+const RegisterPage = lazyLoad(() =>
+  import('#/pages/auth').then(m => ({ default: m.RegisterPage }))
+);
+
 export const router = createBrowserRouter([
   {
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "/register",
+    element: <RegisterPage />,
+  },
+  {
     path: "/",
-    element: <App />,
+    element: <AuthGuard><App /></AuthGuard>,
     children: [
       {
         path: "/",
@@ -77,5 +94,4 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  
 ]);

@@ -771,4 +771,10 @@ paths:
       summary: Count all resident location
       tags:
       - resident_location
+securityDefinitions:
+  Bearer:
+    description: Bearer token (better-auth session_token)
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

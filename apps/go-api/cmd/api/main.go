@@ -2,6 +2,11 @@
 // @version		1.0
 // @description	TBD
 // @BasePath		/api
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Bearer token (better-auth session_token)
+// @security Bearer
 package main
 
 import (
@@ -52,7 +57,7 @@ func main() {
 	// start kafka consumer in background
 	go consumer.Run(ctx)
 
-	r := setupRouter(pool, expenseSvc)
+	r := setupRouter(pool, expenseSvc, cfg)
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,

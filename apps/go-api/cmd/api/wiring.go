@@ -9,26 +9,30 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"flatty-budget/go-api/http/handlers"
+	"flatty-budget/go-api/internal/auth"
+	"flatty-budget/go-api/internal/config"
 	categoryrepo "flatty-budget/go-api/repos/category"
-	categoryservice "flatty-budget/go-api/services/category"
 	expensestatsrepo "flatty-budget/go-api/repos/expense_stats"
+	residentlocationrepo "flatty-budget/go-api/repos/resident_location"
+	categoryservice "flatty-budget/go-api/services/category"
 	expensestatsservice "flatty-budget/go-api/services/expense_stats"
 	expensesservice "flatty-budget/go-api/services/expenses"
-	residentlocationrepo "flatty-budget/go-api/repos/resident_location"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
 
 	_ "flatty-budget/go-api/docs"
 )
 
-func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service) *gin.Engine {
+func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *config.Config) *gin.Engine {
 	r := gin.Default()
+
+	authMw := auth.AuthMiddleware(pool)
 
 	api := r.Group("/api")
 	wireConfig(api)
-	wireResidentLocation(api, pool)
-	wireCategory(api, pool)
-	wireExpenses(api, pool, expenseSvc)
-	wireExpenseStats(api, pool)
+	wireResidentLocation(api, pool, authMw)
+	wireCategory(api, pool, authMw)
+	wireExpenses(api, pool, expenseSvc, authMw)
+	wireExpenseStats(api, pool, authMw)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -41,45 +45,48 @@ func wireConfig(rg *gin.RouterGroup) {
 	rg.GET("/health", h.Health)
 }
 
-func wireResidentLocation(rg *gin.RouterGroup, pool *pgxpool.Pool) {
+func wireResidentLocation(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
 
 	repo := residentlocationrepo.NewPgxRepository(pool)
 	svc := residentlocationservice.New(repo)
 
 	h := handlers.NewResidentLocationHandler(svc)
 
-	rg.GET("/resident-location", h.List)
-	rg.POST("/resident-location", h.Create)
-	rg.PUT("/resident-location/:id", h.Update)
-	rg.DELETE("/resident-location/:id", h.Delete)
-	rg.GET("/resident-location/count", h.Count)
+	protected := rg.Group("", authMw)
+	protected.GET("/resident-location", h.List)
+	protected.POST("/resident-location", h.Create)
+	protected.PUT("/resident-location/:id", h.Update)
+	protected.DELETE("/resident-location/:id", h.Delete)
+	protected.GET("/resident-location/count", h.Count)
 }
 
-func wireCategory(rg *gin.RouterGroup, pool *pgxpool.Pool) {
+func wireCategory(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
 
 	repo := categoryrepo.NewPgxRepository(pool)
 	svc := categoryservice.New(repo)
 
 	h := handlers.NewCategoryHandler(svc)
 
-	rg.GET("/categories", h.List)
-	rg.POST("/categories", h.Create)
-	rg.PUT("/categories/:id", h.Update)
-	rg.DELETE("/categories/:id", h.Delete)
-	rg.GET("/categories/count", h.Count)
+	protected := rg.Group("", authMw)
+	protected.GET("/categories", h.List)
+	protected.POST("/categories", h.Create)
+	protected.PUT("/categories/:id", h.Update)
+	protected.DELETE("/categories/:id", h.Delete)
+	protected.GET("/categories/count", h.Count)
 }
 
-func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool, svc *expensesservice.Service) {
+func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool, svc *expensesservice.Service, authMw gin.HandlerFunc) {
 	h := handlers.NewExpenseHandler(svc)
 
-	rg.GET("/expenses", h.List)
-	rg.POST("/expenses", h.Create)
-	rg.PUT("/expenses/:id", h.Update)
-	rg.DELETE("/expenses/:id", h.Delete)
-	rg.GET("/expenses/count", h.Count)
+	protected := rg.Group("", authMw)
+	protected.GET("/expenses", h.List)
+	protected.POST("/expenses", h.Create)
+	protected.PUT("/expenses/:id", h.Update)
+	protected.DELETE("/expenses/:id", h.Delete)
+	protected.GET("/expenses/count", h.Count)
 }
 
-func wireExpenseStats(rg *gin.RouterGroup, pool *pgxpool.Pool) {
+func wireExpenseStats(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
 	totalRepo := expensestatsrepo.NewPgxMonthlyTotalRepository(pool)
 	avgRepo := expensestatsrepo.NewPgxMonthlyAverageRepository(pool)
 
@@ -88,6 +95,7 @@ func wireExpenseStats(rg *gin.RouterGroup, pool *pgxpool.Pool) {
 
 	h := handlers.NewExpenseStatsHandler(totalSvc, avgSvc)
 
-	rg.GET("/expenses/stats/totals", h.ListTotals)
-	rg.GET("/expenses/stats/averages", h.ListAverages)
+	protected := rg.Group("", authMw)
+	protected.GET("/expenses/stats/totals", h.ListTotals)
+	protected.GET("/expenses/stats/averages", h.ListAverages)
 }

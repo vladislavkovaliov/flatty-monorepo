@@ -97,6 +97,7 @@ services:
       DATABASE_URL: ${GOAPI_DATABASE_URL:-postgres://postgres:password@postgres:5432/flatty?sslmode=disable}
       KAFKA_BROKERS: ${GOAPI_KAFKA_BROKERS:-redpanda:9092}
       RABBITMQ_URL: ${GOAPI_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672}
+      AUTH_SERVICE_URL: ${GOAPI_AUTH_SERVICE_URL:-http://nest-graphql:3000}
     depends_on:
       init-db:
         condition: service_completed_successfully
@@ -109,6 +110,8 @@ services:
     environment:
       PORT: ${NEST_PORT:-3000}
       DATABASE_URL: ${NEST_DATABASE_URL:-postgres://postgres:password@postgres:5432/flatty}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-change-me-to-a-random-secret-at-least-32-chars}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:80}
     depends_on:
       init-db:
         condition: service_completed_successfully

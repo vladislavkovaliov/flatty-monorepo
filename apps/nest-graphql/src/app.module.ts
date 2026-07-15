@@ -8,6 +8,8 @@ import { CategoriesModule } from './controllers/categories/categories.module'
 import { ExpensesModule } from './controllers/expenses/expenses.module'
 import { ExpenseStatsModule } from './controllers/expense-stats/expense-stats.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { AuthModule } from './auth/auth.module'
+import type { Request } from 'express'
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
 
@@ -18,7 +20,6 @@ import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPag
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: () => {
-        console.log(process.env.DATABASE_URL)
         return {
           type: 'postgres',
           url: process.env.DATABASE_URL,
@@ -33,9 +34,13 @@ import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPag
       playground: false,
       introspection: true,
       csrfPrevention: false,
-      // context: ({ req, res }) => ({ req, res }),
+      context: ({ req }: { req: Request }) => ({
+        req,
+        userID: (req as any).userID,
+      }),
       plugins: [ApolloServerPluginLandingPageLocalDefault()]
     }),
+    AuthModule,
     ResidentLocationModule,
     CategoriesModule,
     ExpensesModule,

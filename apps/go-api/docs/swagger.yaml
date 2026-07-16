@@ -214,6 +214,18 @@ definitions:
     - data
     - total
     type: object
+  dto.ListUserResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.UserResponse'
+        type: array
+      total:
+        type: integer
+    required:
+    - data
+    - total
+    type: object
   dto.MonthlyAverageResponse:
     properties:
       average_amount:
@@ -344,6 +356,37 @@ definitions:
     - house
     - postal_code
     - street
+    type: object
+  dto.UserResponse:
+    properties:
+      created_at:
+        example: "2020-04-13t12:00:00Z"
+        type: string
+      email:
+        example: superman@gmail.com
+        type: string
+      email_verified:
+        example: true
+        type: boolean
+      id:
+        example: "1"
+        type: string
+      image:
+        example: string
+        type: string
+      name:
+        example: clark
+        type: string
+      updated_at:
+        example: "2020-04-13t12:00:00Z"
+        type: string
+    required:
+    - created_at
+    - email
+    - email_verified
+    - id
+    - name
+    - updated_at
     type: object
 info:
   contact: {}
@@ -771,6 +814,38 @@ paths:
       summary: Count all resident location
       tags:
       - resident_location
+  /user:
+    get:
+      description: Returns list of user from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListUserResponse'
+      summary: Return list of user
+      tags:
+      - user
+  /user/{id}:
+    get:
+      description: Returns user by id from the database
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+      summary: Return user by id
+      tags:
+      - user
 securityDefinitions:
   Bearer:
     description: Bearer token (better-auth session_token)

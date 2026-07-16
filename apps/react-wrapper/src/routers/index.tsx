@@ -15,6 +15,10 @@ const CreateExpensePage = lazyLoad(() =>
   import('#/pages/expenses').then(m => ({ default: m.CreateExpensePage }))
 );
 
+const UsersPage = lazyLoad(() =>
+  import('#/pages/users').then(m => ({ default: m.UsersPage }))
+);
+
 const CreateCategoryPage = lazyLoad(() =>
   import('#/pages/create-category').then(m => ({ default: m.CreateCategoryPage }))
 );
@@ -66,6 +70,12 @@ export const router = createBrowserRouter([
         path: "/settings/*",
         element: (
           <MicrofrontendHost {...availableConfigs.settings} />
+        ),
+      },
+      {
+        path: "/users",
+        element: (
+          <UsersPage />
         ),
       },
       {

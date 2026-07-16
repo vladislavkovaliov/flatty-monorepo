@@ -7,6 +7,7 @@ import { ResidentLocationModule } from './controllers/resident-location/resident
 import { CategoriesModule } from './controllers/categories/categories.module'
 import { ExpensesModule } from './controllers/expenses/expenses.module'
 import { ExpenseStatsModule } from './controllers/expense-stats/expense-stats.module'
+import { UsersModule } from './controllers/users/users.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from './auth/auth.module'
 import type { Request } from 'express'
@@ -45,6 +46,7 @@ import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPag
     CategoriesModule,
     ExpensesModule,
     ExpenseStatsModule,
+    UsersModule,
   ]
 })
 export class AppModule {}

@@ -14,10 +14,12 @@ import (
 	categoryrepo "flatty-budget/go-api/repos/category"
 	expensestatsrepo "flatty-budget/go-api/repos/expense_stats"
 	residentlocationrepo "flatty-budget/go-api/repos/resident_location"
+	userrepo "flatty-budget/go-api/repos/user"
 	categoryservice "flatty-budget/go-api/services/category"
 	expensestatsservice "flatty-budget/go-api/services/expense_stats"
 	expensesservice "flatty-budget/go-api/services/expenses"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
+	userservice "flatty-budget/go-api/services/user"
 
 	_ "flatty-budget/go-api/docs"
 )
@@ -33,6 +35,7 @@ func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *c
 	wireCategory(api, pool, authMw)
 	wireExpenses(api, pool, expenseSvc, authMw)
 	wireExpenseStats(api, pool, authMw)
+	wireUser(api, pool, authMw)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -98,4 +101,16 @@ func wireExpenseStats(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.Handle
 	protected := rg.Group("", authMw)
 	protected.GET("/expenses/stats/totals", h.ListTotals)
 	protected.GET("/expenses/stats/averages", h.ListAverages)
+}
+
+func wireUser(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
+	userRepo := userrepo.NewPgxRepository(pool)
+	userSvc := userservice.NewUserService(userRepo)
+
+	h := handlers.NewUseHandler(userSvc)
+
+	protected := rg.Group("", authMw)
+
+	protected.GET("/user", h.List)
+	protected.GET("/user/:id", h.GetUserByID)
 }

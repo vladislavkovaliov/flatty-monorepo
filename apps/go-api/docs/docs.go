@@ -654,6 +654,55 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user": {
+            "get": {
+                "description": "Returns list of user from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Return list of user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "description": "Returns user by id from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Return user by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -958,6 +1007,24 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ListUserResponse": {
+            "type": "object",
+            "required": [
+                "data",
+                "total"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.UserResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.MonthlyAverageResponse": {
             "type": "object",
             "properties": {
@@ -1131,6 +1198,47 @@ const docTemplate = `{
                 "street": {
                     "type": "string",
                     "example": "Bobr"
+                }
+            }
+        },
+        "dto.UserResponse": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "email",
+                "email_verified",
+                "id",
+                "name",
+                "updated_at"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2020-04-13t12:00:00Z"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "superman@gmail.com"
+                },
+                "email_verified": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "id": {
+                    "type": "string",
+                    "example": "1"
+                },
+                "image": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "clark"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2020-04-13t12:00:00Z"
                 }
             }
         }

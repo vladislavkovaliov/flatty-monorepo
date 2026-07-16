@@ -1,4 +1,5 @@
 {
+  "exclude": ["vitest.config.ts"],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,

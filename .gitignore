@@ -12,3 +12,4 @@ packages/*/.env
 pgdata/
 .nx
 .angular
+thoughts

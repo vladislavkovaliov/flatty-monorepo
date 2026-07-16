@@ -538,3 +538,16 @@ CREATE TRIGGER set_expense_monthly_averages_updated_at
 BEFORE UPDATE ON expense_monthly_averages
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- invitation table (for admin invitation-by-magic-link flow)
+
+CREATE TYPE invitation_status AS ENUM ('pending', 'accepted', 'expired');
+
+CREATE TABLE invitation (
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email       VARCHAR(255) NOT NULL,
+    "invitedBy" VARCHAR(255) NOT NULL,
+    status      invitation_status NOT NULL DEFAULT 'pending',
+    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    "acceptedAt" TIMESTAMPTZ
+);

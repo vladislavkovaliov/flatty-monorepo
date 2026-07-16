@@ -43,6 +43,14 @@ const RegisterPage = lazyLoad(() =>
   import('#/pages/auth').then(m => ({ default: m.RegisterPage }))
 );
 
+const AcceptInvitePage = lazyLoad(() =>
+  import('#/pages/accept-invite').then(m => ({ default: m.AcceptInvitePage }))
+);
+
+const SetPasswordPage = lazyLoad(() =>
+  import('#/pages/set-password').then(m => ({ default: m.SetPasswordPage }))
+);
+
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -51,6 +59,14 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
+  },
+  {
+    path: "/accept-invite",
+    element: <AcceptInvitePage />,
+  },
+  {
+    path: "/set-password",
+    element: <SetPasswordPage />,
   },
   {
     path: "/",

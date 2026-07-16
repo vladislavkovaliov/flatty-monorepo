@@ -136,3 +136,7 @@ export {
   useUsersGraphql,
   useUserGraphql,
 } from './queries/users.graphql';
+
+export {
+  useAcceptInvitation,
+} from './queries/invitations.graphql';

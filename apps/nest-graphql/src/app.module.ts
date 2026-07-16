@@ -10,6 +10,8 @@ import { ExpenseStatsModule } from './controllers/expense-stats/expense-stats.mo
 import { UsersModule } from './controllers/users/users.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from './auth/auth.module'
+import { InvitationModule } from './invitation/invitation.module'
+import { EmailModule } from './email/email.module'
 import type { Request } from 'express'
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
@@ -42,6 +44,8 @@ import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPag
       plugins: [ApolloServerPluginLandingPageLocalDefault()]
     }),
     AuthModule,
+    EmailModule,
+    InvitationModule,
     ResidentLocationModule,
     CategoriesModule,
     ExpensesModule,

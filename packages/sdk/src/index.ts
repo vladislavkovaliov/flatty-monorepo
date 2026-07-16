@@ -39,7 +39,14 @@ export type {
   ExpensesListData,
   ExpensesCreateData,
   ExpensesDeleteData,
-  ExpensesDeleteParams
+  ExpensesDeleteParams,
+
+  // User types
+  DtoUserResponse,
+  DtoListUserResponse,
+  UserListData,
+  UserDetailData,
+  UserDetailParams,
 } from './types/api';
 
 // Generated GraphQL types
@@ -58,11 +65,13 @@ export type {
   ListCategoryResponse,
   ListExpenseResponse,
   ListResidentLocationResponse,
+  ListUserResponse,
   Mutation,
   Query,
   ResidentLocation,
   ResidentLocationCountResponse,
   ResidentLocationInput,
+  User,
 } from './types/graphql';
 
 // REST queries
@@ -91,6 +100,12 @@ export {
   useDeleteExpense,
 } from './queries/expenses.queries';
 
+export {
+  USERS_QUERIES,
+  useUsers,
+  useUser,
+} from './queries/users.queries';
+
 // GraphQL queries
 export {
   RESIDENT_LOCATION_GRAPHQL_QUERIES,
@@ -115,3 +130,9 @@ export {
   useUpdateExpensesGraphql,
   useDeleteExpensesGraphql,
 } from './queries/expenses.graphql';
+
+export {
+  USERS_GRAPHQL_QUERIES,
+  useUsersGraphql,
+  useUserGraphql,
+} from './queries/users.graphql';

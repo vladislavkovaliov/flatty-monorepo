@@ -101,6 +101,21 @@ type ListMonthlyAveragesResponse {
   data: [ExpenseMonthlyAverage!]!
 }
 
+type User {
+  id: String!
+  name: String!
+  email: String!
+  emailVerified: Boolean!
+  image: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ListUserResponse {
+  total: Int!
+  data: [User!]!
+}
+
 type Query {
   residentLocationCount: ResidentLocationCountResponse!
   residentLocationList(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
@@ -110,6 +125,8 @@ type Query {
   expenseList(limit: Int! = 10, offset: Int! = 0): ListExpenseResponse!
   expenseMonthlyTotals(month: Int, year: Int): ListMonthlyTotalsResponse!
   expenseMonthlyAverages(month: Int, year: Int): ListMonthlyAveragesResponse!
+  userList(limit: Int! = 10, offset: Int! = 0): ListUserResponse!
+  user(id: String!): User!
 }
 
 type Mutation {

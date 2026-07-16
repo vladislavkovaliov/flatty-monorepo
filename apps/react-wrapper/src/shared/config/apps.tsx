@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { IconHome, IconHome2, IconCategory2, IconCoin, IconSettings2, IconBrandGraphql, IconApi } from '@tabler/icons-react';
+import { IconHome, IconHome2, IconCategory2, IconCoin, IconSettings2, IconBrandGraphql, IconApi, IconUsers } from '@tabler/icons-react';
 
 export interface AppDefinition  {
   id: string;
@@ -44,6 +44,13 @@ export const APPS: AppDefinition[] = [
     description: 'Manage expenses',
     path: '/expenses',
     icon: <IconCoin size={24} stroke={1.5} />,
+  },
+  {
+    id: 'users',
+    label: 'Users',
+    description: 'Manage users',
+    path: '/users',
+    icon: <IconUsers size={24} stroke={1.5} />,
   },
   {
     id: 'openapi',

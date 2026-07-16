@@ -6,14 +6,23 @@ import (
 
 	expensestatsdomain "flatty-budget/go-api/domains/expense_stats"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type PgxMonthlyTotalRepository struct {
-	pool *pgxpool.Pool
+// pgxPool is a minimal interface matching the Query, QueryRow, and Exec methods of *pgxpool.Pool.
+// It exists to enable unit testing with mock implementations.
+type pgxPool interface {
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
 }
 
-func NewPgxMonthlyTotalRepository(pool *pgxpool.Pool) *PgxMonthlyTotalRepository {
+type PgxMonthlyTotalRepository struct {
+	pool pgxPool
+}
+
+func NewPgxMonthlyTotalRepository(pool pgxPool) *PgxMonthlyTotalRepository {
 	return &PgxMonthlyTotalRepository{pool: pool}
 }
 
@@ -64,10 +73,10 @@ func (r *PgxMonthlyTotalRepository) UpsertTotal(ctx context.Context, month, year
 }
 
 type PgxMonthlyAverageRepository struct {
-	pool *pgxpool.Pool
+	pool pgxPool
 }
 
-func NewPgxMonthlyAverageRepository(pool *pgxpool.Pool) *PgxMonthlyAverageRepository {
+func NewPgxMonthlyAverageRepository(pool pgxPool) *PgxMonthlyAverageRepository {
 	return &PgxMonthlyAverageRepository{pool: pool}
 }
 

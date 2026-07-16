@@ -7,16 +7,22 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	residentlocationdomain "flatty-budget/go-api/domains/resident_location"
 )
 
-type PgxRepository struct {
-	pool *pgxpool.Pool
+// pgxPool is a minimal interface matching the Query and QueryRow methods of *pgxpool.Pool.
+// It exists to enable unit testing with mock implementations.
+type pgxPool interface {
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 }
 
-func NewPgxRepository(pool *pgxpool.Pool) *PgxRepository {
+type PgxRepository struct {
+	pool pgxPool
+}
+
+func NewPgxRepository(pool pgxPool) *PgxRepository {
 	return &PgxRepository{
 		pool: pool,
 	}

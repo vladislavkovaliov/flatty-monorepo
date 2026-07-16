@@ -116,7 +116,29 @@ type ListUserResponse {
   data: [User!]!
 }
 
+type Invitation {
+  id: String!
+  email: String!
+  invitedBy: String!
+  status: InvitationStatus!
+  createdAt: DateTime!
+  acceptedAt: String
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+type InvitationListResponse {
+  data: [Invitation!]!
+  total: Int!
+}
+
 type Query {
+  invitationList(limit: Int! = 10, offset: Int! = 0): InvitationListResponse!
+  invitationCount: Int!
   residentLocationCount: ResidentLocationCountResponse!
   residentLocationList(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
   categoryCount: CategoryCountResponse!
@@ -130,6 +152,8 @@ type Query {
 }
 
 type Mutation {
+  sendInvitation(input: SendInvitationInput!): Invitation!
+  acceptInvitation(email: String!): Boolean!
   createResidentLocation(residentLocatoinData: ResidentLocationInput!): ResidentLocation!
   updateResidentLocation(id: Int!, residentLocatoinData: ResidentLocationInput!): ResidentLocation!
   deleteResidentLocation(id: Int!): DeleteResidentLocationResponse!
@@ -139,6 +163,10 @@ type Mutation {
   createExpense(expenseData: ExpenseInput!): Expense!
   updateExpense(id: Int!, expenseData: ExpenseInput!): Expense!
   deleteExpense(id: Int!): DeleteExpenseResponse!
+}
+
+input SendInvitationInput {
+  email: String!
 }
 
 input ResidentLocationInput {

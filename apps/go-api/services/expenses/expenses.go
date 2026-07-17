@@ -10,11 +10,11 @@ import (
 )
 
 type Service struct {
-	repo    expensedomain.Repository
-	producer *kafkaclient.Producer
+	repo     expensedomain.Repository
+	producer kafkaclient.ProducerInterface
 }
 
-func New(repo expensedomain.Repository, producer *kafkaclient.Producer) *Service {
+func New(repo expensedomain.Repository, producer kafkaclient.ProducerInterface) *Service {
 	return &Service{
 		repo:     repo,
 		producer: producer,

@@ -17,6 +17,10 @@ type ExpenseEvent struct {
 	PrevAmount float64 `json:"prev_amount,omitempty"`
 }
 
+type ProducerInterface interface {
+	PublishEvent(ctx context.Context, event ExpenseEvent) error
+}
+
 type Producer struct {
 	writer *kafka.Writer
 }

@@ -11,6 +11,10 @@ const ExpensesPage = lazyLoad(() =>
   import('#/pages/expenses').then(m => ({ default: m.ExpensesPage }))
 );
 
+const SpendingPage = lazyLoad(() =>
+  import('#/pages/spending').then(m => ({ default: m.SpendingPage }))
+);
+
 const CreateExpensePage = lazyLoad(() =>
   import('#/pages/expenses').then(m => ({ default: m.CreateExpensePage }))
 );
@@ -110,6 +114,12 @@ export const router = createBrowserRouter([
         path: "/expenses",
         element: (
           <ExpensesPage />
+        ),
+      },
+      {
+        path: "/spending",
+        element: (
+          <SpendingPage />
         ),
       },
       {

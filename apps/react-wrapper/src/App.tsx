@@ -1,4 +1,6 @@
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "@mantine/charts/styles.css";
 import "@mantine/spotlight/styles.css";
 
 import { Outlet, useNavigate } from "react-router-dom";

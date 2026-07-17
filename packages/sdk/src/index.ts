@@ -140,3 +140,9 @@ export {
 export {
   useAcceptInvitation,
 } from './queries/invitations.graphql';
+
+export {
+  EXPENSE_STATS_GRAPHQL_QUERIES,
+  useExpenseMonthlyTotalsGraphql,
+  useExpenseMonthlyAveragesGraphql,
+} from './queries/expense-stats.graphql';

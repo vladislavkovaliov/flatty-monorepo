@@ -1,35 +1,32 @@
 import { Box, Button, Group, SimpleGrid, Stack, TextInput, Title } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { useCreateResidentLocation } from '@flatty-budget/sdk';
-import type { ResidentCreate } from '../model/types';
+
+interface ResidentCreateForm {
+  country: string;
+  city: string;
+  apartment: string;
+  house: string;
+  street: string;
+  postalCode: string;
+}
 
 export function ResidentCreateTab() {
   const createMutation = useCreateResidentLocation();
 
-  const form = useForm<ResidentCreate>({
+  const form = useForm<ResidentCreateForm>({
     initialValues: {
-      fullName: '',
-      email: '',
-      phone: '',
-      dateOfBirth: null,
       country: '',
       city: '',
       apartment: '',
       house: '',
       street: '',
       postalCode: '',
-      address: '',
-    },
-    validate: {
-      fullName: (value) => (value.trim().length < 2 ? 'Full name is required' : null),
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
     },
   });
 
-  const handleSubmit = (values: ResidentCreate) => {
-    const { country, city, apartment, house, street, postalCode } = values;
-    createMutation.mutate({ country, city, apartment, house, street, postalCode }, {
+  const handleSubmit = (values: ResidentCreateForm) => {
+    createMutation.mutate(values, {
       onSuccess: () => form.reset(),
     });
   };
@@ -44,40 +41,6 @@ export function ResidentCreateTab() {
 
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="md">
-          <SimpleGrid cols={2}>
-            <TextInput
-              label="Full name"
-              placeholder="John Doe"
-              withAsterisk
-              key={form.key('fullName')}
-              {...form.getInputProps('fullName')}
-            />
-            <TextInput
-              label="Email"
-              placeholder="john@example.com"
-              withAsterisk
-              key={form.key('email')}
-              {...form.getInputProps('email')}
-            />
-          </SimpleGrid>
-
-          <SimpleGrid cols={2}>
-            <TextInput
-              label="Phone"
-              placeholder="+1 234 567 890"
-              key={form.key('phone')}
-              {...form.getInputProps('phone')}
-            />
-            <DatePickerInput
-              label="Date of birth"
-              placeholder="Pick date"
-              clearable
-              value={form.values.dateOfBirth}
-              onChange={(value) => form.setFieldValue('dateOfBirth', value)}
-              error={form.errors.dateOfBirth}
-            />
-          </SimpleGrid>
-
           <SimpleGrid cols={2}>
             <TextInput
               label="Country"
@@ -122,13 +85,6 @@ export function ResidentCreateTab() {
               {...form.getInputProps('postalCode')}
             />
           </SimpleGrid>
-
-          <TextInput
-            label="Address"
-            placeholder="123 Main St"
-            key={form.key('address')}
-            {...form.getInputProps('address')}
-          />
 
           <Box mt="md">
             <Group justify="flex-end">

@@ -1,5 +1,4 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../../../shared/api/client';
 import { SETTINGS_STORAGE_KEY } from './user-settings.mocks';
 import type { UserSettings } from '../model/types';
 
@@ -8,7 +7,14 @@ export const USER_SETTINGS_QUERIES = {
   current: () =>
     queryOptions({
       queryKey: [...USER_SETTINGS_QUERIES.all(), 'current'],
-      queryFn: () => apiClient.get<UserSettings>(SETTINGS_STORAGE_KEY),
+      queryFn: () => {
+        try {
+          const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+          return Promise.resolve(raw ? (JSON.parse(raw) as UserSettings) : null);
+        } catch {
+          return Promise.resolve(null);
+        }
+      },
     }),
 };
 
@@ -21,10 +27,18 @@ export function useUpdateUserSettings() {
 
   return useMutation({
     mutationFn: (patch: Partial<UserSettings>) => {
-      const currentRaw = localStorage.getItem(SETTINGS_STORAGE_KEY);
-      const current: UserSettings = currentRaw ? JSON.parse(currentRaw) : {};
-      const next: UserSettings = { ...current, ...patch };
-      return apiClient.set(SETTINGS_STORAGE_KEY, next);
+      let current: Partial<UserSettings> = {};
+      try {
+        const currentRaw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+        if (currentRaw) {
+          current = JSON.parse(currentRaw) as UserSettings;
+        }
+      } catch {
+        current = {};
+      }
+      const next = { ...current, ...patch } as UserSettings;
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next));
+      return Promise.resolve(next);
     },
     onMutate: async (patch) => {
       await queryClient.cancelQueries({ queryKey: USER_SETTINGS_QUERIES.current().queryKey });

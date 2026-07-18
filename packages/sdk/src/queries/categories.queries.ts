@@ -42,7 +42,7 @@ export function useCreateCategories() {
   });
 }
 
-export function useUpdatecategories() {
+export function useUpdateCategories() {
   const queryClient = useQueryClient();
 
   return useMutation({

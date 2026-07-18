@@ -56,5 +56,3 @@ export function sanitizeConfig(config: unknown): IAppConfig {
 
     return safeConfig;
 }
-
-export { getJson, postJson, putJson, deleteJson } from '@flatty-budget/sdk';

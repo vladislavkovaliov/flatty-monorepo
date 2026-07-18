@@ -12,6 +12,7 @@
     }
   },
   "scripts": {
+    "build": "tsc",
     "api": "npx dotenv -e .env -- sh -c 'npx swagger-typescript-api generate -p \"${SWAGGER_URL}\" -o src/types -n api.ts --no-client --extract-request-params --extract-response-body'",
     "graphql:codegen": "npx graphql-codegen --config codegen.ts"
   },

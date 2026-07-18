@@ -1,6 +1,6 @@
 import { App } from "./app"
 
-export default function Bootstrap() {
+export function Bootstrap() {
     return (
         <App />
     )

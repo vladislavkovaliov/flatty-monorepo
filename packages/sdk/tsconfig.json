@@ -6,7 +6,6 @@
     "strict": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
-    "declaration": true,
     "outDir": "./dist",
     "jsx": "react-jsx",
     "skipLibCheck": true

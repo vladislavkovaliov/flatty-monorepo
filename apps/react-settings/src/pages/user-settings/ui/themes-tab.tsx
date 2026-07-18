@@ -27,7 +27,6 @@ export function ThemesTab() {
         onChange={(v) => {
           if (v) {
             mutate({ theme: v as Theme });
-            console.log('[UserSettings] theme updated:', v);
           }
         }}
         clearable={false}

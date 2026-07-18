@@ -2,6 +2,7 @@ export interface IAppConfig {
     bundleName?: string;
     cssBundleName?: string;
     remoteOrigin?: string;
+    basePath?: string;
     env: string;
     featureFlags: Record<string, unknown>;
     navigate?: () => Promise<void>;

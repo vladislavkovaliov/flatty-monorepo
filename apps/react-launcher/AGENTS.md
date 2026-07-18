@@ -3,7 +3,7 @@
 Vite shell host for micro-frontends.
 
 - **Port:** 9000
-- **Stack:** React 19, TypeScript, Mantine v9, TanStack Query
+- **Stack:** React 19, TypeScript, Mantine v9
 - **Bundler:** Vite
 - **Role:** Host shell — loads remote MFs via `<script>` at runtime
 

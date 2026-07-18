@@ -8,6 +8,7 @@ type CountResponse struct {
 
 type ResidentLocationResponse struct {
 	ID         int64     `json:"id,omitempty" example:"123" binding:"required"`
+	UserID     string    `json:"user_id,omitempty" example:"00000000-0000-0000-0000-000000000001" binding:"required"`
 	Country    string    `json:"country,omitempty" example:"Poland" binding:"required"`
 	City       string    `json:"city,omitempty" example:"Warsaw" binding:"required"`
 	PostalCode string    `json:"postal_code,omitempty" example:"00-945" binding:"required"`

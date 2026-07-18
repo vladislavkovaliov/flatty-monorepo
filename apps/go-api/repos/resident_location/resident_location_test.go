@@ -131,6 +131,7 @@ func (m *mockRow) Scan(dest ...any) error {
 func assertResidentLocationEqual(t *testing.T, want, got *residentlocationdomain.ResidentLocation) {
 	t.Helper()
 	assert.Equal(t, want.ID(), got.ID())
+	assert.Equal(t, want.UserID(), got.UserID())
 	assert.Equal(t, want.Country(), got.Country())
 	assert.Equal(t, want.City(), got.City())
 	assert.Equal(t, want.PostalCode(), got.PostalCode())
@@ -184,10 +185,10 @@ func TestPgxRepository_Count(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), ([]any)(nil)).
+			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{"test-user-id"}).
 				Return(tc.row)
 
-			got, err := repo.Count(ctx)
+			got, err := repo.Count(ctx, "test-user-id")
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -226,15 +227,15 @@ func TestPgxRepository_List(t *testing.T) {
 		{
 			name: "success",
 			rows: newMockRows([][]any{
-				{int64(1), "US", "New York", "10001", "Broadway", "123", "4B", now, now},
-				{int64(2), "UK", "London", "SW1A 1AA", "Downing St", "10", "", now, now},
+				{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now},
+				{int64(2), "test-user-id", "UK", "London", "SW1A 1AA", "Downing St", "10", "", now, now},
 			}),
 			queryErr: nil,
 			limit:    10,
 			offset:   0,
 			wantResidentLocations: []*residentlocationdomain.ResidentLocation{
-				residentlocationdomain.NewResidentLocation(1, "US", "New York", "10001", "Broadway", "123", "4B", now, now),
-				residentlocationdomain.NewResidentLocation(2, "UK", "London", "SW1A 1AA", "Downing St", "10", "", now, now),
+				residentlocationdomain.NewResidentLocation(1, "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now),
+				residentlocationdomain.NewResidentLocation(2, "test-user-id", "UK", "London", "SW1A 1AA", "Downing St", "10", "", now, now),
 			},
 			wantErr: "",
 		},
@@ -260,7 +261,7 @@ func TestPgxRepository_List(t *testing.T) {
 			name: "scan_error",
 			rows: func() *mockRows {
 				r := newMockRows([][]any{
-					{int64(1), "US", "New York", "10001", "Broadway", "123", "4B", now, now},
+					{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now},
 				})
 				r.scanErr = errors.New("scan failed")
 				return r
@@ -284,10 +285,10 @@ func TestPgxRepository_List(t *testing.T) {
 			if tc.rows != nil {
 				rows = tc.rows
 			}
-			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{tc.limit, tc.offset}).
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{"test-user-id", tc.limit, tc.offset}).
 				Return(rows, tc.queryErr)
 
-			locations, err := repo.List(ctx, tc.limit, tc.offset)
+			locations, err := repo.List(ctx, tc.limit, tc.offset, "test-user-id")
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -327,11 +328,11 @@ func TestPgxRepository_Create(t *testing.T) {
 	cases := []createCase{
 		{
 			name: "success",
-			row:  newMockRow([]any{int64(1), "US", "New York", "10001", "Broadway", "123", "4B", now, now}),
+			row:  newMockRow([]any{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now}),
 			input: residentlocationdomain.NewResidentLocationInput(
 				"US", "New York", "10001", "Broadway", "123", "4B",
 			),
-			wantResult: residentlocationdomain.NewResidentLocation(1, "US", "New York", "10001", "Broadway", "123", "4B", now, now),
+			wantResult: residentlocationdomain.NewResidentLocation(1, "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now),
 			wantErr:    "",
 		},
 		{
@@ -353,10 +354,10 @@ func TestPgxRepository_Create(t *testing.T) {
 			ctx := context.Background()
 
 			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
-				[]any{tc.input.Country(), tc.input.City(), tc.input.PostalCode(), tc.input.Street(), tc.input.House(), tc.input.Apartment()},
+				[]any{"test-user-id", tc.input.Country(), tc.input.City(), tc.input.PostalCode(), tc.input.Street(), tc.input.House(), tc.input.Apartment()},
 			).Return(tc.row)
 
-			result, err := repo.Create(ctx, tc.input)
+			result, err := repo.Create(ctx, tc.input, "test-user-id")
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -393,12 +394,12 @@ func TestPgxRepository_Update(t *testing.T) {
 	cases := []updateCase{
 		{
 			name: "success",
-			row:  newMockRow([]any{int64(1), "US", "New York", "10001", "Broadway", "123", "4B", now, now}),
+			row:  newMockRow([]any{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now}),
 			id:   1,
 			input: residentlocationdomain.NewResidentLocationInput(
 				"US", "New York", "10001", "Broadway", "123", "4B",
 			),
-			wantResult: residentlocationdomain.NewResidentLocation(1, "US", "New York", "10001", "Broadway", "123", "4B", now, now),
+			wantResult: residentlocationdomain.NewResidentLocation(1, "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now),
 			wantErr:    "",
 		},
 		{
@@ -431,10 +432,10 @@ func TestPgxRepository_Update(t *testing.T) {
 			ctx := context.Background()
 
 			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
-				[]any{tc.input.Country(), tc.input.City(), tc.input.PostalCode(), tc.input.Street(), tc.input.House(), tc.input.Apartment(), tc.id},
+				[]any{tc.input.Country(), tc.input.City(), tc.input.PostalCode(), tc.input.Street(), tc.input.House(), tc.input.Apartment(), tc.id, "test-user-id"},
 			).Return(tc.row)
 
-			result, err := repo.Update(ctx, tc.id, tc.input)
+			result, err := repo.Update(ctx, tc.id, tc.input, "test-user-id")
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -495,10 +496,10 @@ func TestPgxRepository_Delete(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{tc.id}).
+			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{tc.id, "test-user-id"}).
 				Return(tc.row)
 
-			got, err := repo.Delete(ctx, tc.id)
+			got, err := repo.Delete(ctx, tc.id, "test-user-id")
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)

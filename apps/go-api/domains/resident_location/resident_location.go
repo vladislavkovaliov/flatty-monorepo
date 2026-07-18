@@ -6,6 +6,7 @@ import (
 
 type ResidentLocation struct {
 	id         int64
+	userID     string
 	country    string
 	city       string
 	postalCode string
@@ -18,6 +19,10 @@ type ResidentLocation struct {
 
 func (r *ResidentLocation) ID() int64 {
 	return r.id
+}
+
+func (r *ResidentLocation) UserID() string {
+	return r.userID
 }
 
 func (r *ResidentLocation) Country() string {
@@ -52,9 +57,10 @@ func (r *ResidentLocation) UpdatedAt() time.Time {
 	return r.updatedAt
 }
 
-func NewResidentLocation(id int64, country, city, postalCode, street, house, apartment string, createdAt, updatedAt time.Time) *ResidentLocation {
+func NewResidentLocation(id int64, userID, country, city, postalCode, street, house, apartment string, createdAt, updatedAt time.Time) *ResidentLocation {
 	return &ResidentLocation{
 		id:         id,
+		userID:     userID,
 		country:    country,
 		city:       city,
 		street:     street,

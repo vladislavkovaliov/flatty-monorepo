@@ -28,21 +28,21 @@ func NewPgxRepository(pool pgxPool) *PgxRepository {
 	}
 }
 
-func (r *PgxRepository) Count(ctx context.Context) (int, error) {
+func (r *PgxRepository) Count(ctx context.Context, userID string) (int, error) {
 	var count int
 
 	err := r.pool.QueryRow(ctx, `
-		SELECT COUNT(*) FROM resident_locations
-	`).Scan(&count)
+		SELECT COUNT(*) FROM resident_locations WHERE user_id = $1
+	`, userID).Scan(&count)
 
 	return count, err
 }
 
-func (r *PgxRepository) List(ctx context.Context, limit, offset int) ([]*residentlocationdomain.ResidentLocation, error) {
+func (r *PgxRepository) List(ctx context.Context, limit, offset int, userID string) ([]*residentlocationdomain.ResidentLocation, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, country, city, postal_code, street, house, apartment, created_at, updated_at 
-		FROM resident_locations LIMIT $1 OFFSET $2
-	`, limit, offset)
+		SELECT id, user_id, country, city, postal_code, street, house, apartment, created_at, updated_at 
+		FROM resident_locations WHERE user_id = $1 LIMIT $2 OFFSET $3
+	`, userID, limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -54,6 +54,7 @@ func (r *PgxRepository) List(ctx context.Context, limit, offset int) ([]*residen
 
 	for rows.Next() {
 		var id int64
+		var userIDResult string
 		var country string
 		var city string
 		var postal_code string
@@ -63,13 +64,13 @@ func (r *PgxRepository) List(ctx context.Context, limit, offset int) ([]*residen
 		var created_at time.Time
 		var updated_at time.Time
 
-		if err := rows.Scan(&id, &country, &city, &postal_code, &street, &house, &apartment, &created_at, &updated_at); err != nil {
+		if err := rows.Scan(&id, &userIDResult, &country, &city, &postal_code, &street, &house, &apartment, &created_at, &updated_at); err != nil {
 			return nil, err
 		}
 
 		residentLocations = append(residentLocations,
 			residentlocationdomain.NewResidentLocation(
-				id, country, city, postal_code, street, house, apartment, created_at, updated_at,
+				id, userIDResult, country, city, postal_code, street, house, apartment, created_at, updated_at,
 			),
 		)
 	}
@@ -77,8 +78,9 @@ func (r *PgxRepository) List(ctx context.Context, limit, offset int) ([]*residen
 	return residentLocations, err
 }
 
-func (r *PgxRepository) Create(ctx context.Context, input *residentlocationdomain.ResidentLocationInput) (*residentlocationdomain.ResidentLocation, error) {
+func (r *PgxRepository) Create(ctx context.Context, input *residentlocationdomain.ResidentLocationInput, userID string) (*residentlocationdomain.ResidentLocation, error) {
 	var id int64
+	var userIDResult string
 	var country string
 	var city string
 	var postalCode string
@@ -89,11 +91,12 @@ func (r *PgxRepository) Create(ctx context.Context, input *residentlocationdomai
 	var updatedAt time.Time
 
 	err := r.pool.QueryRow(ctx, `
-		INSERT INTO resident_locations (country, city, postal_code, street, house, apartment) 
-		VALUES ($1, $2, $3, $4, $5, $6) 
-		RETURNING id, country, city, postal_code, street, house, apartment, created_at, updated_at
-	`, input.Country(), input.City(), input.PostalCode(), input.Street(), input.House(), input.Apartment()).Scan(
+		INSERT INTO resident_locations (user_id, country, city, postal_code, street, house, apartment) 
+		VALUES ($1, $2, $3, $4, $5, $6, $7) 
+		RETURNING id, user_id, country, city, postal_code, street, house, apartment, created_at, updated_at
+	`, userID, input.Country(), input.City(), input.PostalCode(), input.Street(), input.House(), input.Apartment()).Scan(
 		&id,
+		&userIDResult,
 		&country,
 		&city,
 		&postalCode,
@@ -110,6 +113,7 @@ func (r *PgxRepository) Create(ctx context.Context, input *residentlocationdomai
 
 	return residentlocationdomain.NewResidentLocation(
 		id,
+		userIDResult,
 		country,
 		city,
 		postalCode,
@@ -121,8 +125,9 @@ func (r *PgxRepository) Create(ctx context.Context, input *residentlocationdomai
 	), nil
 }
 
-func (r *PgxRepository) Update(ctx context.Context, id int64, input *residentlocationdomain.ResidentLocationInput) (*residentlocationdomain.ResidentLocation, error) {
+func (r *PgxRepository) Update(ctx context.Context, id int64, input *residentlocationdomain.ResidentLocationInput, userID string) (*residentlocationdomain.ResidentLocation, error) {
 	var returningId int64
+	var userIDResult string
 	var country string
 	var city string
 	var postalCode string
@@ -142,10 +147,11 @@ func (r *PgxRepository) Update(ctx context.Context, id int64, input *residentloc
 			house = $5, 
 			apartment = $6,
 			updated_at = NOW() 
-		WHERE id = $7 
-		RETURNING id, country, city, postal_code, street, house, apartment, created_at, updated_at
-	`, input.Country(), input.City(), input.PostalCode(), input.Street(), input.House(), input.Apartment(), id).Scan(
+		WHERE id = $7 AND user_id = $8 
+		RETURNING id, user_id, country, city, postal_code, street, house, apartment, created_at, updated_at
+	`, input.Country(), input.City(), input.PostalCode(), input.Street(), input.House(), input.Apartment(), id, userID).Scan(
 		&returningId,
+		&userIDResult,
 		&country,
 		&city,
 		&postalCode,
@@ -166,6 +172,7 @@ func (r *PgxRepository) Update(ctx context.Context, id int64, input *residentloc
 
 	return residentlocationdomain.NewResidentLocation(
 		returningId,
+		userIDResult,
 		country,
 		city,
 		postalCode,
@@ -177,14 +184,14 @@ func (r *PgxRepository) Update(ctx context.Context, id int64, input *residentloc
 	), nil
 }
 
-func (r *PgxRepository) Delete(ctx context.Context, id int64) (int64, error) {
+func (r *PgxRepository) Delete(ctx context.Context, id int64, userID string) (int64, error) {
 	var returningId int64
 
 	err := r.pool.QueryRow(ctx, `
 		DELETE FROM resident_locations
-		WHERE id = $1
+		WHERE id = $1 AND user_id = $2
 		RETURNING id
-	`, id).Scan(&returningId)
+	`, id, userID).Scan(&returningId)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

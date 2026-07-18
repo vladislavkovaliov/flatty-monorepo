@@ -2,6 +2,7 @@
 
 CREATE TABLE resident_locations (
     id BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
 
     country VARCHAR(100) NOT NULL,
     city VARCHAR(100) NOT NULL,
@@ -15,9 +16,13 @@ CREATE TABLE resident_locations (
 );
 
 
+INSERT INTO "user" (id, name, email, "emailVerified") VALUES
+('00000000-0000-0000-0000-000000000001', 'Seed User', 'seed@example.com', false);
+
 # insert fake data into table
 
 INSERT INTO resident_locations (
+    user_id,
     country,
     city,
     postal_code,
@@ -25,6 +30,7 @@ INSERT INTO resident_locations (
     house,
     apartment
 ) VALUES (
+    '00000000-0000-0000-0000-000000000001',
     'Belarus',
     'Minsk',
     '220045',
@@ -538,6 +544,18 @@ CREATE TRIGGER set_expense_monthly_averages_updated_at
 BEFORE UPDATE ON expense_monthly_averages
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- migration: add user_id to existing resident_locations table
+-- Step 1: add column as nullable (existing rows have no user_id)
+ALTER TABLE resident_locations
+ADD COLUMN IF NOT EXISTS user_id TEXT REFERENCES "user"(id) ON DELETE CASCADE;
+
+-- Step 2: backfill existing rows with the current user's ID
+-- (user_id comes from the actual authenticated user in the database)
+UPDATE resident_locations SET user_id = '84V3SLhMQyhl7CZ4JnX1okQG0zrfplOR' WHERE user_id IS NULL;
+
+-- Step 3: set NOT NULL now that all rows have a value
+ALTER TABLE resident_locations ALTER COLUMN user_id SET NOT NULL;
 
 -- invitation table (for admin invitation-by-magic-link flow)
 

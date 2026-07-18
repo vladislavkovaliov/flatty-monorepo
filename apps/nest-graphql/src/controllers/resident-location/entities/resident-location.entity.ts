@@ -8,6 +8,9 @@ export class ResidentLocation {
     @PrimaryGeneratedColumn()
     id!: number;
 
+    @Column({ name: 'user_id', type: 'text' })
+    userId!: string;  // NOTE: no @Field() — intentionally NOT exposed via GraphQL
+
     @Field()
     @Column()
     country!: string;

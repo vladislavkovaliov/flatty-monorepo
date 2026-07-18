@@ -15,19 +15,21 @@ export class ResidentLocationRepository {
         private readonly dataSource: TypeOrmDataSourceFactory,
     ) {}
 
-    async count(): Promise<number> {
-        return this.residentLocationRepository.count();
+    async count(userId: string): Promise<number> {
+        return this.residentLocationRepository.count({ where: { userId: userId } });
     }
 
-    async list(limit = 10, offset = 0): Promise<[ResidentLocation[], number]> {
+    async list(limit = 10, offset = 0, userId: string): Promise<[ResidentLocation[], number]> {
         return this.residentLocationRepository.findAndCount({
+            where: { userId: userId },
             skip: offset,
             take: limit,
         });
     }
 
-    async create(residentLocatoinData: ResidentLocationInput): Promise<ResidentLocation> {
+    async create(residentLocatoinData: ResidentLocationInput, userId: string): Promise<ResidentLocation> {
         const entity = this.residentLocationRepository.create({
+            userId: userId,
             country: residentLocatoinData.country,
             city: residentLocatoinData.city,
             postalCode: residentLocatoinData.postalCode,
@@ -39,8 +41,8 @@ export class ResidentLocationRepository {
         return this.residentLocationRepository.save(entity); 
     }
 
-    async update(id: number, residentLocatoinData: ResidentLocationInput): Promise<ResidentLocation | undefined> {
-        const entity = await this.residentLocationRepository.findOneBy({ id });
+    async update(id: number, residentLocatoinData: ResidentLocationInput, userId: string): Promise<ResidentLocation | undefined> {
+        const entity = await this.residentLocationRepository.findOneBy({ id, userId });
         
         if (!entity) {
             return undefined
@@ -58,9 +60,10 @@ export class ResidentLocationRepository {
         return this.residentLocationRepository.save(merged);
     }
 
-    async delete(id: number): Promise<DeleteResult> {
+    async delete(id: number, userId: string): Promise<DeleteResult> {
         return this.residentLocationRepository.delete({
-            id: id
+            id: id,
+            userId: userId
         });
     }
 }

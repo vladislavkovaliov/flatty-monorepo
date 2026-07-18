@@ -33,11 +33,13 @@ func NewResidentLocationHandler(service *residentlocationservice.Service) *Resid
 //	@Success		200	{object}	dto.CountResponse
 //	@Router			/resident-location/count [get]
 func (h *ResidentLocationHandler) Count(c *gin.Context) {
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 
 	defer cancel()
 
-	total, err := h.service.Count(ctx)
+	total, err := h.service.Count(ctx, userID)
 
 	if err != nil {
 		internalError(c, err)
@@ -61,6 +63,8 @@ func (h *ResidentLocationHandler) Count(c *gin.Context) {
 //	@Param			limit	query	int	false	"Number of products to return (default 10)"
 //	@Param			offset	query	int	false	"Number of products to skip (default 0)"
 func (h *ResidentLocationHandler) List(c *gin.Context) {
+	userID := c.GetString("userID")
+
 	defaultLimit := 10
 	defaultOffset := 0
 
@@ -75,7 +79,7 @@ func (h *ResidentLocationHandler) List(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	residentLocations, total, err := h.service.List(ctx, defaultLimit, defaultOffset)
+	residentLocations, total, err := h.service.List(ctx, defaultLimit, defaultOffset, userID)
 
 	if err != nil {
 		internalError(c, err)
@@ -87,6 +91,7 @@ func (h *ResidentLocationHandler) List(c *gin.Context) {
 	for _, p := range residentLocations {
 		res = append(res, dto.ResidentLocationResponse{
 			ID:         p.ID(),
+			UserID:     p.UserID(),
 			Country:    p.Country(),
 			City:       p.City(),
 			PostalCode: p.PostalCode(),
@@ -123,6 +128,8 @@ func (h *ResidentLocationHandler) Create(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
@@ -133,7 +140,7 @@ func (h *ResidentLocationHandler) Create(c *gin.Context) {
 		req.Street,
 		req.House,
 		req.Apartment,
-	))
+	), userID)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -142,6 +149,7 @@ func (h *ResidentLocationHandler) Create(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, dto.ResidentLocationResponse{
 		ID:         residentLocation.ID(),
+		UserID:     residentLocation.UserID(),
 		Country:    residentLocation.Country(),
 		City:       residentLocation.City(),
 		PostalCode: residentLocation.PostalCode(),
@@ -182,6 +190,8 @@ func (h *ResidentLocationHandler) Update(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
@@ -192,7 +202,7 @@ func (h *ResidentLocationHandler) Update(c *gin.Context) {
 		req.Street,
 		req.House,
 		req.Apartment,
-	))
+	), userID)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -205,6 +215,7 @@ func (h *ResidentLocationHandler) Update(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, dto.ResidentLocationResponse{
 		ID:         residentLocation.ID(),
+		UserID:     residentLocation.UserID(),
 		Country:    residentLocation.Country(),
 		City:       residentLocation.City(),
 		PostalCode: residentLocation.PostalCode(),
@@ -237,10 +248,12 @@ func (h *ResidentLocationHandler) Delete(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	returningId, err := h.service.Delete(ctx, id)
+	returningId, err := h.service.Delete(ctx, id, userID)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

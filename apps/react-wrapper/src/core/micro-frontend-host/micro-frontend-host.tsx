@@ -73,6 +73,7 @@ export function MicrofrontendHost({
     let cancelled = false;
 
     const loadCommonChunks = (): Promise<unknown> => {
+      console.log(bundleName)
       if (bundleName === APPLICATION_BUNDLE_NAME.APP) {
         // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
         return Promise.resolve();
@@ -150,7 +151,7 @@ export function MicrofrontendHost({
           ...basePathProps,
           ...config,
         };
-
+        console.log(app)
         app?.initialize(el, mergedConfig);
       } catch (e) {
         console.error("[MicrofrontendHost] load failed", e);

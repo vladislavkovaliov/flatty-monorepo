@@ -28,7 +28,6 @@ export function LocalizationTab() {
         onChange={(v) => {
           if (v) {
             mutate({ locale: v as Locale });
-            console.log('[UserSettings] locale updated:', v);
           }
         }}
         searchable

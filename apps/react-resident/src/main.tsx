@@ -1,5 +1,6 @@
-// import "./index.css";
-import {AppComponent} from "./utils/external-app/external-app";
-import Bootstrap from "./bootstrap";
+import { AppComponent } from "./utils/external-app/external-app";
+import { Bootstrap } from "./bootstrap";
 
-export default new AppComponent(Bootstrap)
+export const entry = new AppComponent(Bootstrap);
+
+export default entry;

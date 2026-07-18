@@ -10,13 +10,12 @@ const app: IAppComponent = {
     root.render(<App />);
     roots.set(element, root);
   },
-  destroy(element: HTMLElement): void {
-    const root = roots.get(element);
-    if (root) {
+  destroy(): void {
+    for (const root of roots.values()) {
       root.unmount();
-      roots.delete(element);
     }
+    roots.clear();
   },
 };
 
-export default app;
+export const entry = app;

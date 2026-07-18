@@ -1,27 +1,11 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { graphqlRequest } from '../lib/graphql';
 import type {
   DeleteResidentLocationResponse,
   ListResidentLocationResponse,
   ResidentLocation,
   ResidentLocationInput,
 } from '../types/graphql';
-
-async function graphqlRequest<T>(query: string, variables: Record<string, unknown>): Promise<T> {
-  const response = await fetch('/graphql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ query, variables }),
-  });
-
-  const json = await response.json();
-
-  if (json.errors) {
-    throw new Error(json.errors[0]?.message ?? 'GraphQL error');
-  }
-
-  return json.data as T;
-}
 
 const LIST_RESIDENT_LOCATION = `
   query ListResidentLocation($limit: Int, $offset: Int) {

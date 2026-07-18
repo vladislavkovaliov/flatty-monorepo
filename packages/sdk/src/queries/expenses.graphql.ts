@@ -5,24 +5,8 @@ import type {
   Expense,
   ExpenseInput,
 } from '../types/graphql';
-import { EXPENSES_QUERIES } from './expenses.queries';
+import { graphqlRequest } from '../lib/graphql';
 
-async function graphqlRequest<T>(query: string, variables: Record<string, unknown>): Promise<T> {
-  const response = await fetch('/graphql', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ query, variables }),
-  });
-
-  const json = await response.json();
-
-  if (json.errors) {
-    throw new Error(json.errors[0]?.message ?? 'GraphQL error');
-  }
-
-  return json.data as T;
-}
 
 const LIST_EXPENSE = `
 query expenseList($limit: Int, $offset: Int) {
@@ -88,7 +72,7 @@ export const EXPENSES_GRAPHQL_QUERIES = {
   all: () => ['expenses', 'graphql'] as const,
   list: (limit = 10, offset = 0) =>
     queryOptions({
-      queryKey: [...EXPENSES_QUERIES.all(), 'list', { limit, offset }],
+      queryKey: [...EXPENSES_GRAPHQL_QUERIES.all(), 'list', { limit, offset }],
       queryFn: () => graphqlRequest<GqlListData>(LIST_EXPENSE, { limit, offset }),
     }),
 };
@@ -115,7 +99,7 @@ export function useUpdateExpensesGraphql() {
     mutationFn: ({ id, data }: { id: number; data: ExpenseInput }) =>
       graphqlRequest<GqlUpdateData>(UPDATE_EXPENSE, { id, input: data }),
     onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: EXPENSES_QUERIES.all() }),
+      queryClient.invalidateQueries({ queryKey: EXPENSES_GRAPHQL_QUERIES.all() }),
   });
 }
 
@@ -126,6 +110,6 @@ export function useDeleteExpensesGraphql() {
     mutationFn: (id: number) =>
       graphqlRequest<GqlDeleteData>(DELETE_EXPENSE, { id }),
     onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: EXPENSES_QUERIES.all() }),
+      queryClient.invalidateQueries({ queryKey: EXPENSES_GRAPHQL_QUERIES.all() }),
   });
 }

@@ -1,7 +1,6 @@
 import "./index.css";
 import { useState } from "react";
 import {
-  MantineProvider,
   Drawer,
   ActionIcon,
   Stack,
@@ -11,7 +10,6 @@ import {
 } from "@mantine/core";
 import { AppConfigurator } from "./AppConfigurator";
 import type { IAppConfig } from "./types/external-app-config.type";
-import "@mantine/core/styles.css";
 import { MicrofrontendHost } from "./utils/MicrofrontendHost";
 import { IconSettings, IconRestore } from "@tabler/icons-react";
 
@@ -39,7 +37,6 @@ export function Launcher() {
     localStorage.removeItem("react-applications");
     window.location.reload();
   };
-  console.log(config)
   const renderConfigContent = () => {
     if (!config) {
       return <Text c="dimmed">No configuration set</Text>;
@@ -62,7 +59,7 @@ export function Launcher() {
   };
 
   return (
-    <MantineProvider>
+    <>
       {config && config.bundleName ? (
         <MicrofrontendHost
           bundleName={config.bundleName}
@@ -116,7 +113,7 @@ export function Launcher() {
       >
         {renderConfigContent()}
       </Drawer>
-    </MantineProvider>
+    </>
   );
 }
 

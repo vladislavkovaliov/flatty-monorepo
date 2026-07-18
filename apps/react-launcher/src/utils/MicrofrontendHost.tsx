@@ -4,7 +4,7 @@ import {
   APPS_VENDORS_CHUNK_NAME,
   type IAppComponent,
   type IAppConfig,
-} from "./domain";
+} from "../types/external-app-config.type";
 import { LoaderUtils } from "./loader";
 import { APPLICATION_BUNDLE_NAME } from "./application";
 
@@ -72,34 +72,6 @@ export function MicrofrontendHost({
 
     let cancelled = false;
 
-    const loadCommonChunks = (): Promise<unknown> => {
-      if (bundleName === APPLICATION_BUNDLE_NAME.APP) {
-        // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
-        return Promise.resolve();
-      }
-
-      if (bundleName === APPLICATION_BUNDLE_NAME.SETTINGS) {
-        // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
-        return Promise.resolve();
-      }
-
-      if (bundleName === APPLICATION_BUNDLE_NAME.RESIDENT) {
-        // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
-        return Promise.resolve();
-      }
-
-      const commonChunks = [`${remoteOrigin}/${APPS_VENDORS_CHUNK_NAME}`];
-      console.log(commonChunks)
-      return Promise.all(
-        commonChunks.map((src) =>
-          LoaderUtils.loadScript({
-            src,
-            params: { defer: false, async: true, type: "module" },
-          }),
-        ),
-      );
-    };
-
     const loadBundleScript = (): Promise<void> => {
       if (bundleName === APPLICATION_BUNDLE_NAME.APP) {
         const baseUrl = `${window.location.origin}${proxyBasePath}`;
@@ -127,8 +99,6 @@ export function MicrofrontendHost({
 
     const run = async () => {
       try {
-        await loadCommonChunks();
-
         if (cancelled) {
           return;
         }
@@ -166,7 +136,7 @@ export function MicrofrontendHost({
 
       app?.destroy();
     };
-  }, [hostEl, bundleName, cssBundleName, proxyBasePath, remoteOrigin, config]);
+  }, [hostEl, bundleName, cssBundleName, proxyBasePath, remoteOrigin, config, basePath]);
 
   return createElement("app-external", {
     ref: setHostEl,

@@ -88,7 +88,7 @@ export {
   CATEGORIES_QUERIES,
   useCategories,
   useCreateCategories,
-  useUpdatecategories,
+  useUpdateCategories,
   useDeleteCategory,
 } from './queries/categories.queries';
 export type { CategoriesForm } from './queries/categories.queries';

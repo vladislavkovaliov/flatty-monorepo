@@ -17,8 +17,7 @@ export interface IMicroAppConfig {
 
 export interface IAppComponent {
     initialize(element: Element, _config: IAppConfig): void;
-
-    destroy: (element: HTMLElement) => void;
+    destroy: () => void;
 }
 
 export const APP_NAMESPACES = 'ext-apps';

@@ -17,7 +17,7 @@ const theme = createTheme({
   fontFamily: "system-ui, sans-serif",
 });
 
-export default function App() {
+export function App() {
   const [isActive, setIsActive] = useState<boolean | null>(null);
 
   const managerRef = useRef<SingleTabManager | null>(null);

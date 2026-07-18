@@ -1,0 +1,37 @@
+name: Lint PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: react-launcher
+            workspace: react-launcher
+          - name: react-wrapper
+            workspace: '@flatty-budget/react-wrapper'
+          - name: react-resident
+            workspace: '@flatty-budget/react-resident'
+          - name: react-settings
+            workspace: '@flatty-budget/react-settings'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint ${{ matrix.name }}
+        run: npm run lint -w '${{ matrix.workspace }}'

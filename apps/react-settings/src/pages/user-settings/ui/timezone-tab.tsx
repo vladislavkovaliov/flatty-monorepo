@@ -39,7 +39,6 @@ export function TimezoneTab() {
         onChange={(v) => {
           if (v) {
             mutate({ dateFormat: v as DateFormat });
-            console.log('[UserSettings] dateFormat updated:', v);
           }
         }}
         clearable={false}
@@ -52,7 +51,6 @@ export function TimezoneTab() {
         onChange={(v) => {
           if (v) {
             mutate({ timezone: v as TimezoneOffset });
-            console.log('[UserSettings] timezone updated:', v);
           }
         }}
         searchable

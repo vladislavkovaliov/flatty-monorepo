@@ -96,7 +96,6 @@ export function AppConfigurator({ onStart }: ConfiguratorProps) {
 
     onStart(_config);
   };
-  // console.log(appFactories)
   return (
       <Box maw={500} mx="auto" mt="xl">
         <Title order={2} mb="md">

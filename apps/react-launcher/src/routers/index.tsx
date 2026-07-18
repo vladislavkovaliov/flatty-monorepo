@@ -1,5 +1,5 @@
 import {createBrowserRouter} from "react-router-dom";
-import App from "../App.tsx";
+import {App} from "../App.tsx";
 import {Launcher} from "../Launcher.tsx";
 
 export const router = createBrowserRouter([
@@ -8,7 +8,7 @@ export const router = createBrowserRouter([
         element: <App />,
         children: [
             {
-                path: '/',
+                index: true,
                 element: <Launcher />
             },
         ],

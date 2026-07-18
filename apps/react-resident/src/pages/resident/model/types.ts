@@ -1,10 +1,3 @@
-export interface IUser {
-  fullName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: string | null;
-}
-
 export interface IResident {
   country: string;
   city: string;
@@ -12,7 +5,6 @@ export interface IResident {
   house: string;
   street: string;
   postalCode: string;
-  address: string;
 }
 
-export type ResidentCreate = IUser & IResident;
+export type ResidentCreate = IResident;

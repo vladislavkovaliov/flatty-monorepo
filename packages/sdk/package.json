@@ -13,6 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "api": "npx dotenv -e .env -- sh -c 'npx swagger-typescript-api generate -p \"${SWAGGER_URL}\" -o src/types -n api.ts --no-client --extract-request-params --extract-response-body'",
     "graphql:codegen": "npx graphql-codegen --config codegen.ts"
   },
@@ -24,6 +26,7 @@
     "@graphql-codegen/typescript": "^6.1.0",
     "@graphql-codegen/typescript-operations": "^6.1.0",
     "dotenv-cli": "^11.0.0",
-    "swagger-typescript-api": "^13.0.0"
+    "swagger-typescript-api": "^13.0.0",
+    "vitest": "^4.1.10"
   }
 }

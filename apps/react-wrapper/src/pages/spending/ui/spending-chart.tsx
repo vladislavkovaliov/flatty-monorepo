@@ -38,8 +38,8 @@ export function SpendingChart({ data }: SpendingChartProps) {
           data={chartData}
           dataKey="month"
           series={[
-            { name: "totalSpent", color: "cyan.6", type: "bar" },
-            { name: "averageAmount", color: "orange.6", type: "line" },
+            { name: "totalSpent", color: "cyan.6", type: "bar", label: "Total Spent" },
+            { name: "averageAmount", color: "orange.6", type: "line", label: "Average Amount" },
           ]}
           tickLine="xy"
           gridAxis="xy"

@@ -1,7 +1,6 @@
 import {
   AppShell as MantineAppShell,
   Box as MantineBox,
-  Text as MantineText,
   NavLink as MantinveNavLink,
 } from "@mantine/core"
 

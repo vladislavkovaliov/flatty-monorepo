@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { Center, Loader } from '@mantine/core';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function lazyLoad<T extends React.ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
 ) {

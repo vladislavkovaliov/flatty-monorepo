@@ -34,8 +34,8 @@ export function SpendingPage() {
     setAppliedTo(null);
   };
 
-  const totals = totalsData?.expenseMonthlyTotals?.data ?? [];
-  const averages = averagesData?.expenseMonthlyAverages?.data ?? [];
+  const totals = useMemo(() => totalsData?.expenseMonthlyTotals?.data ?? [], [totalsData?.expenseMonthlyTotals?.data]);
+  const averages = useMemo(() => averagesData?.expenseMonthlyAverages?.data ?? [], [averagesData?.expenseMonthlyAverages?.data]);
 
   const merged: SpendingRow[] = useMemo(() => {
     const map = new Map<string, SpendingRow>();

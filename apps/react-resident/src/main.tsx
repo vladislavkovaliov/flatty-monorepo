@@ -1,4 +1,4 @@
-import { AppComponent } from "./utils/external-app/external-app";
+import { AppComponent } from "@flatty-budget/mfe-host";
 import { Bootstrap } from "./bootstrap";
 
 export const entry = new AppComponent(Bootstrap);

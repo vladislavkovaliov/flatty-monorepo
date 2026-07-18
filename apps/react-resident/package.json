@@ -15,6 +15,7 @@
     "graphql:codegen": "npm run graphql:codegen -w @flatty-budget/sdk"
   },
   "dependencies": {
+    "@flatty-budget/mfe-host": "*",
     "@mantine/core": "^8.0.0",
     "@mantine/dates": "^8.3.18",
     "@mantine/form": "^8.0.0",

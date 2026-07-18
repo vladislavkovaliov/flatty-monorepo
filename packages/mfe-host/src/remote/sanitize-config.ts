@@ -1,4 +1,4 @@
-import type {IAppConfig} from '../types/external-app-config.type';
+import type { IAppConfig } from '../contracts/app-config.type';
 
 export const ALLOWED_ENVS = ['development', 'production', 'qa'] as const;
 export const ALLOWED_HOST_TYPES = ['angular', 'react', 'other'] as const;

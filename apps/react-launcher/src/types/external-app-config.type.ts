@@ -1,28 +1,10 @@
-export interface IAppConfig {
-    bundleName?: string;
-    cssBundleName?: string;
-    remoteOrigin?: string;
+import type { IAppConfig as BaseIAppConfig, IAppComponent, IMicroAppConfig } from '@flatty-budget/mfe-host';
+import { APP_NAMESPACES, APPS_VENDORS_CHUNK_NAME } from '@flatty-budget/mfe-host';
+
+export interface IAppConfig extends BaseIAppConfig {
     basePath?: string;
-    env: string;
-    featureFlags: Record<string, unknown>;
-    navigate?: () => Promise<void>;
-    iconsSpriteUrl?: string;
     proxyBasePath?: string;
-    hostType: 'angular' | 'react' | 'other';
 }
 
-export interface IMicroAppConfig {
-    bundleName: string;
-    cssBundleName: string;
-    remoteOrigin: string;
-}
-
-export interface IAppComponent {
-    initialize(element: Element, config: IAppConfig): void;
-
-    destroy: () => void;
-}
-
-export const APP_NAMESPACES = 'ext-apps';
-
-export const APPS_VENDORS_CHUNK_NAME = 'apps';
+export type { IAppComponent, IMicroAppConfig };
+export { APP_NAMESPACES, APPS_VENDORS_CHUNK_NAME };

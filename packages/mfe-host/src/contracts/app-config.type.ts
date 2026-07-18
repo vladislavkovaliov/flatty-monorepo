@@ -16,10 +16,6 @@ export interface IMicroAppConfig {
 }
 
 export interface IAppComponent {
-    initialize(element: Element, _config: IAppConfig): void;
+    initialize(element: Element, config: IAppConfig): void;
     destroy: () => void;
 }
-
-export const APP_NAMESPACES = 'ext-apps';
-
-export const APPS_VENDORS_CHUNK_NAME = 'apps';

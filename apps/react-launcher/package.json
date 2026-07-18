@@ -11,6 +11,7 @@
     "build:launcher": "vite build --config vite.launcher.config.ts"
   },
   "dependencies": {
+    "@flatty-budget/mfe-host": "*",
     "@mantine/core": "^9.1.0",
     "@mantine/hooks": "^9.1.0",
     "@tabler/icons-react": "^3.41.1",

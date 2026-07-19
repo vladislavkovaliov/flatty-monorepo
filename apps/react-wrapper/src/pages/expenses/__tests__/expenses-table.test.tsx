@@ -60,13 +60,13 @@ describe('ExpensesTable', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useExpensesGraphql>);
 
     const { useDeleteExpense } = await import('@flatty-budget/sdk');
     vi.mocked(useDeleteExpense).mockReturnValue({
       mutate: vi.fn(),
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useDeleteExpense>);
 
 
     render(<ExpensesTable />, { wrapper: createWrapper() });
@@ -84,7 +84,7 @@ describe('ExpensesTable', () => {
     vi.mocked(useDeleteExpense).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useDeleteExpense>);
 
     vi.mocked(useExpensesGraphql).mockReturnValue({
       data: {
@@ -98,7 +98,7 @@ describe('ExpensesTable', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useExpensesGraphql>);
 
 
     render(<ExpensesTable />, { wrapper: createWrapper() });
@@ -118,7 +118,7 @@ describe('ExpensesTable', () => {
     vi.mocked(useDeleteExpense).mockReturnValue({
       mutate: vi.fn(),
       isPending: true,
-    } as any);
+    } as unknown as ReturnType<typeof useDeleteExpense>);
 
     vi.mocked(useExpensesGraphql).mockReturnValue({
       data: {
@@ -132,7 +132,7 @@ describe('ExpensesTable', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useExpensesGraphql>);
 
 
     render(<ExpensesTable />, { wrapper: createWrapper() });
@@ -144,16 +144,12 @@ describe('ExpensesTable', () => {
   it('invalidates expense-stats cache on delete settled', async () => {
     const { useExpensesGraphql, useDeleteExpense } = await import('@flatty-budget/sdk');
 
-    // Capture the onSettled callback
-    let capturedOnSettled: (() => void) | undefined;
-    const mockMutate = vi.fn((_id: number, options?: { onSettled?: () => void }) => {
-      capturedOnSettled = options?.onSettled;
-    });
+    const mockMutate = vi.fn((_id: number, _options?: { onSettled?: () => void }) => undefined);
 
     vi.mocked(useDeleteExpense).mockReturnValue({
       mutate: mockMutate,
       isPending: false,
-    } as any);
+    } as unknown as ReturnType<typeof useDeleteExpense>);
 
     vi.mocked(useExpensesGraphql).mockReturnValue({
       data: {
@@ -167,7 +163,7 @@ describe('ExpensesTable', () => {
       isLoading: false,
       isError: false,
       error: null,
-    } as any);
+    } as unknown as ReturnType<typeof useExpensesGraphql>);
 
 
     // Create a wrapper with a query client we can spy on

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Box, Title } from "@mantine/core";
 import { useExpenseMonthlyTotalsGraphql, useExpenseMonthlyAveragesGraphql } from "@flatty-budget/sdk";
 import { SpendingFilters } from "./spending-filters";
@@ -22,16 +22,18 @@ export function SpendingPage() {
   const [appliedFrom, setAppliedFrom] = useState<Date | null>(null);
   const [appliedTo, setAppliedTo] = useState<Date | null>(null);
 
+  const defaultsSet = useRef(false);
+
   const handleApply = () => {
     setAppliedFrom(fromDate);
     setAppliedTo(toDate);
   };
 
   const handleReset = () => {
-    setFromDate(null);
-    setToDate(null);
-    setAppliedFrom(null);
-    setAppliedTo(null);
+    setFromDate(minMax.minDate ?? null);
+    setToDate(minMax.maxDate ?? null);
+    setAppliedFrom(minMax.minDate ?? null);
+    setAppliedTo(minMax.maxDate ?? null);
   };
 
   const totals = useMemo(() => totalsData?.expenseMonthlyTotals?.data ?? [], [totalsData?.expenseMonthlyTotals?.data]);
@@ -118,6 +120,16 @@ export function SpendingPage() {
 
     return result;
   }, [merged, appliedFrom, appliedTo]);
+
+  useEffect(() => {
+    if (minMax.minDate && minMax.maxDate && !defaultsSet.current) {
+      setFromDate(minMax.minDate);
+      setToDate(minMax.maxDate);
+      setAppliedFrom(minMax.minDate);
+      setAppliedTo(minMax.maxDate);
+      defaultsSet.current = true;
+    }
+  }, [minMax]);
 
   return (
     <>

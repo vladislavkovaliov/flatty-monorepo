@@ -69,10 +69,6 @@ type ExpenseCountResponse {
   total: Int!
 }
 
-type DeleteExpenseResponse {
-  data: Int!
-}
-
 type ListExpenseResponse {
   total: Int!
   data: [Expense!]!
@@ -160,9 +156,6 @@ type Mutation {
   createCategory(categoryData: CategoryInput!): Category!
   updateCategory(id: Int!, categoryData: CategoryInput!): Category!
   deleteCategory(id: Int!): DeleteCategoryResponse!
-  createExpense(expenseData: ExpenseInput!): Expense!
-  updateExpense(id: Int!, expenseData: ExpenseInput!): Expense!
-  deleteExpense(id: Int!): DeleteExpenseResponse!
 }
 
 input SendInvitationInput {
@@ -183,10 +176,3 @@ input CategoryInput {
   description: String!
 }
 
-input ExpenseInput {
-  residentLocationId: Int!
-  categoryId: Int!
-  amount: Float!
-  month: Int!
-  year: Int!
-}

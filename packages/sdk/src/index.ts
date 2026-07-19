@@ -58,10 +58,8 @@ export type {
   CategoryCountResponse,
   CategoryInput,
   DeleteCategoryResponse,
-  DeleteExpenseResponse,
   DeleteResidentLocationResponse,
   Expense,
-  ExpenseInput,
   ListCategoryResponse,
   ListExpenseResponse,
   ListResidentLocationResponse,
@@ -126,9 +124,6 @@ export {
 export {
   EXPENSES_GRAPHQL_QUERIES,
   useExpensesGraphql,
-  useCreateExpensesGraphql,
-  useUpdateExpensesGraphql,
-  useDeleteExpensesGraphql,
 } from './queries/expenses.graphql';
 
 export {

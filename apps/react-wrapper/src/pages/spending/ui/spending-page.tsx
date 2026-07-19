@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Box, Title } from "@mantine/core";
 import { useExpenseMonthlyTotalsGraphql, useExpenseMonthlyAveragesGraphql } from "@flatty-budget/sdk";
 import { SpendingFilters } from "./spending-filters";
@@ -74,7 +74,7 @@ export function SpendingPage() {
       .sort((a, b) => b.year - a.year || b.month - a.month);
   }, [totals, averages]);
 
-  const minMax = useMemo(() => {
+  const minMax = useCallback(() => {
     if (merged.length === 0) return { minDate: undefined, maxDate: undefined };
 
     let minYear = Infinity;

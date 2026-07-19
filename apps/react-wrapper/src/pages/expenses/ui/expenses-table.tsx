@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useExpensesGraphql, useDeleteExpensesGraphql } from "@flatty-budget/sdk";
+import { useExpensesGraphql, useDeleteExpense } from "@flatty-budget/sdk";
+import { useQueryClient } from "@tanstack/react-query";
 import { Table, Button, Box, Container, Pagination } from "@mantine/core";
 import { useSearchParams } from "react-router-dom";
 
@@ -11,7 +12,16 @@ export function ExpensesTable() {
     const offset = (page - 1) * LIMIT;
 
     const { data } = useExpensesGraphql(LIMIT, offset);
-    const deleteMutation = useDeleteExpensesGraphql()
+    const queryClient = useQueryClient();
+    const deleteMutation = useDeleteExpense();
+
+    const handleDelete = (id: number) => {
+        deleteMutation.mutate(id, {
+            onSettled: () => {
+                queryClient.invalidateQueries({ queryKey: ['expense-stats', 'graphql'] });
+            },
+        });
+    };
 
     const total = data?.expenseList?.total ?? 0;
     const totalPages = Math.ceil(total / LIMIT);
@@ -34,7 +44,7 @@ export function ExpensesTable() {
             <Table.Td>{element.month}</Table.Td>
             <Table.Td>{element.year}</Table.Td>
             <Table.Td>
-                <Button size="xs" variant="light" color="red" loading={deleteMutation.isPending} onClick={() => deleteMutation.mutate(element.id)}>
+                <Button size="xs" variant="light" color="red" loading={deleteMutation.isPending} onClick={() => handleDelete(element.id)}>
                     Delete
                 </Button>
             </Table.Td>

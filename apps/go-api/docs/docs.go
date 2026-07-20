@@ -785,6 +785,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 1
                 },
+                "description": {
+                    "type": "string",
+                    "example": "Some text"
+                },
                 "month": {
                     "type": "integer",
                     "example": 7
@@ -878,6 +882,7 @@ const docTemplate = `{
                 "amount",
                 "category_id",
                 "created_at",
+                "description",
                 "id",
                 "month",
                 "resident_location_id",
@@ -896,6 +901,10 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string",
                     "example": "2026-07-13T12:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Some text"
                 },
                 "id": {
                     "type": "integer",
@@ -1074,7 +1083,8 @@ const docTemplate = `{
                 "id",
                 "postal_code",
                 "street",
-                "updated_at"
+                "updated_at",
+                "user_id"
             ],
             "properties": {
                 "apartment": {
@@ -1112,6 +1122,10 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string",
                     "example": "2026-07-09 08:34:05.796617"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "00000000-0000-0000-0000-000000000001"
                 }
             }
         },
@@ -1149,6 +1163,10 @@ const docTemplate = `{
                 "category_id": {
                     "type": "integer",
                     "example": 1
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Some text"
                 },
                 "month": {
                     "type": "integer",

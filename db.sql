@@ -69,6 +69,7 @@ CREATE TABLE expenses (
     resident_location_id BIGINT NOT NULL REFERENCES resident_locations(id) ON DELETE CASCADE,
     category_id          BIGINT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
     amount               NUMERIC(12, 2) NOT NULL,
+    description          TEXT DEFAULT '',
     month                INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
     year                 INTEGER NOT NULL CHECK (year >= 2000),
     created_at           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

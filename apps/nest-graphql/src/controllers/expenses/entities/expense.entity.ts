@@ -26,6 +26,10 @@ export class Expense {
   @Column({ type: 'numeric', precision: 12, scale: 2 })
   amount!: number;
 
+  @Field({ nullable: true })
+  @Column({ nullable: true, default: '' })
+  description?: string;
+
   @Field(() => Int)
   @Column()
   month!: number;

@@ -5,7 +5,7 @@ import {
   type IAppComponent,
   type IAppConfig,
 } from "../types/external-app-config.type";
-import { LoaderUtils } from "./loader";
+import { LoaderUtils, type ScriptLoadError} from "@wsmk/wi-resource-loader"
 import { APPLICATION_BUNDLE_NAME } from "./application";
 
 export type MicrofrontendHostProps = {
@@ -72,23 +72,23 @@ export function MicrofrontendHost({
 
     let cancelled = false;
 
-    const loadBundleScript = (): Promise<void> => {
+    const loadBundleScript = (): Promise<void | ScriptLoadError> => {
       if (bundleName === APPLICATION_BUNDLE_NAME.APP) {
         const baseUrl = `${window.location.origin}${proxyBasePath}`;
 
-        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js` });
+        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js`, params: {} });
       }
 
       if (bundleName === APPLICATION_BUNDLE_NAME.SETTINGS) {
         const baseUrl = `${window.location.origin}${proxyBasePath}`;
 
-        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js` });
+        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js`, params: {} });
       }
 
        if (bundleName === APPLICATION_BUNDLE_NAME.RESIDENT) {
         const baseUrl = `${window.location.origin}${proxyBasePath}`;
 
-        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js` });
+        return LoaderUtils.loadScript({ src: `${baseUrl}/${bundleName}.js`, params: {} });
       }
 
       return LoaderUtils.loadScript({

@@ -175,4 +175,3 @@ input CategoryInput {
   name: String!
   description: String!
 }
-

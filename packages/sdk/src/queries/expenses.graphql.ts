@@ -1,8 +1,5 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
-import type {
-  ListExpenseResponse,
-  Expense,
-} from '../types/graphql';
+import type { ListExpenseResponse } from '../types/graphql';
 import { graphqlRequest } from '../lib/graphql';
 
 

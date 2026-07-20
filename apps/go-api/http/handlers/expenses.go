@@ -85,14 +85,15 @@ func (h *ExpenseHandler) List(c *gin.Context) {
 
 	for _, e := range expenses {
 		res = append(res, dto.ExpenseResponse{
-			ID:                  e.ID(),
-			ResidentLocationID:  e.ResidentLocationID(),
-			CategoryID:          e.CategoryID(),
-			Amount:              e.Amount(),
-			Month:               e.Month(),
-			Year:                e.Year(),
-			CreatedAt:           e.CreatedAt(),
-			UpdatedAt:           e.UpdatedAt(),
+			ID:                 e.ID(),
+			ResidentLocationID: e.ResidentLocationID(),
+			CategoryID:         e.CategoryID(),
+			Amount:             e.Amount(),
+			Month:              e.Month(),
+			Year:               e.Year(),
+			CreatedAt:          e.CreatedAt(),
+			UpdatedAt:          e.UpdatedAt(),
+			Description:        e.Description(),
 		})
 	}
 
@@ -128,6 +129,7 @@ func (h *ExpenseHandler) Create(c *gin.Context) {
 		req.ResidentLocationID,
 		req.CategoryID,
 		req.Amount,
+		req.Description,
 		req.Month,
 		req.Year,
 	))
@@ -138,14 +140,15 @@ func (h *ExpenseHandler) Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, dto.ExpenseResponse{
-		ID:                  expense.ID(),
-		ResidentLocationID:  expense.ResidentLocationID(),
-		CategoryID:          expense.CategoryID(),
-		Amount:              expense.Amount(),
-		Month:               expense.Month(),
-		Year:                expense.Year(),
-		CreatedAt:           expense.CreatedAt(),
-		UpdatedAt:           expense.UpdatedAt(),
+		ID:                 expense.ID(),
+		ResidentLocationID: expense.ResidentLocationID(),
+		CategoryID:         expense.CategoryID(),
+		Amount:             expense.Amount(),
+		Month:              expense.Month(),
+		Year:               expense.Year(),
+		CreatedAt:          expense.CreatedAt(),
+		UpdatedAt:          expense.UpdatedAt(),
+		Description:        expense.Description(),
 	})
 }
 
@@ -185,6 +188,7 @@ func (h *ExpenseHandler) Update(c *gin.Context) {
 		req.ResidentLocationID,
 		req.CategoryID,
 		req.Amount,
+		req.Description,
 		req.Month,
 		req.Year,
 	))
@@ -199,14 +203,15 @@ func (h *ExpenseHandler) Update(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, dto.ExpenseResponse{
-		ID:                  expense.ID(),
-		ResidentLocationID:  expense.ResidentLocationID(),
-		CategoryID:          expense.CategoryID(),
-		Amount:              expense.Amount(),
-		Month:               expense.Month(),
-		Year:                expense.Year(),
-		CreatedAt:           expense.CreatedAt(),
-		UpdatedAt:           expense.UpdatedAt(),
+		ID:                 expense.ID(),
+		ResidentLocationID: expense.ResidentLocationID(),
+		CategoryID:         expense.CategoryID(),
+		Amount:             expense.Amount(),
+		Month:              expense.Month(),
+		Year:               expense.Year(),
+		CreatedAt:          expense.CreatedAt(),
+		UpdatedAt:          expense.UpdatedAt(),
+		Description:        expense.Description(),
 	})
 }
 

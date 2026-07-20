@@ -8,6 +8,7 @@ import (
 	"time"
 
 	expensedomain "flatty-budget/go-api/domains/expenses"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
@@ -223,13 +224,13 @@ func TestPgxRepository_List(t *testing.T) {
 		{
 			name: "success",
 			rows: newMockRows([][]any{
-				{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now},
-				{int64(2), int64(10), int64(21), 75.00, 6, 2024, now, now},
+				{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""},
+				{int64(2), int64(10), int64(21), 75.00, 6, 2024, now, now, ""},
 			}),
 			queryErr: nil,
 			wantExpenses: []*expensedomain.Expense{
-				expensedomain.NewExpense(1, 10, 20, 150.50, 6, 2024, now, now),
-				expensedomain.NewExpense(2, 10, 21, 75.00, 6, 2024, now, now),
+				expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now),
+				expensedomain.NewExpense(2, 10, 21, 75.00, "", 6, 2024, now, now),
 			},
 			wantErr: "",
 		},
@@ -317,11 +318,11 @@ func TestPgxRepository_GetByID(t *testing.T) {
 
 	cases := []getCase{
 		{
-			name: "success",
-			row:  newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now}),
-			id:   1,
-			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, 6, 2024, now, now),
-			wantErr: "",
+			name:        "success",
+			row:         newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""}),
+			id:          1,
+			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now),
+			wantErr:     "",
 		},
 		{
 			name:        "not_found",
@@ -375,27 +376,27 @@ func TestPgxRepository_Create(t *testing.T) {
 	now := time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)
 
 	type createCase struct {
-		name         string
-		row          *mockRow
-		input        *expensedomain.ExpenseInput
-		wantExpense  *expensedomain.Expense
-		wantErr      string
+		name        string
+		row         *mockRow
+		input       *expensedomain.ExpenseInput
+		wantExpense *expensedomain.Expense
+		wantErr     string
 	}
 
 	cases := []createCase{
 		{
-			name: "success",
-			row:  newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now}),
-			input: expensedomain.NewExpenseInput(10, 20, 150.50, 6, 2024),
-			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, 6, 2024, now, now),
-			wantErr: "",
+			name:        "success",
+			row:         newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""}),
+			input:       expensedomain.NewExpenseInput(10, 20, 150.50, "", 6, 2024),
+			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now),
+			wantErr:     "",
 		},
 		{
-			name:    "query_error",
-			row:     newMockRowWithError(errors.New("insert failed")),
-			input:   expensedomain.NewExpenseInput(10, 20, 150.50, 6, 2024),
+			name:        "query_error",
+			row:         newMockRowWithError(errors.New("insert failed")),
+			input:       expensedomain.NewExpenseInput(10, 20, 150.50, "", 6, 2024),
 			wantExpense: nil,
-			wantErr: "insert failed",
+			wantErr:     "insert failed",
 		},
 	}
 
@@ -407,7 +408,7 @@ func TestPgxRepository_Create(t *testing.T) {
 			ctx := context.Background()
 
 			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
-				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year()},
+				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description()},
 			).Return(tc.row)
 
 			expense, err := repo.Create(ctx, tc.input)
@@ -446,28 +447,28 @@ func TestPgxRepository_Update(t *testing.T) {
 
 	cases := []updateCase{
 		{
-			name: "success",
-			row:  newMockRow([]any{int64(1), int64(10), int64(20), 200.00, 7, 2024, now, now}),
-			id:   1,
-			input: expensedomain.NewExpenseInput(10, 20, 200.00, 7, 2024),
-			wantExpense: expensedomain.NewExpense(1, 10, 20, 200.00, 7, 2024, now, now),
-			wantErr: "",
+			name:        "success",
+			row:         newMockRow([]any{int64(1), int64(10), int64(20), 200.00, 7, 2024, now, now, ""}),
+			id:          1,
+			input:       expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
+			wantExpense: expensedomain.NewExpense(1, 10, 20, 200.00, "", 7, 2024, now, now),
+			wantErr:     "",
 		},
 		{
-			name:    "not_found",
-			row:     newMockRowWithError(pgx.ErrNoRows),
-			id:      999,
-			input:   expensedomain.NewExpenseInput(10, 20, 200.00, 7, 2024),
+			name:        "not_found",
+			row:         newMockRowWithError(pgx.ErrNoRows),
+			id:          999,
+			input:       expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
 			wantExpense: nil,
-			wantErr: "expense with id 999 not found: no rows in result set",
+			wantErr:     "expense with id 999 not found: no rows in result set",
 		},
 		{
-			name:    "query_error",
-			row:     newMockRowWithError(errors.New("update failed")),
-			id:      1,
-			input:   expensedomain.NewExpenseInput(10, 20, 200.00, 7, 2024),
+			name:        "query_error",
+			row:         newMockRowWithError(errors.New("update failed")),
+			id:          1,
+			input:       expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
 			wantExpense: nil,
-			wantErr: "update failed",
+			wantErr:     "update failed",
 		},
 	}
 
@@ -479,7 +480,7 @@ func TestPgxRepository_Update(t *testing.T) {
 			ctx := context.Background()
 
 			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
-				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.id},
+				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description(), tc.id},
 			).Return(tc.row)
 
 			expense, err := repo.Update(ctx, tc.id, tc.input)

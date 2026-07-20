@@ -59,6 +59,7 @@ type Expense {
   categoryId: Int!
   category: Category
   amount: Float!
+  description: String
   month: Int!
   year: Int!
   createdAt: DateTime!

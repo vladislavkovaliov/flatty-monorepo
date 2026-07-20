@@ -3,14 +3,15 @@ package expenses
 import "time"
 
 type Expense struct {
-	id                  int64
-	residentLocationID  int64
-	categoryID          int64
-	amount              float64
-	month               int
-	year                int
-	createdAt           time.Time
-	updatedAt           time.Time
+	id                 int64
+	residentLocationID int64
+	categoryID         int64
+	amount             float64
+	month              int
+	year               int
+	createdAt          time.Time
+	updatedAt          time.Time
+	description        string
 }
 
 func (e *Expense) ID() int64 {
@@ -45,20 +46,26 @@ func (e *Expense) UpdatedAt() time.Time {
 	return e.updatedAt
 }
 
+func (e *Expense) Description() string {
+	return e.description
+}
+
 func NewExpense(
 	id, residentLocationID, categoryID int64,
 	amount float64,
+	description string,
 	month, year int,
 	createdAt, updatedAt time.Time,
 ) *Expense {
 	return &Expense{
-		id:                  id,
-		residentLocationID:  residentLocationID,
-		categoryID:          categoryID,
-		amount:              amount,
-		month:               month,
-		year:                year,
-		createdAt:           createdAt,
-		updatedAt:           updatedAt,
+		id:                 id,
+		residentLocationID: residentLocationID,
+		categoryID:         categoryID,
+		amount:             amount,
+		description:        description,
+		month:              month,
+		year:               year,
+		createdAt:          createdAt,
+		updatedAt:          updatedAt,
 	}
 }

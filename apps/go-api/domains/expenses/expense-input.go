@@ -6,6 +6,7 @@ type ExpenseInput struct {
 	amount             float64
 	month              int
 	year               int
+	description        string
 }
 
 func (i *ExpenseInput) ResidentLocationID() int64 {
@@ -28,15 +29,21 @@ func (i *ExpenseInput) Year() int {
 	return i.year
 }
 
+func (i *ExpenseInput) Description() string {
+	return i.description
+}
+
 func NewExpenseInput(
 	residentLocationID, categoryID int64,
 	amount float64,
+	description string,
 	month, year int,
 ) *ExpenseInput {
 	return &ExpenseInput{
 		residentLocationID: residentLocationID,
 		categoryID:         categoryID,
 		amount:             amount,
+		description:        description,
 		month:              month,
 		year:               year,
 	}

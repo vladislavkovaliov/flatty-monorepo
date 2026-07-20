@@ -18,6 +18,9 @@ export class ExpenseRepository {
     return this.expenseRepository.findAndCount({
       skip: offset,
       take: limit,
+      order: {
+        id: 'ASC'
+      },
       relations: { category: true },
     });
   }

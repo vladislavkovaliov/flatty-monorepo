@@ -10,6 +10,7 @@ query expenseList($limit: Int, $offset: Int) {
         id
         amount
         categoryId
+        description
         category {
           id
           name

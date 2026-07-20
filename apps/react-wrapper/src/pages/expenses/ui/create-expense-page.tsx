@@ -1,4 +1,4 @@
-import { Select, NumberInput, Button, Stack, Container, Title, Group } from '@mantine/core';
+import { Select, NumberInput, Button, Stack, Container, Title, Group, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 import { useCreateExpense, useCategories } from '@flatty-budget/sdk';
@@ -7,6 +7,7 @@ interface CreateExpenseForm {
   resident_location_id: number;
   category_id: number;
   amount: number;
+  description: string;
   month: number;
   year: number;
 }
@@ -26,6 +27,7 @@ export function CreateExpensePage() {
       resident_location_id: 1,
       category_id: 1,
       amount: 0,
+      description: "",
       month: new Date().getMonth() + 1,
       year: new Date().getFullYear(),
     },
@@ -96,6 +98,13 @@ export function CreateExpensePage() {
             min={2000}
             key={form.key('year')}
             {...form.getInputProps('year')}
+          />
+
+          <TextInput
+            label="Description"
+            placeholder="Description"
+            key={form.key('description')}
+            {...form.getInputProps('description')}
           />
 
           <Group justify="flex-end" mt="md">

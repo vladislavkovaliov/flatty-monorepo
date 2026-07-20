@@ -40,6 +40,7 @@ export function ExpensesTable() {
         <Table.Tr key={element.id}>
             <Table.Td>{element.id}</Table.Td>
             <Table.Td>{element.amount}</Table.Td>
+            <Table.Td>{element.description}</Table.Td>
             <Table.Td>{element.category?.description}</Table.Td>
             <Table.Td>{element.month}</Table.Td>
             <Table.Td>{element.year}</Table.Td>
@@ -60,6 +61,7 @@ export function ExpensesTable() {
                     <Table.Tr>
                         <Table.Th>ID</Table.Th>
                         <Table.Th>Amount</Table.Th>
+                        <Table.Th>Description</Table.Th>
                         <Table.Th>Category</Table.Th>
                         <Table.Th>Month</Table.Th>
                         <Table.Th>Year</Table.Th>

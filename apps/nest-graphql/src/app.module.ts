@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigController } from './config/config.controller';
 import { ConfigService } from './config/config.service';
 import { ResidentLocationModule } from './controllers/resident-location/resident-location.module'
@@ -14,13 +15,16 @@ import { InvitationModule } from './invitation/invitation.module'
 import { EmailModule } from './email/email.module'
 import type { Request } from 'express'
 import { join } from 'path';
-import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from '@apollo/server/plugin/landingPage/default';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 
 @Module({
   controllers: [ConfigController],
   providers: [ConfigService],
   imports: [
+    CacheModule.register({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         return {

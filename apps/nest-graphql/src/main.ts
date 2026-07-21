@@ -2,6 +2,7 @@ import 'dotenv/config'
 
 import cookieParser from 'cookie-parser'
 import express from 'express'
+import helmet from 'helmet';
 import { NestFactory } from '@nestjs/core'
 import { ExpressAdapter } from '@nestjs/platform-express'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
@@ -97,7 +98,19 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, new ExpressAdapter(expressApp))
 
   expressApp.use(express.json())
+
   app.use(cookieParser())
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
+        scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+        manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
+        frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
+      },
+    },
+  }));
 
   app.setGlobalPrefix('api')
 

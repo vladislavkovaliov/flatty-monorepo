@@ -11,6 +11,7 @@ import (
 	"flatty-budget/go-api/http/handlers"
 	"flatty-budget/go-api/internal/auth"
 	"flatty-budget/go-api/internal/config"
+	"flatty-budget/go-api/internal/secure"
 	categoryrepo "flatty-budget/go-api/repos/category"
 	expensestatsrepo "flatty-budget/go-api/repos/expense_stats"
 	residentlocationrepo "flatty-budget/go-api/repos/resident_location"
@@ -30,6 +31,9 @@ func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *c
 	authMw := auth.AuthMiddleware(pool)
 
 	api := r.Group("/api")
+
+	api.Use(secure.SecurityMiddleware())
+
 	wireConfig(api)
 	wireResidentLocation(api, pool, authMw)
 	wireCategory(api, pool, authMw)

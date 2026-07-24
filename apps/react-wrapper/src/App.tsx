@@ -30,26 +30,26 @@ export default function App() {
   const spotlightActions = buildSpotlightActions(APPS, navigate);
 
   return (
-    <MantineProvider theme={theme} defaultColorScheme="dark">
-      <AppShell header={{ height: 60 }}>
-        <AppShellHeader opened={opened} toggle={toggle} />
+    <SingleTabManagerWrapper>
+      <MantineProvider theme={theme} defaultColorScheme="dark">
+        <AppShell header={{ height: 60 }}>
+          <AppShellHeader opened={opened} toggle={toggle} />
 
-        <AppShell.Main>
-          <SingleTabManagerWrapper>
-            <Outlet />
-          </SingleTabManagerWrapper>
-        </AppShell.Main>
-      </AppShell>
+          <AppShell.Main>
+              <Outlet />
+          </AppShell.Main>
+        </AppShell>
 
-      <Spotlight
-        shortcut="mod + K"
-        actions={spotlightActions}
-        nothingFound="Nothing found..."
-        highlightQuery
-        searchProps={{
-          placeholder: "Search applications...",
-        }}
-      />
-    </MantineProvider>
+        <Spotlight
+          shortcut="mod + K"
+          actions={spotlightActions}
+          nothingFound="Nothing found..."
+          highlightQuery
+          searchProps={{
+            placeholder: "Search applications...",
+          }}
+        />
+      </MantineProvider>
+    </SingleTabManagerWrapper>
   );
 }

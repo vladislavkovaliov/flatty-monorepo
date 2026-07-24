@@ -1,15 +1,8 @@
 import { useCallback, useMemo } from "react";
 import { type ReactNode } from 'react';
 
-import { useUserSettings, type DtoUserSettingsResponse, useUpdateUserSettings } from "@flatty-budget/sdk"
-import { UserSettingsContext } from "./user-settings-context";
-
-type UserSettings = {
-    dateFormat?: DtoUserSettingsResponse["date_format"];
-    language?: DtoUserSettingsResponse["language"];
-    theme?: DtoUserSettingsResponse["theme"];
-    timezone?: DtoUserSettingsResponse["timezone"];
-};
+import { useUserSettings, useUpdateUserSettings } from "@flatty-budget/sdk"
+import { UserSettingsContext, type UserSettings } from "./user-settings-context";
 
 interface UserSettingsProviderProps {
       children: ReactNode;

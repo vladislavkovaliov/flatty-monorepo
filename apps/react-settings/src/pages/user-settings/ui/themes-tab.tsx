@@ -1,12 +1,8 @@
 import { Select, Stack, Text } from '@mantine/core';
 import type { Theme } from '../model/types';
-import { useUserSettingsContext } from '../../../app/providers/user-settings-provider';
+import { useUserSettingsContext } from '../../../hooks/use-user-settings-context';
+import { THEME_OPTIONS } from './constants';
 
-export const THEME_OPTIONS = [
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-  { value: 'system', label: 'System' },
-] as const;
 
 function getSystemTheme(): Theme {
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';

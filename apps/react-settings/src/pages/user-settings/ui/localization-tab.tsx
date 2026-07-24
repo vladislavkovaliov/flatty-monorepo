@@ -1,16 +1,7 @@
 import { Select, Stack, Text } from '@mantine/core';
 import type { Locale } from '../model/types';
-import { useUserSettingsContext } from '../../../app/providers/user-settings-provider';
-
-export const LOCALE_OPTIONS = [
-  { value: 'en', label: 'English' },
-  { value: 'ru', label: 'Русский' },
-  { value: 'de', label: 'Deutsch' },
-  { value: 'fr', label: 'Français' },
-  { value: 'es', label: 'Español' },
-  { value: 'zh', label: '中文' },
-  { value: 'ja', label: '日本語' },
-] as const;
+import { useUserSettingsContext } from '../../../hooks/use-user-settings-context';
+import { LOCALE_OPTIONS } from './constants';
 
 function getDefaultLocale(): Locale {
   const raw = navigator.language?.slice(0, 2);

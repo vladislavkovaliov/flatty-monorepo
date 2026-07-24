@@ -4,7 +4,22 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Table, Button, Box, Container, Pagination } from "@mantine/core";
 import { useSearchParams } from "react-router-dom";
 
-const LIMIT = 5;
+const LIMIT = 10;
+
+const MONTH: Record<number, string> = {
+    1: "Jan",
+    2: "Feb",
+    3: "Mar",
+    4: "Apr",
+    5: "May",
+    6: "Jun",
+    7: "Jul",
+    8: "Aug",
+    9: "Sep",
+    10: "Oct",
+    11: "Nov",
+    12: "Dec"
+} as const;
 
 export function ExpensesTable() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -42,7 +57,7 @@ export function ExpensesTable() {
             <Table.Td>{element.amount}</Table.Td>
             <Table.Td>{element.description}</Table.Td>
             <Table.Td>{element.category?.description}</Table.Td>
-            <Table.Td>{element.month}</Table.Td>
+            <Table.Td>{MONTH[element.month]}</Table.Td>
             <Table.Td>{element.year}</Table.Td>
             <Table.Td>
                 <Button size="xs" variant="light" color="red" loading={deleteMutation.isPending} onClick={() => handleDelete(element.id)}>

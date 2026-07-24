@@ -19,7 +19,8 @@ export class ExpenseRepository {
       skip: offset,
       take: limit,
       order: {
-        id: 'ASC'
+        year: 'DESC',
+        month: 'DESC'
       },
       relations: { category: true },
     });

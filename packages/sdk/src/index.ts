@@ -14,6 +14,8 @@ export type {
   DtoResidentLocationResponse,
   DtoUpdateCategoryRequest,
   DtoUpdateResidentLocationRequest,
+  DtoUserSettingsResponse,
+  DtoUpdateUserSettingsRequest,
   CategoriesListParams,
   CategoriesListData,
   CategoriesCreateData,
@@ -103,6 +105,13 @@ export {
   useUsers,
   useUser,
 } from './queries/users.queries';
+
+export {
+  USER_SETTINGS_QUERIES,
+  useUserSettings,
+  useUpdateUserSettings,
+} from './queries/user-settings.queries'
+export type { UserSettingsForm } from './queries/user-settings.queries'
 
 // GraphQL queries
 export {

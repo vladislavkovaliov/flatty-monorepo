@@ -1,7 +1,40 @@
 import { Select, Stack, Text } from '@mantine/core';
-import { useUserSettings, useUpdateUserSettings } from '../api/user-settings.queries';
-import { DATE_FORMAT_OPTIONS, TIMEZONE_OPTIONS } from '../api/user-settings.mocks';
 import type { DateFormat, TimezoneOffset } from '../model/types';
+import { useUserSettingsContext } from '../../../app/providers/user-settings-provider';
+
+export const DATE_FORMAT_OPTIONS = [
+  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+] as const;
+
+export const TIMEZONE_OPTIONS = [
+  { value: 'UTC-12', label: 'UTC-12' },
+  { value: 'UTC-11', label: 'UTC-11' },
+  { value: 'UTC-10', label: 'UTC-10' },
+  { value: 'UTC-9', label: 'UTC-9' },
+  { value: 'UTC-8', label: 'UTC-8' },
+  { value: 'UTC-7', label: 'UTC-7' },
+  { value: 'UTC-6', label: 'UTC-6' },
+  { value: 'UTC-5', label: 'UTC-5' },
+  { value: 'UTC-4', label: 'UTC-4' },
+  { value: 'UTC-3', label: 'UTC-3' },
+  { value: 'UTC-2', label: 'UTC-2' },
+  { value: 'UTC-1', label: 'UTC-1' },
+  { value: 'UTC+0', label: 'UTC+0' },
+  { value: 'UTC+1', label: 'UTC+1' },
+  { value: 'UTC+2', label: 'UTC+2' },
+  { value: 'UTC+3', label: 'UTC+3' },
+  { value: 'UTC+4', label: 'UTC+4' },
+  { value: 'UTC+5', label: 'UTC+5' },
+  { value: 'UTC+6', label: 'UTC+6' },
+  { value: 'UTC+7', label: 'UTC+7' },
+  { value: 'UTC+8', label: 'UTC+8' },
+  { value: 'UTC+9', label: 'UTC+9' },
+  { value: 'UTC+10', label: 'UTC+10' },
+  { value: 'UTC+11', label: 'UTC+11' },
+  { value: 'UTC+12', label: 'UTC+12' },
+] as const;
 
 function getDefaultDateFormat(): DateFormat {
   const raw = new Intl.DateTimeFormat().resolvedOptions().locale;
@@ -20,11 +53,10 @@ function getDefaultTimezone(): TimezoneOffset {
 }
 
 export function TimezoneTab() {
-  const { data: settings } = useUserSettings();
-  const { mutate } = useUpdateUserSettings();
-
-  const dateFormat = settings?.dateFormat ?? getDefaultDateFormat();
-  const timezone = settings?.timezone ?? getDefaultTimezone();
+  const userSettings = useUserSettingsContext();    
+  
+  const dateFormat = userSettings.settings?.dateFormat ?? getDefaultDateFormat();
+  const timezone = userSettings.settings?.timezone ?? getDefaultTimezone();
 
   return (
     <Stack gap="md">
@@ -38,7 +70,7 @@ export function TimezoneTab() {
         value={dateFormat}
         onChange={(v) => {
           if (v) {
-            mutate({ dateFormat: v as DateFormat });
+            userSettings.updateTimezone(v, timezone);
           }
         }}
         clearable={false}
@@ -50,7 +82,7 @@ export function TimezoneTab() {
         value={timezone}
         onChange={(v) => {
           if (v) {
-            mutate({ timezone: v as TimezoneOffset });
+            userSettings.updateTimezone(dateFormat, v);
           }
         }}
         searchable

@@ -1,7 +1,16 @@
 import { Select, Stack, Text } from '@mantine/core';
-import { useUserSettings, useUpdateUserSettings } from '../api/user-settings.queries';
-import { LOCALE_OPTIONS } from '../api/user-settings.mocks';
 import type { Locale } from '../model/types';
+import { useUserSettingsContext } from '../../../app/providers/user-settings-provider';
+
+export const LOCALE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'ru', label: 'Русский' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'fr', label: 'Français' },
+  { value: 'es', label: 'Español' },
+  { value: 'zh', label: '中文' },
+  { value: 'ja', label: '日本語' },
+] as const;
 
 function getDefaultLocale(): Locale {
   const raw = navigator.language?.slice(0, 2);
@@ -10,10 +19,8 @@ function getDefaultLocale(): Locale {
 }
 
 export function LocalizationTab() {
-  const { data: settings } = useUserSettings();
-  const { mutate } = useUpdateUserSettings();
-
-  const value = settings?.locale ?? getDefaultLocale();
+  const userSettings = useUserSettingsContext();    
+  const value = userSettings.settings?.language ?? getDefaultLocale();
 
   return (
     <Stack gap="md">
@@ -27,7 +34,7 @@ export function LocalizationTab() {
         value={value}
         onChange={(v) => {
           if (v) {
-            mutate({ locale: v as Locale });
+            userSettings.updateLanguage(v);
           }
         }}
         searchable

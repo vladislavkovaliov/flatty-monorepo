@@ -371,6 +371,21 @@ definitions:
     - postal_code
     - street
     type: object
+  dto.UpdateUserSettingsRequest:
+    properties:
+      date_format:
+        example: YYYY-MM-DD
+        type: string
+      language:
+        example: en
+        type: string
+      theme:
+        example: dark
+        type: string
+      timezone:
+        example: UTC+0
+        type: string
+    type: object
   dto.UserResponse:
     properties:
       created_at:
@@ -401,6 +416,30 @@ definitions:
     - id
     - name
     - updated_at
+    type: object
+  dto.UserSettingsResponse:
+    properties:
+      created_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      date_format:
+        example: YYYY-MM-DD
+        type: string
+      language:
+        example: en
+        type: string
+      theme:
+        example: dark
+        type: string
+      timezone:
+        example: UTC+0
+        type: string
+      updated_at:
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      user_id:
+        example: 00000000-0000-0000-0000-000000000001
+        type: string
     type: object
 info:
   contact: {}
@@ -860,6 +899,52 @@ paths:
       summary: Return user by id
       tags:
       - user
+  /user/me/settings:
+    get:
+      description: 'Returns the authenticated user''s settings. If no settings have
+        been saved yet, returns sensible defaults (language: en, theme: system, timezone:
+        UTC, date_format: YYYY-MM-DD).'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserSettingsResponse'
+      security:
+      - Bearer: []
+      summary: Get user settings
+      tags:
+      - user-settings
+    put:
+      consumes:
+      - application/json
+      description: Updates the authenticated user's settings. This is a partial update
+        — only send the fields you want to change. Missing fields will keep their
+        current values. If no settings exist yet, they will be created.
+      parameters:
+      - description: Settings to update (partial)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserSettingsResponse'
+        "400":
+          description: Invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Update user settings
+      tags:
+      - user-settings
 securityDefinitions:
   Bearer:
     description: Bearer token (better-auth session_token)

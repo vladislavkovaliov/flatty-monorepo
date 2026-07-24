@@ -1,7 +1,12 @@
 import { Select, Stack, Text } from '@mantine/core';
-import { useUserSettings, useUpdateUserSettings } from '../api/user-settings.queries';
-import { THEME_OPTIONS } from '../api/user-settings.mocks';
 import type { Theme } from '../model/types';
+import { useUserSettingsContext } from '../../../app/providers/user-settings-provider';
+
+export const THEME_OPTIONS = [
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+  { value: 'system', label: 'System' },
+] as const;
 
 function getSystemTheme(): Theme {
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
@@ -9,10 +14,8 @@ function getSystemTheme(): Theme {
 }
 
 export function ThemesTab() {
-  const { data: settings } = useUserSettings();
-  const { mutate } = useUpdateUserSettings();
-
-  const value = settings?.theme ?? getSystemTheme();
+  const userSettings = useUserSettingsContext();    
+  const value = userSettings.settings?.theme ?? getSystemTheme();
 
   return (
     <Stack gap="md">
@@ -26,7 +29,7 @@ export function ThemesTab() {
         value={value}
         onChange={(v) => {
           if (v) {
-            mutate({ theme: v as Theme });
+            userSettings.updateTheme(v);
           }
         }}
         clearable={false}

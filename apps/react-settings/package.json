@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@flatty-budget/mfe-host": "*",
+    "@flatty-budget/sdk": "*",
     "@mantine/core": "^8.0.0",
     "@mantine/hooks": "^8.0.0",
     "@tanstack/react-query": "^5.0.0",

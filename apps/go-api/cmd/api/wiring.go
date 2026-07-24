@@ -21,6 +21,8 @@ import (
 	expensesservice "flatty-budget/go-api/services/expenses"
 	residentlocationservice "flatty-budget/go-api/services/resident_location"
 	userservice "flatty-budget/go-api/services/user"
+	user_settings_repo "flatty-budget/go-api/repos/user_settings"
+	user_settings_service "flatty-budget/go-api/services/user_settings"
 
 	_ "flatty-budget/go-api/docs"
 )
@@ -40,6 +42,7 @@ func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *c
 	wireExpenses(api, pool, expenseSvc, authMw)
 	wireExpenseStats(api, pool, authMw)
 	wireUser(api, pool, authMw)
+	wireUserSettings(api, pool, authMw)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -117,4 +120,15 @@ func wireUser(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
 
 	protected.GET("/user", h.List)
 	protected.GET("/user/:id", h.GetUserByID)
+}
+
+func wireUserSettings(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
+	repo := user_settings_repo.NewPgxRepository(pool)
+	svc := user_settings_service.NewService(repo)
+
+	h := handlers.NewUserSettingsHandler(svc)
+
+	protected := rg.Group("", authMw)
+	protected.GET("/user/me/settings", h.GetSettings)
+	protected.PUT("/user/me/settings", h.UpdateSettings)
 }

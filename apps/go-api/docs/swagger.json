@@ -668,6 +668,74 @@
                 }
             }
         },
+        "/user/me/settings": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the authenticated user's settings. If no settings have been saved yet, returns sensible defaults (language: en, theme: system, timezone: UTC, date_format: YYYY-MM-DD).",
+                "tags": [
+                    "user-settings"
+                ],
+                "summary": "Get user settings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserSettingsResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Updates the authenticated user's settings. This is a partial update — only send the fields you want to change. Missing fields will keep their current values. If no settings exist yet, they will be created.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-settings"
+                ],
+                "summary": "Update user settings",
+                "parameters": [
+                    {
+                        "description": "Settings to update (partial)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserSettingsRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserSettingsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/user/{id}": {
             "get": {
                 "description": "Returns user by id from the database",
@@ -1212,6 +1280,27 @@
                 }
             }
         },
+        "dto.UpdateUserSettingsRequest": {
+            "type": "object",
+            "properties": {
+                "date_format": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "language": {
+                    "type": "string",
+                    "example": "en"
+                },
+                "theme": {
+                    "type": "string",
+                    "example": "dark"
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "UTC+0"
+                }
+            }
+        },
         "dto.UserResponse": {
             "type": "object",
             "required": [
@@ -1250,6 +1339,39 @@
                 "updated_at": {
                     "type": "string",
                     "example": "2020-04-13t12:00:00Z"
+                }
+            }
+        },
+        "dto.UserSettingsResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "date_format": {
+                    "type": "string",
+                    "example": "YYYY-MM-DD"
+                },
+                "language": {
+                    "type": "string",
+                    "example": "en"
+                },
+                "theme": {
+                    "type": "string",
+                    "example": "dark"
+                },
+                "timezone": {
+                    "type": "string",
+                    "example": "UTC+0"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2024-01-15T10:30:00Z"
+                },
+                "user_id": {
+                    "type": "string",
+                    "example": "00000000-0000-0000-0000-000000000001"
                 }
             }
         }

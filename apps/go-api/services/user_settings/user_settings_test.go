@@ -47,7 +47,7 @@ func TestService_Get_ReturnsDefaultsWhenNoRow(t *testing.T) {
 	assert.Equal(t, "user-1", got.UserID())
 	assert.Equal(t, "en", got.Language())
 	assert.Equal(t, "system", got.Theme())
-	assert.Equal(t, "UTC", got.Timezone())
+	assert.Equal(t, "UTC+0", got.Timezone())
 	assert.Equal(t, "YYYY-MM-DD", got.DateFormat())
 	assert.False(t, got.CreatedAt().IsZero())
 	assert.False(t, got.UpdatedAt().IsZero())

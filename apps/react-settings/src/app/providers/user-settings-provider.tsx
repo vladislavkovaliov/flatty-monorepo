@@ -1,7 +1,8 @@
-import { createContext, useContext, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { type ReactNode } from 'react';
 
 import { useUserSettings, type DtoUserSettingsResponse, useUpdateUserSettings } from "@flatty-budget/sdk"
+import { UserSettingsContext } from "./user-settings-context";
 
 type UserSettings = {
     dateFormat?: DtoUserSettingsResponse["date_format"];
@@ -9,21 +10,6 @@ type UserSettings = {
     theme?: DtoUserSettingsResponse["theme"];
     timezone?: DtoUserSettingsResponse["timezone"];
 };
-
-interface UserSettingsContextValue {
-    settings?: UserSettings;
-    isLoading: boolean;
-    isError: boolean;
-    isPendingMutate: boolean;
-    isSuccessMutate: boolean;
-    isErrorMutate: boolean;
-    error: Error | null;
-    updateTimezone: (dateFormat: string, timezone: string) => void;
-    updateLanguage: (language: string) => void;
-    updateTheme: (theme: string) => void;
-}
-
-const UserSettingsContext = createContext<UserSettingsContextValue | null>(null);
 
 interface UserSettingsProviderProps {
       children: ReactNode;
@@ -39,17 +25,17 @@ export function UserSettingsProvider({ children }: UserSettingsProviderProps) {
         error, 
     } = useUpdateUserSettings()
 
-    const updateTimezone = (dateFormat: UserSettings["dateFormat"], timezone: UserSettings['timezone']) => {
+    const updateTimezone = useCallback((dateFormat: UserSettings["dateFormat"], timezone: UserSettings['timezone']) => {
         mutate({ data: { dateFormat: dateFormat, timezone: timezone } })
-    };
+    }, [mutate]);
 
-    const updateLanguage = (lang: UserSettings['language']) => {
+    const updateLanguage = useCallback((lang: UserSettings['language']) => {
         mutate({ data: { language: lang } })
-    };
+    }, [mutate]);
 
-    const updateTheme = (theme: UserSettings['theme']) => {
+    const updateTheme = useCallback((theme: UserSettings['theme']) => {
         mutate({ data: { theme: theme } })
-    };
+    }, [mutate]);
 
     const value = useMemo(
         () => {
@@ -73,7 +59,7 @@ export function UserSettingsProvider({ children }: UserSettingsProviderProps) {
                 updateTheme,
             };
         },
-        [data, isLoading, isError]
+        [data, isLoading, isError, isErrorMutate, isPendingMutate, isSuccessMutate, error, updateLanguage, updateTheme, updateTimezone]
     );
 
     
@@ -83,14 +69,4 @@ export function UserSettingsProvider({ children }: UserSettingsProviderProps) {
             {children}
         </UserSettingsContext>
     )
-}
-
-export function useUserSettingsContext() {
-    const context = useContext(UserSettingsContext);
-
-    if (!context) {
-        throw new Error("useUserSettingsContext must be used within UserSettingsProvider");
-    }
-
-    return context;
 }

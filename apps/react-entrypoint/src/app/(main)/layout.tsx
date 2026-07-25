@@ -1,8 +1,8 @@
 "use client";
 
 import { AppShell } from "@mantine/core";
-import { Spotlight } from "@mantine/spotlight";
 import { useDisclosure } from "@mantine/hooks";
+import { Spotlight } from "@mantine/spotlight";
 import { useRouter } from "next/navigation";
 import { AppShellHeader } from "@/components/app-shell-header";
 import { AuthGuard } from "@/features/auth/guard/auth-guard";

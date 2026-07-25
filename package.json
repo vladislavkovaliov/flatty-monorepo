@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "nx run-many --target=serve --all --parallel=5",
-    "dev:frontend": "nx run-many --target=serve --projects=react-launcher,react-settings,react-resident,react-wrapper --parallel=4",
+    "dev:frontend": "nx run-many --target=serve --projects=react-launcher,react-settings,react-resident,react-entrypoint --parallel=5",
     "dev:resident": "nx run-many --target=serve --projects=react-launcher,react-resident --parallel=2",
     "dev:settings": "nx run-many --target=serve --projects=react-launcher,react-settings --parallel=2",
     "dev:launcher": "nx run-many --target=serve --projects=react-launcher --parallel=1",
@@ -26,6 +26,7 @@
     "@nx/jest": "^23.0.1",
     "@nx/js": "^23.0.1",
     "@nx/nest": "^23.0.1",
+    "@nx/next": "^23.1.0",
     "@nx/vite": "^23.0.1",
     "@nx/webpack": "^23.0.1",
     "jsdom": "^29.1.1",

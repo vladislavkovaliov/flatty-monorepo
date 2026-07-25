@@ -15,6 +15,7 @@ export const auth = betterAuth({
     'http://localhost:5174',
     'http://localhost:80',
     'http://localhost:9000',
+    'http://localhost:3001',
   ],
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
   plugins: [

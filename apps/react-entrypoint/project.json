@@ -1,0 +1,16 @@
+{
+  "name": "react-entrypoint",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/react-entrypoint/src",
+  "tags": ["scope:frontend", "type:shell"],
+  "targets": {
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next dev",
+        "cwd": "apps/react-entrypoint"
+      }
+    }
+  }
+}

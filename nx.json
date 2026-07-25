@@ -36,6 +36,15 @@
         "testTargetName": "test",
         "lintTargetName": "lint"
       }
+    },
+    {
+      "plugin": "@nx/next/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "devTargetName": "dev",
+        "startTargetName": "start",
+        "lintTargetName": "lint"
+      }
     }
   ],
   "analytics": false

@@ -22,6 +22,8 @@ jobs:
             workspace: '@flatty-budget/react-resident'
           - name: react-settings
             workspace: '@flatty-budget/react-settings'
+          - name: react-entrypoint
+            workspace: react-entrypoint
 
     steps:
       - uses: actions/checkout@v4

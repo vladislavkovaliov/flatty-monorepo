@@ -1,0 +1,37 @@
+{
+  "name": "react-entrypoint",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check",
+    "format": "biome format --write"
+  },
+  "dependencies": {
+    "@flatty-budget/sdk": "*",
+    "@mantine/charts": "^9.4.1",
+    "@mantine/core": "^9.1.0",
+    "@mantine/dates": "^9.4.1",
+    "@mantine/form": "^9.4.2",
+    "@mantine/hooks": "^9.1.0",
+    "@mantine/spotlight": "^9.4.1",
+    "@tabler/icons-react": "^3.41.1",
+    "@wsmk/wi-resource-loader": "^1.15.2",
+    "better-auth": "^1.6.23",
+    "next": "16.2.11",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.9.2",
+    "single-active-browser-tab": "^1.9.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "typescript": "^5"
+  }
+}

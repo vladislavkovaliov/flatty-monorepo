@@ -15,7 +15,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "go run ./cmd/api/",
+        "command": "$HOME/go/bin/air",
         "cwd": "apps/go-api"
       }
     },

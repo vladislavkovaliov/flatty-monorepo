@@ -54,6 +54,8 @@ export default function Home() {
       <Text size="sm" c="dimmed">
         Press <Kbd>⌘</Kbd> + <Kbd>K</Kbd> to search
       </Text>
+
+      {/* <Button onClick={() => logMessage()}>Log Message</Button> */}
     </Stack>
   );
 }

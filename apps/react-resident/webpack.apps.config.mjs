@@ -84,14 +84,6 @@ export default (env, argv) => {
         },
         devServer: {
             port: 8082,
-            // proxy: [
-            //     {
-            //         context: ['/api'],
-            //         target: 'http://localhost:8080',
-            //         changeOrigin: true,
-            //     },
-            // ],
-            // historyApiFallback: false,
         },
         // externals: {
         //     'react': {

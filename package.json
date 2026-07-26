@@ -32,9 +32,10 @@
     "jsdom": "^29.1.1",
     "nx": "^23.0.1",
     "vitest": "^4.1.10",
+    "@emnapi/runtime": "1.11.3",
     "@parcel/watcher": "^2.6.0"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=24"
   }
 }

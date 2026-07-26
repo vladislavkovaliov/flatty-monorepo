@@ -2,6 +2,7 @@
 
 import { useUsersGraphql } from "@flatty-budget/sdk";
 import { Badge, Box, Container, Pagination, Table } from "@mantine/core";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -36,7 +37,9 @@ export function UsersTable() {
 
   const rows = (responseData?.data || []).map((element) => (
     <Table.Tr key={element.id}>
-      <Table.Td>{element.id}</Table.Td>
+      <Table.Td>
+        <Link href={`/users/${element.id}`}>{element.id.slice(0, 8)}</Link>
+      </Table.Td>
       <Table.Td>{element.name}</Table.Td>
       <Table.Td>{element.email}</Table.Td>
       <Table.Td>

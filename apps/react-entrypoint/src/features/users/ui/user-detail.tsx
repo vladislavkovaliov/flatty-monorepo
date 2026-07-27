@@ -1,48 +1,20 @@
 import { Card, Container, Stack, Text } from "@mantine/core";
+import type {
+  UserDetailExpenseAverage,
+  UserDetailExpenseTotal,
+  UserDetailLocation,
+  UserDetailUser,
+} from "../types";
 import { ExpenseStatisticsCard } from "./expense-statistics-card";
 import { ResidentLocationCard } from "./resident-location-card";
 import { UserInfoCard } from "./user-info-card";
 
-interface UserDetailUser {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: boolean;
-  image: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface UserDetailLocation {
-  id: number;
-  country: string;
-  city: string;
-  postalCode: string;
-  street: string;
-  house: string;
-  apartment: string | null;
-  createdAt: string | null;
-  updatedAt: string | null;
-}
-
-interface UserDetailExpenseTotal {
-  month: number;
-  year: number;
-  totalSpent: string;
-}
-
-interface UserDetailExpenseAverage {
-  month: number;
-  year: number;
-  averageAmount: string;
-  expenseCount: number;
-}
-
 interface UserDetailProps {
   user: UserDetailUser | null;
-  locations: UserDetailLocation[];
-  expenseTotal: UserDetailExpenseTotal[];
-  expenseAverage: UserDetailExpenseAverage[];
+  locations: UserDetailLocation | null;
+  expenseTotal: UserDetailExpenseTotal | null;
+  expenseAverage: UserDetailExpenseAverage | null;
+  hasExpenseData: boolean;
 }
 
 export function UserDetail({
@@ -50,6 +22,7 @@ export function UserDetail({
   locations,
   expenseTotal,
   expenseAverage,
+  hasExpenseData,
 }: UserDetailProps) {
   if (!user) {
     return (
@@ -65,8 +38,12 @@ export function UserDetail({
     <Container size="sm" py="xl">
       <Stack gap="lg">
         <UserInfoCard user={user} />
-        <ResidentLocationCard locations={locations} />
-        <ExpenseStatisticsCard total={expenseTotal} average={expenseAverage} />
+        <ResidentLocationCard location={locations} />
+        <ExpenseStatisticsCard
+          hasExpenseData={hasExpenseData}
+          total={expenseTotal}
+          average={expenseAverage}
+        />
       </Stack>
     </Container>
   );

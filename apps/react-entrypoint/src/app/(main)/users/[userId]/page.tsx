@@ -1,5 +1,5 @@
-import { getUserInfoById } from "@/actions/get-user-info-by-id";
 import { UserDetail } from "@/features/users/ui/user-detail";
+import { loadUserProfile } from "@/lib/services/user.service";
 
 export default async function UserPage({
   params,
@@ -8,21 +8,23 @@ export default async function UserPage({
 }) {
   const { userId } = await params;
   const {
-    userInfo,
-    expense: { total, average },
-  } = await getUserInfoById(userId);
+    user: userRow,
+    expense,
+    hasExpenseData,
+  } = await loadUserProfile(userId);
 
-  const user = userInfo.length > 0 ? userInfo[0].user : null;
-  const locations = userInfo.map(
-    (row: { resident_locations: unknown }) => row.resident_locations,
-  );
+  const user = userRow?.user ?? null;
+  const location = userRow?.resident_locations ?? null;
+  const expenseTotal = expense.total ?? null;
+  const expenseAverage = expense.average ?? null;
 
   return (
     <UserDetail
       user={user}
-      locations={locations}
-      expenseTotal={total}
-      expenseAverage={average}
+      locations={location}
+      expenseTotal={expenseTotal}
+      expenseAverage={expenseAverage}
+      hasExpenseData={hasExpenseData}
     />
   );
 }

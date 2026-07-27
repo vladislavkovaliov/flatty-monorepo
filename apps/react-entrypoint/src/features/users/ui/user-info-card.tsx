@@ -1,19 +1,10 @@
 "use client";
 
 import { Badge, Card, Group, Stack, Text, Title } from "@mantine/core";
-
-interface UserInfoCardUser {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: boolean;
-  image: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import type { UserDetailUser } from "../types";
 
 interface UserInfoCardProps {
-  user: UserInfoCardUser;
+  user: UserDetailUser;
 }
 
 export function UserInfoCard({ user }: UserInfoCardProps) {

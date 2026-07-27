@@ -33,6 +33,7 @@
     "nx": "^23.0.1",
     "vitest": "^4.1.10",
     "typescript": "^7.0.0",
+    "@typescript/typescript6": "^6.0.2",
     "@emnapi/runtime": "1.11.3",
     "@parcel/watcher": "^2.6.0"
   },

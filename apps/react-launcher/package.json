@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite --config vite.launcher.config.ts --port 9000",
     "build:vite": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "node --require ../../scripts/eslint-compat.cjs ../../node_modules/.bin/eslint .",
     "preview": "vite preview",
     "build:launcher": "vite build --config vite.launcher.config.ts"
   },

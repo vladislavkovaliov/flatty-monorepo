@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --mode=development --config ./webpack.apps.config.mjs",
     "build:webpack": "webpack --config ./webpack.apps.config.mjs",
-    "lint": "eslint .",
+    "lint": "node --require ../../scripts/eslint-compat.cjs ../../node_modules/.bin/eslint .",
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest --coverage",

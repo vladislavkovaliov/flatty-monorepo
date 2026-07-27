@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite --port 5174",
     "build:vite": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "node --require ../../scripts/eslint-compat.cjs ../../node_modules/.bin/eslint .",
     "preview": "vite preview",
     "api": "npm run api -w @flatty-budget/sdk",
     "graphql:codegen": "npm run graphql:codegen -w @flatty-budget/sdk"

@@ -54,11 +54,11 @@ export default (env, argv) => {
             rules: [
                 {
                     test: /\.(ts|tsx)$/,
-                    use: {
-                        loader: 'ts-loader',
-                        options: {
-                            configFile: path.resolve(__dirname, './tsconfig.webpack.config.json'),
-                        },
+                    loader: 'esbuild-loader',
+                    options: {
+                        loader: 'tsx',
+                        target: 'es2022',
+                        jsx: 'automatic',
                     },
                     exclude: /node_modules/,
                 },

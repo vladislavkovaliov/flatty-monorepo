@@ -3,7 +3,6 @@
     "target": "ES2022",
     "module": "ESNext",
     "rootDir": "../../",
-    "ignoreDeprecations": "6.0",
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,

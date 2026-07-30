@@ -1,19 +1,25 @@
 package expense_stats
 
 type ExpenseMonthlyAverage struct {
-	month         int
-	year          int
-	averageAmount float64
-	expenseCount  int
+	residentLocationID int64
+	month              int
+	year               int
+	averageAmount      float64
+	expenseCount       int
 }
 
-func NewExpenseMonthlyAverage(month, year int, averageAmount float64, expenseCount int) *ExpenseMonthlyAverage {
+func NewExpenseMonthlyAverage(residentLocationID int64, month, year int, averageAmount float64, expenseCount int) *ExpenseMonthlyAverage {
 	return &ExpenseMonthlyAverage{
-		month:         month,
-		year:          year,
-		averageAmount: averageAmount,
-		expenseCount:  expenseCount,
+		residentLocationID: residentLocationID,
+		month:              month,
+		year:               year,
+		averageAmount:      averageAmount,
+		expenseCount:       expenseCount,
 	}
+}
+
+func (e *ExpenseMonthlyAverage) ResidentLocationID() int64 {
+	return e.residentLocationID
 }
 
 func (e *ExpenseMonthlyAverage) Month() int {

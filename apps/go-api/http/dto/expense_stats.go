@@ -1,9 +1,10 @@
 package dto
 
 type MonthlyTotalResponse struct {
-	Month      int     `json:"month" example:"6"`
-	Year       int     `json:"year" example:"2026"`
-	TotalSpent float64 `json:"total_spent" example:"1500.50"`
+	ResidentLocationID int64   `json:"resident_location_id" example:"1"`
+	Month              int     `json:"month" example:"6"`
+	Year               int     `json:"year" example:"2026"`
+	TotalSpent         float64 `json:"total_spent" example:"1500.50"`
 }
 
 type ListMonthlyTotalResponse struct {
@@ -11,10 +12,11 @@ type ListMonthlyTotalResponse struct {
 }
 
 type MonthlyAverageResponse struct {
-	Month         int     `json:"month" example:"6"`
-	Year          int     `json:"year" example:"2026"`
-	AverageAmount float64 `json:"average_amount" example:"187.50"`
-	ExpenseCount  int     `json:"expense_count" example:"8"`
+	ResidentLocationID int64   `json:"resident_location_id" example:"1"`
+	Month              int     `json:"month" example:"6"`
+	Year               int     `json:"year" example:"2026"`
+	AverageAmount      float64 `json:"average_amount" example:"187.50"`
+	ExpenseCount       int     `json:"expense_count" example:"8"`
 }
 
 type ListMonthlyAverageResponse struct {

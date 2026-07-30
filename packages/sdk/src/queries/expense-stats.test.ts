@@ -8,14 +8,24 @@ describe('EXPENSE_STATS_GRAPHQL_QUERIES', () => {
   });
 
   it('totals() has correct query key shape', () => {
-    const opts = EXPENSE_STATS_GRAPHQL_QUERIES.totals();
-    expect(opts.queryKey).toEqual(['expense-stats', 'graphql', 'totals']);
+    const opts = EXPENSE_STATS_GRAPHQL_QUERIES.totals(1);
+    expect(opts.queryKey).toEqual([
+      'expense-stats',
+      'graphql',
+      'totals',
+      { residentLocationId: 1, month: undefined, year: undefined },
+    ]);
     expect(typeof opts.queryFn).toBe('function');
   });
 
   it('averages() has correct query key shape', () => {
-    const opts = EXPENSE_STATS_GRAPHQL_QUERIES.averages();
-    expect(opts.queryKey).toEqual(['expense-stats', 'graphql', 'averages']);
+    const opts = EXPENSE_STATS_GRAPHQL_QUERIES.averages(1);
+    expect(opts.queryKey).toEqual([
+      'expense-stats',
+      'graphql',
+      'averages',
+      { residentLocationId: 1, month: undefined, year: undefined },
+    ]);
     expect(typeof opts.queryFn).toBe('function');
   });
 });

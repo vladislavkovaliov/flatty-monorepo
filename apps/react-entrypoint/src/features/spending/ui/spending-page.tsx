@@ -3,6 +3,7 @@
 import {
   useExpenseMonthlyAveragesGraphql,
   useExpenseMonthlyTotalsGraphql,
+  useResidentLocationGraphql,
 } from "@flatty-budget/sdk";
 import { Box, Title } from "@mantine/core";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -19,8 +20,11 @@ export interface SpendingRow {
 }
 
 export function SpendingPage() {
-  const { data: totalsData } = useExpenseMonthlyTotalsGraphql();
-  const { data: averagesData } = useExpenseMonthlyAveragesGraphql();
+  const { data: residentLocationsData } = useResidentLocationGraphql();
+  const residentLocationId = residentLocationsData?.list?.data?.[0]?.id;
+
+  const { data: totalsData } = useExpenseMonthlyTotalsGraphql(residentLocationId);
+  const { data: averagesData } = useExpenseMonthlyAveragesGraphql(residentLocationId);
 
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);

@@ -1,17 +1,23 @@
 package expense_stats
 
 type ExpenseMonthlyTotal struct {
-	month      int
-	year       int
-	totalSpent float64
+	residentLocationID int64
+	month              int
+	year               int
+	totalSpent         float64
 }
 
-func NewExpenseMonthlyTotal(month, year int, totalSpent float64) *ExpenseMonthlyTotal {
+func NewExpenseMonthlyTotal(residentLocationID int64, month, year int, totalSpent float64) *ExpenseMonthlyTotal {
 	return &ExpenseMonthlyTotal{
-		month:      month,
-		year:       year,
-		totalSpent: totalSpent,
+		residentLocationID: residentLocationID,
+		month:              month,
+		year:               year,
+		totalSpent:         totalSpent,
 	}
+}
+
+func (e *ExpenseMonthlyTotal) ResidentLocationID() int64 {
+	return e.residentLocationID
 }
 
 func (e *ExpenseMonthlyTotal) Month() int {

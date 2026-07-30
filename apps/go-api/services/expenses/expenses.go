@@ -56,11 +56,12 @@ func (s *Service) Create(ctx context.Context, input *expensedomain.ExpenseInput)
 
 	if s.producer != nil {
 		event := kafkaclient.ExpenseEvent{
-			Action: "created",
-			ID:     expense.ID(),
-			Month:  expense.Month(),
-			Year:   expense.Year(),
-			Amount: expense.Amount(),
+			Action:             "created",
+			ID:                 expense.ID(),
+			ResidentLocationID: expense.ResidentLocationID(),
+			Month:              expense.Month(),
+			Year:               expense.Year(),
+			Amount:             expense.Amount(),
 		}
 		if pubErr := s.producer.PublishEvent(ctx, event); pubErr != nil {
 			fmt.Printf("failed to publish created event: %v\n", pubErr)
@@ -83,12 +84,13 @@ func (s *Service) Update(ctx context.Context, id int64, input *expensedomain.Exp
 
 	if s.producer != nil {
 		event := kafkaclient.ExpenseEvent{
-			Action:     "updated",
-			ID:         expense.ID(),
-			Month:      expense.Month(),
-			Year:       expense.Year(),
-			Amount:     expense.Amount(),
-			PrevAmount: prevExpense.Amount(),
+			Action:             "updated",
+			ID:                 expense.ID(),
+			ResidentLocationID: expense.ResidentLocationID(),
+			Month:              expense.Month(),
+			Year:               expense.Year(),
+			Amount:             expense.Amount(),
+			PrevAmount:         prevExpense.Amount(),
 		}
 		if pubErr := s.producer.PublishEvent(ctx, event); pubErr != nil {
 			fmt.Printf("failed to publish updated event: %v\n", pubErr)
@@ -111,11 +113,12 @@ func (s *Service) Delete(ctx context.Context, id int64) (int64, error) {
 
 	if s.producer != nil {
 		event := kafkaclient.ExpenseEvent{
-			Action: "deleted",
-			ID:     prevExpense.ID(),
-			Month:  prevExpense.Month(),
-			Year:   prevExpense.Year(),
-			Amount: prevExpense.Amount(),
+			Action:             "deleted",
+			ID:                 prevExpense.ID(),
+			ResidentLocationID: prevExpense.ResidentLocationID(),
+			Month:              prevExpense.Month(),
+			Year:               prevExpense.Year(),
+			Amount:             prevExpense.Amount(),
 		}
 		if pubErr := s.producer.PublishEvent(ctx, event); pubErr != nil {
 			fmt.Printf("failed to publish deleted event: %v\n", pubErr)

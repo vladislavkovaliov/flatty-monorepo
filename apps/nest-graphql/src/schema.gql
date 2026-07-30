@@ -76,6 +76,7 @@ type ListExpenseResponse {
 }
 
 type ExpenseMonthlyTotal {
+  residentLocationId: Int!
   month: Int!
   year: Int!
   totalSpent: Float!
@@ -83,6 +84,7 @@ type ExpenseMonthlyTotal {
 }
 
 type ExpenseMonthlyAverage {
+  residentLocationId: Int!
   month: Int!
   year: Int!
   averageAmount: Float!
@@ -142,8 +144,8 @@ type Query {
   categoryList(limit: Int! = 10, offset: Int! = 0): ListCategoryResponse!
   expenseCount: ExpenseCountResponse!
   expenseList(limit: Int! = 10, offset: Int! = 0): ListExpenseResponse!
-  expenseMonthlyTotals(month: Int, year: Int): ListMonthlyTotalsResponse!
-  expenseMonthlyAverages(month: Int, year: Int): ListMonthlyAveragesResponse!
+  expenseMonthlyTotals(residentLocationId: Int!, month: Int, year: Int): ListMonthlyTotalsResponse!
+  expenseMonthlyAverages(residentLocationId: Int!, month: Int, year: Int): ListMonthlyAveragesResponse!
   userList(limit: Int! = 10, offset: Int! = 0): ListUserResponse!
   user(id: String!): User!
 }

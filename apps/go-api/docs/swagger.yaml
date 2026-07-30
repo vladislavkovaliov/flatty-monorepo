@@ -244,6 +244,9 @@ definitions:
       month:
         example: 6
         type: integer
+      resident_location_id:
+        example: 1
+        type: integer
       year:
         example: 2026
         type: integer
@@ -252,6 +255,9 @@ definitions:
     properties:
       month:
         example: 6
+        type: integer
+      resident_location_id:
+        example: 1
         type: integer
       total_spent:
         example: 1500.5
@@ -691,8 +697,14 @@ paths:
       - expenses
   /expenses/stats/averages:
     get:
-      description: Returns monthly expense averages, optionally filtered by month/year
+      description: Returns monthly expense averages for a resident location owned
+        by the caller, optionally filtered by month/year
       parameters:
+      - description: Resident Location ID
+        in: query
+        name: residentLocationId
+        required: true
+        type: integer
       - description: Month (1-12)
         in: query
         name: month
@@ -708,13 +720,25 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.ListMonthlyAverageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: List monthly averages
       tags:
       - expense-stats
   /expenses/stats/totals:
     get:
-      description: Returns monthly expense totals, optionally filtered by month/year
+      description: Returns monthly expense totals for a resident location owned by
+        the caller, optionally filtered by month/year
       parameters:
+      - description: Resident Location ID
+        in: query
+        name: residentLocationId
+        required: true
+        type: integer
       - description: Month (1-12)
         in: query
         name: month
@@ -730,6 +754,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.ListMonthlyTotalResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: List monthly totals
       tags:
       - expense-stats

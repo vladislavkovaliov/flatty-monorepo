@@ -296,7 +296,7 @@ const docTemplate = `{
         },
         "/expenses/stats/averages": {
             "get": {
-                "description": "Returns monthly expense averages, optionally filtered by month/year",
+                "description": "Returns monthly expense averages for a resident location owned by the caller, optionally filtered by month/year",
                 "produces": [
                     "application/json"
                 ],
@@ -305,6 +305,13 @@ const docTemplate = `{
                 ],
                 "summary": "List monthly averages",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resident Location ID",
+                        "name": "residentLocationId",
+                        "in": "query",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Month (1-12)",
@@ -324,13 +331,22 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.ListMonthlyAverageResponse"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
                     }
                 }
             }
         },
         "/expenses/stats/totals": {
             "get": {
-                "description": "Returns monthly expense totals, optionally filtered by month/year",
+                "description": "Returns monthly expense totals for a resident location owned by the caller, optionally filtered by month/year",
                 "produces": [
                     "application/json"
                 ],
@@ -339,6 +355,13 @@ const docTemplate = `{
                 ],
                 "summary": "List monthly totals",
                 "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resident Location ID",
+                        "name": "residentLocationId",
+                        "in": "query",
+                        "required": true
+                    },
                     {
                         "type": "integer",
                         "description": "Month (1-12)",
@@ -357,6 +380,15 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.ListMonthlyTotalResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -1117,6 +1149,10 @@ const docTemplate = `{
                     "type": "integer",
                     "example": 6
                 },
+                "resident_location_id": {
+                    "type": "integer",
+                    "example": 1
+                },
                 "year": {
                     "type": "integer",
                     "example": 2026
@@ -1129,6 +1165,10 @@ const docTemplate = `{
                 "month": {
                     "type": "integer",
                     "example": 6
+                },
+                "resident_location_id": {
+                    "type": "integer",
+                    "example": 1
                 },
                 "total_spent": {
                     "type": "number",

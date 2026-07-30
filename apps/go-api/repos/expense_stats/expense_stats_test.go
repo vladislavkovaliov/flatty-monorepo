@@ -100,8 +100,11 @@ func (m *mockRows) Conn() *pgx.Conn { return nil }
 // Helpers
 // ---------------------------------------------------------------------------
 
+const testUserID = "user-123"
+
 func assertMonthlyTotalEqual(t *testing.T, want, got *expensestatsdomain.ExpenseMonthlyTotal) {
 	t.Helper()
+	assert.Equal(t, want.ResidentLocationID(), got.ResidentLocationID())
 	assert.Equal(t, want.Month(), got.Month())
 	assert.Equal(t, want.Year(), got.Year())
 	assert.Equal(t, want.TotalSpent(), got.TotalSpent())
@@ -117,6 +120,7 @@ func assertMonthlyTotalSliceEqual(t *testing.T, want, got []*expensestatsdomain.
 
 func assertMonthlyAverageEqual(t *testing.T, want, got *expensestatsdomain.ExpenseMonthlyAverage) {
 	t.Helper()
+	assert.Equal(t, want.ResidentLocationID(), got.ResidentLocationID())
 	assert.Equal(t, want.Month(), got.Month())
 	assert.Equal(t, want.Year(), got.Year())
 	assert.Equal(t, want.AverageAmount(), got.AverageAmount())
@@ -139,13 +143,13 @@ func TestPgxMonthlyTotalRepository_List(t *testing.T) {
 	t.Parallel()
 
 	type listCase struct {
-		name      string
-		month     *int
-		year      *int
-		rows      *mockRows
-		queryErr  error
-		want      []*expensestatsdomain.ExpenseMonthlyTotal
-		wantErr   string
+		name     string
+		month    *int
+		year     *int
+		rows     *mockRows
+		queryErr error
+		want     []*expensestatsdomain.ExpenseMonthlyTotal
+		wantErr  string
 	}
 
 	cases := []listCase{
@@ -154,13 +158,13 @@ func TestPgxMonthlyTotalRepository_List(t *testing.T) {
 			month: nil,
 			year:  nil,
 			rows: newMockRows([][]any{
-				{1, 2024, 1500.50},
-				{2, 2024, 2000.00},
+				{int64(1), 1, 2024, 1500.50},
+				{int64(1), 2, 2024, 2000.00},
 			}),
 			queryErr: nil,
 			want: []*expensestatsdomain.ExpenseMonthlyTotal{
-				expensestatsdomain.NewExpenseMonthlyTotal(1, 2024, 1500.50),
-				expensestatsdomain.NewExpenseMonthlyTotal(2, 2024, 2000.00),
+				expensestatsdomain.NewExpenseMonthlyTotal(1, 1, 2024, 1500.50),
+				expensestatsdomain.NewExpenseMonthlyTotal(1, 2, 2024, 2000.00),
 			},
 			wantErr: "",
 		},
@@ -169,11 +173,11 @@ func TestPgxMonthlyTotalRepository_List(t *testing.T) {
 			month: intPtr(1),
 			year:  nil,
 			rows: newMockRows([][]any{
-				{1, 2024, 1500.50},
+				{int64(1), 1, 2024, 1500.50},
 			}),
 			queryErr: nil,
 			want: []*expensestatsdomain.ExpenseMonthlyTotal{
-				expensestatsdomain.NewExpenseMonthlyTotal(1, 2024, 1500.50),
+				expensestatsdomain.NewExpenseMonthlyTotal(1, 1, 2024, 1500.50),
 			},
 			wantErr: "",
 		},
@@ -182,13 +186,13 @@ func TestPgxMonthlyTotalRepository_List(t *testing.T) {
 			month: nil,
 			year:  intPtr(2024),
 			rows: newMockRows([][]any{
-				{1, 2024, 1500.50},
-				{2, 2024, 2000.00},
+				{int64(1), 1, 2024, 1500.50},
+				{int64(1), 2, 2024, 2000.00},
 			}),
 			queryErr: nil,
 			want: []*expensestatsdomain.ExpenseMonthlyTotal{
-				expensestatsdomain.NewExpenseMonthlyTotal(1, 2024, 1500.50),
-				expensestatsdomain.NewExpenseMonthlyTotal(2, 2024, 2000.00),
+				expensestatsdomain.NewExpenseMonthlyTotal(1, 1, 2024, 1500.50),
+				expensestatsdomain.NewExpenseMonthlyTotal(1, 2, 2024, 2000.00),
 			},
 			wantErr: "",
 		},
@@ -214,7 +218,7 @@ func TestPgxMonthlyTotalRepository_List(t *testing.T) {
 			year:  nil,
 			rows: func() *mockRows {
 				r := newMockRows([][]any{
-					{1, 2024, 1500.50},
+					{int64(1), 1, 2024, 1500.50},
 				})
 				r.scanErr = errors.New("scan failed")
 				return r
@@ -237,12 +241,12 @@ func TestPgxMonthlyTotalRepository_List(t *testing.T) {
 				rows = tc.rows
 			}
 
-			expectedArgs := buildExpectedArgs(tc.month, tc.year)
+			expectedArgs := buildExpectedArgs(1, testUserID, tc.month, tc.year)
 			pool.On("Query", ctx, mock.AnythingOfType("string"),
 				mock.MatchedBy(argsMatcher(expectedArgs)),
 			).Return(rows, tc.queryErr)
 
-			got, err := repo.List(ctx, tc.month, tc.year)
+			got, err := repo.List(ctx, 1, testUserID, tc.month, tc.year)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -270,30 +274,33 @@ func TestPgxMonthlyTotalRepository_UpsertTotal(t *testing.T) {
 	t.Parallel()
 
 	type upsertCase struct {
-		name       string
-		month      int
-		year       int
-		totalSpent float64
-		execErr    error
-		wantErr    string
+		name               string
+		residentLocationID int64
+		month              int
+		year               int
+		totalSpent         float64
+		execErr            error
+		wantErr            string
 	}
 
 	cases := []upsertCase{
 		{
-			name:       "success",
-			month:      1,
-			year:       2024,
-			totalSpent: 1500.50,
-			execErr:    nil,
-			wantErr:    "",
+			name:               "success",
+			residentLocationID: 1,
+			month:              1,
+			year:               2024,
+			totalSpent:         1500.50,
+			execErr:            nil,
+			wantErr:            "",
 		},
 		{
-			name:       "exec_error",
-			month:      1,
-			year:       2024,
-			totalSpent: 1500.50,
-			execErr:    errors.New("upsert failed"),
-			wantErr:    "upsert failed",
+			name:               "exec_error",
+			residentLocationID: 1,
+			month:              1,
+			year:               2024,
+			totalSpent:         1500.50,
+			execErr:            errors.New("upsert failed"),
+			wantErr:            "upsert failed",
 		},
 	}
 
@@ -305,10 +312,10 @@ func TestPgxMonthlyTotalRepository_UpsertTotal(t *testing.T) {
 			ctx := context.Background()
 
 			pool.On("Exec", ctx, mock.AnythingOfType("string"),
-				[]any{tc.month, tc.year, tc.totalSpent},
+				[]any{tc.residentLocationID, tc.month, tc.year, tc.totalSpent},
 			).Return(pgconn.CommandTag{}, tc.execErr)
 
-			err := repo.UpsertTotal(ctx, tc.month, tc.year, tc.totalSpent)
+			err := repo.UpsertTotal(ctx, tc.residentLocationID, tc.month, tc.year, tc.totalSpent)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -345,13 +352,13 @@ func TestPgxMonthlyAverageRepository_List(t *testing.T) {
 			month: nil,
 			year:  nil,
 			rows: newMockRows([][]any{
-				{1, 2024, 150.05, 10},
-				{2, 2024, 200.00, 10},
+				{int64(1), 1, 2024, 150.05, 10},
+				{int64(1), 2, 2024, 200.00, 10},
 			}),
 			queryErr: nil,
 			want: []*expensestatsdomain.ExpenseMonthlyAverage{
-				expensestatsdomain.NewExpenseMonthlyAverage(1, 2024, 150.05, 10),
-				expensestatsdomain.NewExpenseMonthlyAverage(2, 2024, 200.00, 10),
+				expensestatsdomain.NewExpenseMonthlyAverage(1, 1, 2024, 150.05, 10),
+				expensestatsdomain.NewExpenseMonthlyAverage(1, 2, 2024, 200.00, 10),
 			},
 			wantErr: "",
 		},
@@ -360,11 +367,11 @@ func TestPgxMonthlyAverageRepository_List(t *testing.T) {
 			month: intPtr(1),
 			year:  nil,
 			rows: newMockRows([][]any{
-				{1, 2024, 150.05, 10},
+				{int64(1), 1, 2024, 150.05, 10},
 			}),
 			queryErr: nil,
 			want: []*expensestatsdomain.ExpenseMonthlyAverage{
-				expensestatsdomain.NewExpenseMonthlyAverage(1, 2024, 150.05, 10),
+				expensestatsdomain.NewExpenseMonthlyAverage(1, 1, 2024, 150.05, 10),
 			},
 			wantErr: "",
 		},
@@ -373,11 +380,11 @@ func TestPgxMonthlyAverageRepository_List(t *testing.T) {
 			month: nil,
 			year:  intPtr(2024),
 			rows: newMockRows([][]any{
-				{1, 2024, 150.05, 10},
+				{int64(1), 1, 2024, 150.05, 10},
 			}),
 			queryErr: nil,
 			want: []*expensestatsdomain.ExpenseMonthlyAverage{
-				expensestatsdomain.NewExpenseMonthlyAverage(1, 2024, 150.05, 10),
+				expensestatsdomain.NewExpenseMonthlyAverage(1, 1, 2024, 150.05, 10),
 			},
 			wantErr: "",
 		},
@@ -403,7 +410,7 @@ func TestPgxMonthlyAverageRepository_List(t *testing.T) {
 			year:  nil,
 			rows: func() *mockRows {
 				r := newMockRows([][]any{
-					{1, 2024, 150.05, 10},
+					{int64(1), 1, 2024, 150.05, 10},
 				})
 				r.scanErr = errors.New("scan failed")
 				return r
@@ -426,12 +433,12 @@ func TestPgxMonthlyAverageRepository_List(t *testing.T) {
 				rows = tc.rows
 			}
 
-			expectedArgs := buildExpectedArgs(tc.month, tc.year)
+			expectedArgs := buildExpectedArgs(1, testUserID, tc.month, tc.year)
 			pool.On("Query", ctx, mock.AnythingOfType("string"),
 				mock.MatchedBy(argsMatcher(expectedArgs)),
 			).Return(rows, tc.queryErr)
 
-			got, err := repo.List(ctx, tc.month, tc.year)
+			got, err := repo.List(ctx, 1, testUserID, tc.month, tc.year)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -459,33 +466,36 @@ func TestPgxMonthlyAverageRepository_UpsertAverage(t *testing.T) {
 	t.Parallel()
 
 	type upsertCase struct {
-		name          string
-		month         int
-		year          int
-		averageAmount float64
-		expenseCount  int
-		execErr       error
-		wantErr       string
+		name               string
+		residentLocationID int64
+		month              int
+		year               int
+		averageAmount      float64
+		expenseCount       int
+		execErr            error
+		wantErr            string
 	}
 
 	cases := []upsertCase{
 		{
-			name:          "success",
-			month:         1,
-			year:          2024,
-			averageAmount: 150.05,
-			expenseCount:  10,
-			execErr:       nil,
-			wantErr:       "",
+			name:               "success",
+			residentLocationID: 1,
+			month:              1,
+			year:               2024,
+			averageAmount:      150.05,
+			expenseCount:       10,
+			execErr:            nil,
+			wantErr:            "",
 		},
 		{
-			name:          "exec_error",
-			month:         1,
-			year:          2024,
-			averageAmount: 150.05,
-			expenseCount:  10,
-			execErr:       errors.New("upsert failed"),
-			wantErr:       "upsert failed",
+			name:               "exec_error",
+			residentLocationID: 1,
+			month:              1,
+			year:               2024,
+			averageAmount:      150.05,
+			expenseCount:       10,
+			execErr:            errors.New("upsert failed"),
+			wantErr:            "upsert failed",
 		},
 	}
 
@@ -497,10 +507,10 @@ func TestPgxMonthlyAverageRepository_UpsertAverage(t *testing.T) {
 			ctx := context.Background()
 
 			pool.On("Exec", ctx, mock.AnythingOfType("string"),
-				[]any{tc.month, tc.year, tc.averageAmount, tc.expenseCount},
+				[]any{tc.residentLocationID, tc.month, tc.year, tc.averageAmount, tc.expenseCount},
 			).Return(pgconn.CommandTag{}, tc.execErr)
 
-			err := repo.UpsertAverage(ctx, tc.month, tc.year, tc.averageAmount, tc.expenseCount)
+			err := repo.UpsertAverage(ctx, tc.residentLocationID, tc.month, tc.year, tc.averageAmount, tc.expenseCount)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -523,8 +533,8 @@ func intPtr(v int) *int {
 }
 
 // buildExpectedArgs builds the expected SQL args slice for List queries.
-func buildExpectedArgs(month, year *int) []any {
-	var args []any
+func buildExpectedArgs(residentLocationID int64, userID string, month, year *int) []any {
+	args := []any{residentLocationID, userID}
 	if month != nil {
 		args = append(args, *month)
 	}

@@ -520,20 +520,22 @@ INSERT INTO expenses (resident_location_id, category_id, amount, month, year) VA
 -- expense stats materialized tables
 
 CREATE TABLE expense_monthly_totals (
+    resident_location_id BIGINT NOT NULL REFERENCES resident_locations(id) ON DELETE CASCADE,
     month       INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
     year        INTEGER NOT NULL CHECK (year >= 2000),
     total_spent NUMERIC(12,2) NOT NULL DEFAULT 0,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (month, year)
+    PRIMARY KEY (resident_location_id, month, year)
 );
 
 CREATE TABLE expense_monthly_averages (
+    resident_location_id BIGINT NOT NULL REFERENCES resident_locations(id) ON DELETE CASCADE,
     month          INTEGER NOT NULL CHECK (month >= 1 AND month <= 12),
     year           INTEGER NOT NULL CHECK (year >= 2000),
     average_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
     expense_count  INTEGER NOT NULL DEFAULT 0,
     updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (month, year)
+    PRIMARY KEY (resident_location_id, month, year)
 );
 
 CREATE TRIGGER set_expense_monthly_totals_updated_at

@@ -6,9 +6,10 @@ import type {
 } from '../types/graphql';
 
 const EXPENSE_MONTHLY_TOTALS = `
-  query {
-    expenseMonthlyTotals {
+  query ExpenseMonthlyTotals($residentLocationId: Int!, $month: Int, $year: Int) {
+    expenseMonthlyTotals(residentLocationId: $residentLocationId, month: $month, year: $year) {
       data {
+        residentLocationId
         month
         year
         totalSpent
@@ -19,9 +20,10 @@ const EXPENSE_MONTHLY_TOTALS = `
 `;
 
 const EXPENSE_MONTHLY_AVERAGES = `
-  query {
-    expenseMonthlyAverages {
+  query ExpenseMonthlyAverages($residentLocationId: Int!, $month: Int, $year: Int) {
+    expenseMonthlyAverages(residentLocationId: $residentLocationId, month: $month, year: $year) {
       data {
+        residentLocationId
         month
         year
         averageAmount
@@ -37,22 +39,40 @@ type GqlAveragesData = { expenseMonthlyAverages: { data: ExpenseMonthlyAverage[]
 
 export const EXPENSE_STATS_GRAPHQL_QUERIES = {
   all: () => ['expense-stats', 'graphql'] as const,
-  totals: () =>
+  totals: (residentLocationId: number, month?: number, year?: number) =>
     queryOptions({
-      queryKey: [...EXPENSE_STATS_GRAPHQL_QUERIES.all(), 'totals'],
-      queryFn: () => graphqlRequest<GqlTotalsData>(EXPENSE_MONTHLY_TOTALS, {}),
+      queryKey: [...EXPENSE_STATS_GRAPHQL_QUERIES.all(), 'totals', { residentLocationId, month, year }],
+      queryFn: () =>
+        graphqlRequest<GqlTotalsData>(EXPENSE_MONTHLY_TOTALS, { residentLocationId, month, year }),
+      enabled: residentLocationId != null,
     }),
-  averages: () =>
+  averages: (residentLocationId: number, month?: number, year?: number) =>
     queryOptions({
-      queryKey: [...EXPENSE_STATS_GRAPHQL_QUERIES.all(), 'averages'],
-      queryFn: () => graphqlRequest<GqlAveragesData>(EXPENSE_MONTHLY_AVERAGES, {}),
+      queryKey: [...EXPENSE_STATS_GRAPHQL_QUERIES.all(), 'averages', { residentLocationId, month, year }],
+      queryFn: () =>
+        graphqlRequest<GqlAveragesData>(EXPENSE_MONTHLY_AVERAGES, { residentLocationId, month, year }),
+      enabled: residentLocationId != null,
     }),
 };
 
-export function useExpenseMonthlyTotalsGraphql() {
-  return useQuery(EXPENSE_STATS_GRAPHQL_QUERIES.totals());
+export function useExpenseMonthlyTotalsGraphql(
+  residentLocationId: number | undefined,
+  month?: number,
+  year?: number,
+) {
+  return useQuery({
+    ...EXPENSE_STATS_GRAPHQL_QUERIES.totals(residentLocationId as number, month, year),
+    enabled: residentLocationId != null,
+  });
 }
 
-export function useExpenseMonthlyAveragesGraphql() {
-  return useQuery(EXPENSE_STATS_GRAPHQL_QUERIES.averages());
+export function useExpenseMonthlyAveragesGraphql(
+  residentLocationId: number | undefined,
+  month?: number,
+  year?: number,
+) {
+  return useQuery({
+    ...EXPENSE_STATS_GRAPHQL_QUERIES.averages(residentLocationId as number, month, year),
+    enabled: residentLocationId != null,
+  });
 }

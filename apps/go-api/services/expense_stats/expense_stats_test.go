@@ -11,18 +11,21 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+const testUserID = "user-123"
+const testResidentLocationID int64 = 1
+
 // mockMonthlyTotalRepo implements expensestatsdomain.MonthlyTotalRepository.
 type mockMonthlyTotalRepo struct {
 	mock.Mock
 }
 
-func (m *mockMonthlyTotalRepo) List(ctx context.Context, month, year *int) ([]*expense_stats.ExpenseMonthlyTotal, error) {
-	args := m.Called(ctx, month, year)
+func (m *mockMonthlyTotalRepo) List(ctx context.Context, residentLocationID int64, userID string, month, year *int) ([]*expense_stats.ExpenseMonthlyTotal, error) {
+	args := m.Called(ctx, residentLocationID, userID, month, year)
 	return args.Get(0).([]*expense_stats.ExpenseMonthlyTotal), args.Error(1)
 }
 
-func (m *mockMonthlyTotalRepo) UpsertTotal(ctx context.Context, month, year int, totalSpent float64) error {
-	args := m.Called(ctx, month, year, totalSpent)
+func (m *mockMonthlyTotalRepo) UpsertTotal(ctx context.Context, residentLocationID int64, month, year int, totalSpent float64) error {
+	args := m.Called(ctx, residentLocationID, month, year, totalSpent)
 	return args.Error(0)
 }
 
@@ -31,13 +34,13 @@ type mockMonthlyAverageRepo struct {
 	mock.Mock
 }
 
-func (m *mockMonthlyAverageRepo) List(ctx context.Context, month, year *int) ([]*expense_stats.ExpenseMonthlyAverage, error) {
-	args := m.Called(ctx, month, year)
+func (m *mockMonthlyAverageRepo) List(ctx context.Context, residentLocationID int64, userID string, month, year *int) ([]*expense_stats.ExpenseMonthlyAverage, error) {
+	args := m.Called(ctx, residentLocationID, userID, month, year)
 	return args.Get(0).([]*expense_stats.ExpenseMonthlyAverage), args.Error(1)
 }
 
-func (m *mockMonthlyAverageRepo) UpsertAverage(ctx context.Context, month, year int, averageAmount float64, expenseCount int) error {
-	args := m.Called(ctx, month, year, averageAmount, expenseCount)
+func (m *mockMonthlyAverageRepo) UpsertAverage(ctx context.Context, residentLocationID int64, month, year int, averageAmount float64, expenseCount int) error {
+	args := m.Called(ctx, residentLocationID, month, year, averageAmount, expenseCount)
 	return args.Error(0)
 }
 
@@ -48,16 +51,16 @@ func intPtr(v int) *int {
 func TestMonthlyTotalService_List(t *testing.T) {
 	t.Parallel()
 
-	total1 := expense_stats.NewExpenseMonthlyTotal(1, 2024, 500.0)
-	total2 := expense_stats.NewExpenseMonthlyTotal(2, 2024, 750.0)
+	total1 := expense_stats.NewExpenseMonthlyTotal(testResidentLocationID, 1, 2024, 500.0)
+	total2 := expense_stats.NewExpenseMonthlyTotal(testResidentLocationID, 2, 2024, 750.0)
 
 	type listCase struct {
-		name         string
-		month, year  *int
-		repoRes      []*expense_stats.ExpenseMonthlyTotal
-		repoErr      error
-		want         []*expense_stats.ExpenseMonthlyTotal
-		wantErr      string
+		name        string
+		month, year *int
+		repoRes     []*expense_stats.ExpenseMonthlyTotal
+		repoErr     error
+		want        []*expense_stats.ExpenseMonthlyTotal
+		wantErr     string
 	}
 
 	cases := []listCase{
@@ -83,9 +86,9 @@ func TestMonthlyTotalService_List(t *testing.T) {
 			want:    []*expense_stats.ExpenseMonthlyTotal{},
 		},
 		{
-			name:   "repo error",
-			month:  nil,
-			year:   nil,
+			name:    "repo error",
+			month:   nil,
+			year:    nil,
 			repoErr: errors.New("db error"),
 			wantErr: "db error",
 		},
@@ -99,9 +102,9 @@ func TestMonthlyTotalService_List(t *testing.T) {
 			repo := new(mockMonthlyTotalRepo)
 			svc := NewMonthlyTotalService(repo)
 
-			repo.On("List", mock.Anything, tc.month, tc.year).Return(tc.repoRes, tc.repoErr)
+			repo.On("List", mock.Anything, testResidentLocationID, testUserID, tc.month, tc.year).Return(tc.repoRes, tc.repoErr)
 
-			got, err := svc.List(context.Background(), tc.month, tc.year)
+			got, err := svc.List(context.Background(), testResidentLocationID, testUserID, tc.month, tc.year)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -120,16 +123,16 @@ func TestMonthlyTotalService_List(t *testing.T) {
 func TestMonthlyAverageService_List(t *testing.T) {
 	t.Parallel()
 
-	avg1 := expense_stats.NewExpenseMonthlyAverage(1, 2024, 250.0, 2)
-	avg2 := expense_stats.NewExpenseMonthlyAverage(2, 2024, 375.0, 2)
+	avg1 := expense_stats.NewExpenseMonthlyAverage(testResidentLocationID, 1, 2024, 250.0, 2)
+	avg2 := expense_stats.NewExpenseMonthlyAverage(testResidentLocationID, 2, 2024, 375.0, 2)
 
 	type listCase struct {
-		name         string
-		month, year  *int
-		repoRes      []*expense_stats.ExpenseMonthlyAverage
-		repoErr      error
-		want         []*expense_stats.ExpenseMonthlyAverage
-		wantErr      string
+		name        string
+		month, year *int
+		repoRes     []*expense_stats.ExpenseMonthlyAverage
+		repoErr     error
+		want        []*expense_stats.ExpenseMonthlyAverage
+		wantErr     string
 	}
 
 	cases := []listCase{
@@ -155,9 +158,9 @@ func TestMonthlyAverageService_List(t *testing.T) {
 			want:    []*expense_stats.ExpenseMonthlyAverage{},
 		},
 		{
-			name:   "repo error",
-			month:  nil,
-			year:   nil,
+			name:    "repo error",
+			month:   nil,
+			year:    nil,
 			repoErr: errors.New("db error"),
 			wantErr: "db error",
 		},
@@ -171,9 +174,9 @@ func TestMonthlyAverageService_List(t *testing.T) {
 			repo := new(mockMonthlyAverageRepo)
 			svc := NewMonthlyAverageService(repo)
 
-			repo.On("List", mock.Anything, tc.month, tc.year).Return(tc.repoRes, tc.repoErr)
+			repo.On("List", mock.Anything, testResidentLocationID, testUserID, tc.month, tc.year).Return(tc.repoRes, tc.repoErr)
 
-			got, err := svc.List(context.Background(), tc.month, tc.year)
+			got, err := svc.List(context.Background(), testResidentLocationID, testUserID, tc.month, tc.year)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)

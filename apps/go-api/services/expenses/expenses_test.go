@@ -256,11 +256,12 @@ func TestService_Create(t *testing.T) {
 			} else {
 				mockProd := new(mockProducer)
 				expectedEvent := kafkaclient.ExpenseEvent{
-					Action: "created",
-					ID:     expected.ID(),
-					Month:  expected.Month(),
-					Year:   expected.Year(),
-					Amount: expected.Amount(),
+					Action:             "created",
+					ID:                 expected.ID(),
+					ResidentLocationID: expected.ResidentLocationID(),
+					Month:              expected.Month(),
+					Year:               expected.Year(),
+					Amount:             expected.Amount(),
 				}
 				mockProd.On("PublishEvent", mock.Anything, expectedEvent).Return(tc.pubErr)
 				producer = mockProd
@@ -368,12 +369,13 @@ func TestService_Update(t *testing.T) {
 			if !tc.producerNil && tc.getRepoErr == nil && tc.updRepoErr == nil {
 				mockProd := new(mockProducer)
 				expectedEvent := kafkaclient.ExpenseEvent{
-					Action:     "updated",
-					ID:         updatedExpense.ID(),
-					Month:      updatedExpense.Month(),
-					Year:       updatedExpense.Year(),
-					Amount:     updatedExpense.Amount(),
-					PrevAmount: prevExpense.Amount(),
+					Action:             "updated",
+					ID:                 updatedExpense.ID(),
+					ResidentLocationID: updatedExpense.ResidentLocationID(),
+					Month:              updatedExpense.Month(),
+					Year:               updatedExpense.Year(),
+					Amount:             updatedExpense.Amount(),
+					PrevAmount:         prevExpense.Amount(),
 				}
 				mockProd.On("PublishEvent", mock.Anything, expectedEvent).Return(tc.pubErr)
 				producer = mockProd
@@ -472,11 +474,12 @@ func TestService_Delete(t *testing.T) {
 			if !tc.producerNil && tc.getRepoErr == nil && tc.delRepoErr == nil {
 				mockProd := new(mockProducer)
 				expectedEvent := kafkaclient.ExpenseEvent{
-					Action: "deleted",
-					ID:     prevExpense.ID(),
-					Month:  prevExpense.Month(),
-					Year:   prevExpense.Year(),
-					Amount: prevExpense.Amount(),
+					Action:             "deleted",
+					ID:                 prevExpense.ID(),
+					ResidentLocationID: prevExpense.ResidentLocationID(),
+					Month:              prevExpense.Month(),
+					Year:               prevExpense.Year(),
+					Amount:             prevExpense.Amount(),
 				}
 				mockProd.On("PublishEvent", mock.Anything, expectedEvent).Return(tc.pubErr)
 				producer = mockProd

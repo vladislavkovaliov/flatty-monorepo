@@ -7,12 +7,12 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 | App | Role | Stack | Port | AGENT.md |
 |-----|------|-------|------|----------|
 | react-launcher | Shell host (Vite) | React, Mantine v9 | 9000 | [→](apps/react-launcher/AGENTS.md) |
-| react-wrapper | Shell host (Vite) | React | 5174 | [→](apps/react-wrapper/AGENTS.md) |
 | react-settings | Remote MF (Webpack) | React | 8081 | [→](apps/react-settings/AGENTS.md) |
 | react-resident | Remote MF (Webpack) | React, Mantine v8 | 8082 | [→](apps/react-resident/AGENTS.md) |
 | go-api | REST API | Go + Gin | 8080 | [→](apps/go-api/AGENTS.md) |
 | nest-graphql | GraphQL API | NestJS | 3000 | [→](apps/nest-graphql/AGENTS.md) |
 | nginx-proxy | Reverse proxy | Nginx | 80 | [→](apps/nginx-proxy/AGENTS.md) |
+| react-entrypoint | Shell host (Vite) | Nestjs | 3000 (3001) | [→](apps/react-entrypoint/AGENTS.md) |
 
 ## Tools
 
@@ -23,7 +23,7 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 
 ## Shared Frontend Conventions
 
-Apply to all React apps (react-launcher, react-wrapper, react-settings, react-resident).
+Apply to all React apps (react-launcher, react-wrapper, react-entrypoint, react-settings, react-resident).
 
 Use:
 - React

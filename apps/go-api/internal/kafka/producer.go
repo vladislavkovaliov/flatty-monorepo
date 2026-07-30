@@ -9,12 +9,13 @@ import (
 )
 
 type ExpenseEvent struct {
-	Action     string  `json:"action"`
-	ID         int64   `json:"id"`
-	Month      int     `json:"month"`
-	Year       int     `json:"year"`
-	Amount     float64 `json:"amount"`
-	PrevAmount float64 `json:"prev_amount,omitempty"`
+	Action             string  `json:"action"`
+	ID                 int64   `json:"id"`
+	ResidentLocationID int64   `json:"resident_location_id"`
+	Month              int     `json:"month"`
+	Year               int     `json:"year"`
+	Amount             float64 `json:"amount"`
+	PrevAmount         float64 `json:"prev_amount,omitempty"`
 }
 
 type ProducerInterface interface {

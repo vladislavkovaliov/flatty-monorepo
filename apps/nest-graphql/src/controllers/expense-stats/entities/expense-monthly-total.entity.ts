@@ -5,6 +5,10 @@ import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 @Entity('expense_monthly_totals')
 export class ExpenseMonthlyTotal {
   @Field(() => Int)
+  @PrimaryColumn({ name: 'resident_location_id' })
+  residentLocationId!: number;
+
+  @Field(() => Int)
   @PrimaryColumn()
   month!: number;
 

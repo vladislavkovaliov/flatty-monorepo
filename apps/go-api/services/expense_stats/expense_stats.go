@@ -14,8 +14,8 @@ func NewMonthlyTotalService(repo expensestatsdomain.MonthlyTotalRepository) *Mon
 	return &MonthlyTotalService{repo: repo}
 }
 
-func (s *MonthlyTotalService) List(ctx context.Context, month, year *int) ([]*expensestatsdomain.ExpenseMonthlyTotal, error) {
-	return s.repo.List(ctx, month, year)
+func (s *MonthlyTotalService) List(ctx context.Context, residentLocationID int64, userID string, month, year *int) ([]*expensestatsdomain.ExpenseMonthlyTotal, error) {
+	return s.repo.List(ctx, residentLocationID, userID, month, year)
 }
 
 type MonthlyAverageService struct {
@@ -26,6 +26,6 @@ func NewMonthlyAverageService(repo expensestatsdomain.MonthlyAverageRepository) 
 	return &MonthlyAverageService{repo: repo}
 }
 
-func (s *MonthlyAverageService) List(ctx context.Context, month, year *int) ([]*expensestatsdomain.ExpenseMonthlyAverage, error) {
-	return s.repo.List(ctx, month, year)
+func (s *MonthlyAverageService) List(ctx context.Context, residentLocationID int64, userID string, month, year *int) ([]*expensestatsdomain.ExpenseMonthlyAverage, error) {
+	return s.repo.List(ctx, residentLocationID, userID, month, year)
 }

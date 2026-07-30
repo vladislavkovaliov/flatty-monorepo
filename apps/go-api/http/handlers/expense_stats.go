@@ -13,8 +13,8 @@ import (
 )
 
 type ExpenseStatsHandler struct {
-	totalSvc    *totalservice.MonthlyTotalService
-	averageSvc  *totalservice.MonthlyAverageService
+	totalSvc   *totalservice.MonthlyTotalService
+	averageSvc *totalservice.MonthlyAverageService
 }
 
 func NewExpenseStatsHandler(
@@ -42,23 +42,40 @@ func parseMonthYear(c *gin.Context) (*int, *int) {
 	return month, year
 }
 
+func parseResidentLocationID(c *gin.Context) (int64, bool) {
+	id, err := strconv.ParseInt(c.Query("residentLocationId"), 10, 64)
+	if err != nil || id <= 0 {
+		return 0, false
+	}
+	return id, true
+}
+
 // ListTotals godoc
 //
 //	@Summary		List monthly totals
-//	@Description	Returns monthly expense totals, optionally filtered by month/year
+//	@Description	Returns monthly expense totals for a resident location owned by the caller, optionally filtered by month/year
 //	@Tags			expense-stats
 //	@Produce		json
+//	@Param			residentLocationId	query	int	true	"Resident Location ID"
 //	@Param			month	query	int	false	"Month (1-12)"
 //	@Param			year	query	int	false	"Year (2000+)"
 //	@Success		200	{object}	dto.ListMonthlyTotalResponse
+//	@Failure		400	{object}	map[string]string
 //	@Router			/expenses/stats/totals [get]
 func (h *ExpenseStatsHandler) ListTotals(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
+	residentLocationID, ok := parseResidentLocationID(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "residentLocationId is required"})
+		return
+	}
+	userID := c.GetString("userID")
+
 	month, year := parseMonthYear(c)
 
-	totals, err := h.totalSvc.List(ctx, month, year)
+	totals, err := h.totalSvc.List(ctx, residentLocationID, userID, month, year)
 	if err != nil {
 		internalError(c, err)
 		return
@@ -67,9 +84,10 @@ func (h *ExpenseStatsHandler) ListTotals(c *gin.Context) {
 	res := make([]dto.MonthlyTotalResponse, 0, len(totals))
 	for _, t := range totals {
 		res = append(res, dto.MonthlyTotalResponse{
-			Month:      t.Month(),
-			Year:       t.Year(),
-			TotalSpent: t.TotalSpent(),
+			ResidentLocationID: t.ResidentLocationID(),
+			Month:              t.Month(),
+			Year:               t.Year(),
+			TotalSpent:         t.TotalSpent(),
 		})
 	}
 
@@ -79,20 +97,29 @@ func (h *ExpenseStatsHandler) ListTotals(c *gin.Context) {
 // ListAverages godoc
 //
 //	@Summary		List monthly averages
-//	@Description	Returns monthly expense averages, optionally filtered by month/year
+//	@Description	Returns monthly expense averages for a resident location owned by the caller, optionally filtered by month/year
 //	@Tags			expense-stats
 //	@Produce		json
+//	@Param			residentLocationId	query	int	true	"Resident Location ID"
 //	@Param			month	query	int	false	"Month (1-12)"
 //	@Param			year	query	int	false	"Year (2000+)"
 //	@Success		200	{object}	dto.ListMonthlyAverageResponse
+//	@Failure		400	{object}	map[string]string
 //	@Router			/expenses/stats/averages [get]
 func (h *ExpenseStatsHandler) ListAverages(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
+	residentLocationID, ok := parseResidentLocationID(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "residentLocationId is required"})
+		return
+	}
+	userID := c.GetString("userID")
+
 	month, year := parseMonthYear(c)
 
-	averages, err := h.averageSvc.List(ctx, month, year)
+	averages, err := h.averageSvc.List(ctx, residentLocationID, userID, month, year)
 	if err != nil {
 		internalError(c, err)
 		return
@@ -101,10 +128,11 @@ func (h *ExpenseStatsHandler) ListAverages(c *gin.Context) {
 	res := make([]dto.MonthlyAverageResponse, 0, len(averages))
 	for _, a := range averages {
 		res = append(res, dto.MonthlyAverageResponse{
-			Month:         a.Month(),
-			Year:          a.Year(),
-			AverageAmount: a.AverageAmount(),
-			ExpenseCount:  a.ExpenseCount(),
+			ResidentLocationID: a.ResidentLocationID(),
+			Month:              a.Month(),
+			Year:               a.Year(),
+			AverageAmount:      a.AverageAmount(),
+			ExpenseCount:       a.ExpenseCount(),
 		})
 	}
 

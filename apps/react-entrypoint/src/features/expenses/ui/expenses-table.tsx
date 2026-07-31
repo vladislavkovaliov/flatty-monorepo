@@ -1,6 +1,10 @@
 "use client";
 
-import { useDeleteExpense, useExpensesGraphql, useResidentLocationGraphql } from "@flatty-budget/sdk";
+import {
+  useDeleteExpense,
+  useExpensesGraphql,
+  useResidentLocationGraphql,
+} from "@flatty-budget/sdk";
 import { Box, Button, Container, Pagination, Table } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -31,7 +35,8 @@ export function ExpensesTable() {
   const offset = (page - 1) * LIMIT;
 
   const { data: residentLocationsData } = useResidentLocationGraphql();
-  const residentLocationId = residentLocationsData?.residentLocationList?.data?.[0]?.id;
+  const residentLocationId =
+    residentLocationsData?.residentLocationList?.data?.[0]?.id;
 
   const { data } = useExpensesGraphql(residentLocationId, LIMIT, offset);
   const queryClient = useQueryClient();

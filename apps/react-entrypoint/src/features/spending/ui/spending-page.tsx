@@ -22,12 +22,15 @@ export interface SpendingRow {
 export function SpendingPage() {
   const { data: residentLocationsData } = useResidentLocationGraphql();
   // const residentLocationId = residentLocationsData?.list?.data?.[0]?.id;
-  const residentLocationId = residentLocationsData?.residentLocationList?.data?.[0]?.id
+  const residentLocationId =
+    residentLocationsData?.residentLocationList?.data?.[0]?.id;
 
-  console.log({residentLocationsData})
+  console.log({ residentLocationsData });
 
-  const { data: totalsData } = useExpenseMonthlyTotalsGraphql(residentLocationId);
-  const { data: averagesData } = useExpenseMonthlyAveragesGraphql(residentLocationId);
+  const { data: totalsData } =
+    useExpenseMonthlyTotalsGraphql(residentLocationId);
+  const { data: averagesData } =
+    useExpenseMonthlyAveragesGraphql(residentLocationId);
 
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);

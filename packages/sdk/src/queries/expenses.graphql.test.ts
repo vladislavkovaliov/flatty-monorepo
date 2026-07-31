@@ -9,7 +9,7 @@ describe('EXPENSES_GRAPHQL_QUERIES', () => {
 
   it('list() has correct query key shape and queryFn', () => {
     const opts = EXPENSES_GRAPHQL_QUERIES.list(5, 0);
-    expect(opts.queryKey).toEqual(['expenses', 'graphql', 'list', { limit: 5, offset: 0 }]);
+    expect(opts.queryKey).toEqual(['expenses', 'graphql', 'list', { residentLocationId: 5, limit: 0, offset: 0 }]);
     expect(typeof opts.queryFn).toBe('function');
   });
 });

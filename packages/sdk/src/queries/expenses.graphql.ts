@@ -4,8 +4,8 @@ import { graphqlRequest } from '../lib/graphql';
 
 
 const LIST_EXPENSE = `
-query expenseList($limit: Int, $offset: Int) {
-    expenseList(limit: $limit, offset: $offset) {
+query expenseList($residentLocationId: Int!, $limit: Int, $offset: Int) {
+    expenseList(residentLocationId: $residentLocationId, limit: $limit, offset: $offset) {
       data {
         id
         amount
@@ -31,13 +31,14 @@ type GqlListData = { expenseList: ListExpenseResponse };
 
 export const EXPENSES_GRAPHQL_QUERIES = {
   all: () => ['expenses', 'graphql'] as const,
-  list: (limit = 10, offset = 0) =>
+  list: (residentLocationId: number, limit = 10, offset = 0) =>
     queryOptions({
-      queryKey: [...EXPENSES_GRAPHQL_QUERIES.all(), 'list', { limit, offset }],
-      queryFn: () => graphqlRequest<GqlListData>(LIST_EXPENSE, { limit, offset }),
+      queryKey: [...EXPENSES_GRAPHQL_QUERIES.all(), 'list', { residentLocationId, limit, offset }],
+      queryFn: () => graphqlRequest<GqlListData>(LIST_EXPENSE, { residentLocationId, limit, offset }),
     }),
 };
 
-export function useExpensesGraphql(limit = 10, offset = 0) {
-  return useQuery(EXPENSES_GRAPHQL_QUERIES.list(limit, offset));
+export function useExpensesGraphql(residentLocationId: number, limit = 10, offset = 0) {
+  console.log(residentLocationId)
+  return useQuery(EXPENSES_GRAPHQL_QUERIES.list(residentLocationId, limit, offset));
 }

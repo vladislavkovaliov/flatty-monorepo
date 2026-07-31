@@ -212,6 +212,12 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
+                        "description": "Resident location ID",
+                        "name": "residentLocationId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
                         "description": "Number of items to return (default 10)",
                         "name": "limit",
                         "in": "query"
@@ -284,6 +290,14 @@ const docTemplate = `{
                     "expenses"
                 ],
                 "summary": "Count all expenses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resident location ID",
+                        "name": "residentLocationId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

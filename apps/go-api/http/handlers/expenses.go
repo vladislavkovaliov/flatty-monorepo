@@ -32,11 +32,19 @@ func NewExpenseHandler(service *expensesservice.Service) *ExpenseHandler {
 //	@Produce		json
 //	@Success		200	{object}	dto.CountResponse
 //	@Router			/expenses/count [get]
+//	@Param			residentLocationId	query	int	false	"Resident location ID"
 func (h *ExpenseHandler) Count(c *gin.Context) {
+	residentLocationID, ok := parseResidentLocationID(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "residentLocationId is required"})
+		return
+	}
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	total, err := h.service.Count(ctx)
+	total, err := h.service.Count(ctx, residentLocationID, userID)
 
 	if err != nil {
 		internalError(c, err)
@@ -57,9 +65,17 @@ func (h *ExpenseHandler) Count(c *gin.Context) {
 //	@Success		200	{object}	dto.ListExpenseResponse
 //	@Router			/expenses [get]
 //
+//	@Param			residentLocationId	query	int	false	"Resident location ID"
 //	@Param			limit	query	int	false	"Number of items to return (default 10)"
 //	@Param			offset	query	int	false	"Number of items to skip (default 0)"
 func (h *ExpenseHandler) List(c *gin.Context) {
+	residentLocationID, ok := parseResidentLocationID(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "residentLocationId is required"})
+		return
+	}
+	userID := c.GetString("userID")
+
 	defaultLimit := 10
 	defaultOffset := 0
 
@@ -74,7 +90,7 @@ func (h *ExpenseHandler) List(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	expenses, total, err := h.service.List(ctx, defaultLimit, defaultOffset)
+	expenses, total, err := h.service.List(ctx, residentLocationID, userID, defaultLimit, defaultOffset)
 
 	if err != nil {
 		internalError(c, err)

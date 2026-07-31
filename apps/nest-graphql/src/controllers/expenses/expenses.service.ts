@@ -6,12 +6,12 @@ import { ListExpenseResponse } from './dto/list-expense-response';
 export class ExpenseService {
   constructor(private readonly expenseRepository: ExpenseRepository) {}
 
-  async count(): Promise<number> {
-    return this.expenseRepository.count();
+  async count(residentLocationId: number, userId: string): Promise<number> {
+    return this.expenseRepository.count(residentLocationId, userId);
   }
 
-  async list(limit = 10, offset = 0): Promise<ListExpenseResponse> {
-    const [data, total] = await this.expenseRepository.list(limit, offset);
+  async list(residentLocationId: number, userId: string, limit = 10, offset = 0): Promise<ListExpenseResponse> {
+    const [data, total] = await this.expenseRepository.list(residentLocationId, userId, limit, offset);
     return { data, total };
   }
 }

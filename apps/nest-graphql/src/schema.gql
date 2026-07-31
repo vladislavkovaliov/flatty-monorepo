@@ -142,8 +142,8 @@ type Query {
   residentLocationList(limit: Int! = 10, offset: Int! = 0): ListResidentLocationResponse!
   categoryCount: CategoryCountResponse!
   categoryList(limit: Int! = 10, offset: Int! = 0): ListCategoryResponse!
-  expenseCount: ExpenseCountResponse!
-  expenseList(limit: Int! = 10, offset: Int! = 0): ListExpenseResponse!
+  expenseCount(residentLocationId: Int!): ExpenseCountResponse!
+  expenseList(residentLocationId: Int!, limit: Int! = 10, offset: Int! = 0): ListExpenseResponse!
   expenseMonthlyTotals(residentLocationId: Int!, month: Int, year: Int): ListMonthlyTotalsResponse!
   expenseMonthlyAverages(residentLocationId: Int!, month: Int, year: Int): ListMonthlyAveragesResponse!
   userList(limit: Int! = 10, offset: Int! = 0): ListUserResponse!

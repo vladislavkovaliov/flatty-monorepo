@@ -18,13 +18,13 @@ type mockRepo struct {
 	mock.Mock
 }
 
-func (m *mockRepo) Count(ctx context.Context) (int, error) {
-	args := m.Called(ctx)
+func (m *mockRepo) Count(ctx context.Context, residentLocationID int64, userID string) (int, error) {
+	args := m.Called(ctx, residentLocationID, userID)
 	return args.Int(0), args.Error(1)
 }
 
-func (m *mockRepo) List(ctx context.Context, limit, offset int) ([]*expenses.Expense, error) {
-	args := m.Called(ctx, limit, offset)
+func (m *mockRepo) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expenses.Expense, error) {
+	args := m.Called(ctx, residentLocationID, userID, limit, offset)
 	return args.Get(0).([]*expenses.Expense), args.Error(1)
 }
 
@@ -90,9 +90,12 @@ func TestService_Count(t *testing.T) {
 			repo := new(mockRepo)
 			svc := New(repo, nil)
 
-			repo.On("Count", mock.Anything).Return(tc.repoRes, tc.repoErr)
+			residentLocationID := int64(1)
+			userID := "test-user-id"
 
-			got, err := svc.Count(context.Background())
+			repo.On("Count", mock.Anything, residentLocationID, userID).Return(tc.repoRes, tc.repoErr)
+
+			got, err := svc.Count(context.Background(), residentLocationID, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -171,13 +174,16 @@ func TestService_List(t *testing.T) {
 			repo := new(mockRepo)
 			svc := New(repo, nil)
 
-			repo.On("List", mock.Anything, tc.limit, tc.offset).Return(tc.listRepoRes, tc.listRepoErr)
+			residentLocationID := int64(1)
+			userID := "test-user-id"
+
+			repo.On("List", mock.Anything, residentLocationID, userID, tc.limit, tc.offset).Return(tc.listRepoRes, tc.listRepoErr)
 
 			if tc.listRepoErr == nil {
-				repo.On("Count", mock.Anything).Return(tc.countRepoRes, tc.countRepoErr)
+				repo.On("Count", mock.Anything, residentLocationID, userID).Return(tc.countRepoRes, tc.countRepoErr)
 			}
 
-			got, total, err := svc.List(context.Background(), tc.limit, tc.offset)
+			got, total, err := svc.List(context.Background(), residentLocationID, userID, tc.limit, tc.offset)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)

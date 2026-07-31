@@ -9,7 +9,7 @@ import type {
 
 const LIST_RESIDENT_LOCATION = `
   query ListResidentLocation($limit: Int, $offset: Int) {
-    list(limit: $limit, offset: $offset) {
+    residentLocationList(limit: $limit, offset: $offset) {
       data {
         id
         country
@@ -28,7 +28,7 @@ const LIST_RESIDENT_LOCATION = `
 
 const CREATE_RESIDENT_LOCATION = `
   mutation CreateResidentLocation($input: ResidentLocationInput!) {
-    create(residentLocatoinData: $input) {
+    createResidentLocation(residentLocatoinData: $input) {
       id
       country
       city
@@ -44,7 +44,7 @@ const CREATE_RESIDENT_LOCATION = `
 
 const UPDATE_RESIDENT_LOCATION = `
   mutation UpdateResidentLocation($id: Int!, $input: ResidentLocationInput!) {
-    update(id: $id, residentLocatoinData: $input) {
+    updateResidentLocation(id: $id, residentLocatoinData: $input) {
       id
       country
       city
@@ -60,16 +60,16 @@ const UPDATE_RESIDENT_LOCATION = `
 
 const DELETE_RESIDENT_LOCATION = `
   mutation DeleteResidentLocation($id: Int!) {
-    delete(id: $id) {
+    deleteResidentLocation(id: $id) {
       data
     }
   }
 `;
 
-type GqlListData = { list: ListResidentLocationResponse };
-type GqlCreateData = { create: ResidentLocation };
-type GqlUpdateData = { update: ResidentLocation };
-type GqlDeleteData = { delete: DeleteResidentLocationResponse };
+type GqlListData = { residentLocationList: ListResidentLocationResponse };
+type GqlCreateData = { createResidentLocation: ResidentLocation };
+type GqlUpdateData = { updateResidentLocation: ResidentLocation };
+type GqlDeleteData = { deleteResidentLocation: DeleteResidentLocationResponse };
 
 export const RESIDENT_LOCATION_GRAPHQL_QUERIES = {
   all: () => ['resident-location', 'graphql'] as const,

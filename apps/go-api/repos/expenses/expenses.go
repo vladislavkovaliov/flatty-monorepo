@@ -28,23 +28,33 @@ func NewPgxRepository(pool pgxPool) *PgxRepository {
 	}
 }
 
-func (r *PgxRepository) Count(ctx context.Context) (int, error) {
+func (r *PgxRepository) Count(ctx context.Context, residentLocationID int64, userID string) (int, error) {
 	var count int
 
 	err := r.pool.QueryRow(ctx, `
 		SELECT COUNT(*) FROM expenses
-	`).Scan(&count)
+		WHERE resident_location_id = $1
+			AND EXISTS (
+				SELECT 1 FROM resident_locations rl
+				WHERE rl.id = expenses.resident_location_id AND rl.user_id = $2
+			)
+	`, residentLocationID, userID).Scan(&count)
 
 	return count, err
 }
 
-func (r *PgxRepository) List(ctx context.Context, limit, offset int) ([]*expensedomain.Expense, error) {
+func (r *PgxRepository) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.Expense, error) {
 	rows, err := r.pool.Query(ctx, `
 		SELECT id, resident_location_id, category_id, amount, month, year, created_at, updated_at, description
 		FROM expenses
+		WHERE resident_location_id = $1
+			AND EXISTS (
+				SELECT 1 FROM resident_locations rl
+				WHERE rl.id = expenses.resident_location_id AND rl.user_id = $2
+			)
 		ORDER BY id 
-		LIMIT $1 OFFSET $2
-	`, limit, offset)
+		LIMIT $3 OFFSET $4
+	`, residentLocationID, userID, limit, offset)
 
 	if err != nil {
 		return nil, err

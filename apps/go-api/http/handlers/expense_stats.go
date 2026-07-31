@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"flatty-budget/go-api/http/dto"
@@ -25,29 +24,6 @@ func NewExpenseStatsHandler(
 		totalSvc:   totalSvc,
 		averageSvc: averageSvc,
 	}
-}
-
-func parseMonthYear(c *gin.Context) (*int, *int) {
-	var month, year *int
-	if m := c.Query("month"); m != "" {
-		if v, err := strconv.Atoi(m); err == nil && v >= 1 && v <= 12 {
-			month = &v
-		}
-	}
-	if y := c.Query("year"); y != "" {
-		if v, err := strconv.Atoi(y); err == nil && v >= 2000 {
-			year = &v
-		}
-	}
-	return month, year
-}
-
-func parseResidentLocationID(c *gin.Context) (int64, bool) {
-	id, err := strconv.ParseInt(c.Query("residentLocationId"), 10, 64)
-	if err != nil || id <= 0 {
-		return 0, false
-	}
-	return id, true
 }
 
 // ListTotals godoc

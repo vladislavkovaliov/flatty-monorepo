@@ -21,8 +21,8 @@ func New(repo expensedomain.Repository, producer kafkaclient.ProducerInterface) 
 	}
 }
 
-func (s *Service) Count(ctx context.Context) (int, error) {
-	count, err := s.repo.Count(ctx)
+func (s *Service) Count(ctx context.Context, residentLocationID int64, userID string) (int, error) {
+	count, err := s.repo.Count(ctx, residentLocationID, userID)
 
 	if err != nil {
 		return 0, err
@@ -31,15 +31,14 @@ func (s *Service) Count(ctx context.Context) (int, error) {
 	return count, nil
 }
 
-func (s *Service) List(ctx context.Context, limit, offset int) ([]*expensedomain.Expense, int, error) {
-	items, err := s.repo.List(ctx, limit, offset)
+func (s *Service) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.Expense, int, error) {
+	items, err := s.repo.List(ctx, residentLocationID, userID, limit, offset)
 
 	if err != nil {
 		return nil, 0, err
 	}
 
-	total, err := s.repo.Count(ctx)
-	fmt.Println(total)
+	total, err := s.repo.Count(ctx, residentLocationID, userID)
 
 	if err != nil {
 		return nil, 0, err

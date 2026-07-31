@@ -183,11 +183,13 @@ func TestPgxRepository_Count(t *testing.T) {
 			repo := NewPgxRepository(pool)
 
 			ctx := context.Background()
+			residentLocationID := int64(10)
+			userID := "test-user-id"
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), ([]any)(nil)).
+			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{residentLocationID, userID}).
 				Return(tc.row)
 
-			got, err := repo.Count(ctx)
+			got, err := repo.Count(ctx, residentLocationID, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -269,6 +271,8 @@ func TestPgxRepository_List(t *testing.T) {
 			repo := NewPgxRepository(pool)
 
 			ctx := context.Background()
+			residentLocationID := int64(10)
+			userID := "test-user-id"
 			limit := 10
 			offset := 0
 
@@ -276,10 +280,10 @@ func TestPgxRepository_List(t *testing.T) {
 			if tc.rows != nil {
 				rows = tc.rows
 			}
-			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{limit, offset}).
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{residentLocationID, userID, limit, offset}).
 				Return(rows, tc.queryErr)
 
-			expenses, err := repo.List(ctx, limit, offset)
+			expenses, err := repo.List(ctx, residentLocationID, userID, limit, offset)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)

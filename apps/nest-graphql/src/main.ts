@@ -8,6 +8,7 @@ import { ExpressAdapter } from '@nestjs/platform-express'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 import { auth, ensureMigrations } from './lib/auth'
+import { GraphQLTracingInterceptor } from './common/graphql-tracing.interceptor';
 
 async function bootstrap() {
   await ensureMigrations()
@@ -113,6 +114,10 @@ async function bootstrap() {
   }));
 
   app.setGlobalPrefix('api')
+
+  app.useGlobalInterceptors(
+    new GraphQLTracingInterceptor(),
+  )
 
   const config = new DocumentBuilder()
     .setTitle('Flatty Budget API')

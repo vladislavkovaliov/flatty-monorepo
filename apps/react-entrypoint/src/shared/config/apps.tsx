@@ -83,4 +83,11 @@ export const APPS: AppDefinition[] = [
     path: "/graphql",
     icon: <IconBrandGraphql size={24} stroke={1.5} />,
   },
+  {
+    id: "jeager",
+    label: "Open Jaeger",
+    description: "Open Jaeger",
+    path: "http://localhost:16686",
+    icon: <IconBrandGraphql size={24} stroke={1.5} />,
+  },
 ];

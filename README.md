@@ -12,8 +12,8 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 ## Quick Start
 
 ```bash
-# 1. Start infrastructure (PostgreSQL, Redpanda, RabbitMQ)
-docker compose up postgres redpanda rabbitmq
+# 1. Start infrastructure (PostgreSQL, Redpanda, RabbitMQ, Jaeger)
+docker compose up postgres redpanda rabbitmq jaeger
 
 # 2. Create the database table (run once)
 psql postgres://postgres:password@localhost:55000/flatty -f db.sql
@@ -61,7 +61,7 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                        Vite Shell Hosts                             │
+│                        Shell Hosts                                  │
 │  ┌───────────────────┐          ┌──────────────────────────────┐    │
 │  │  react-launcher   │          │  react-wrapper               │    │
 │  │  (port 9000)      │          │  (port 5174)                 │    │
@@ -77,6 +77,15 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 │  │  │  User settings    │     │  Resident management       │    │   │
 │  │  └───────────────────┘     └────────────────────────────┘    │   │
 │  └──────────────────────────────────────────────────────────────┘   │
+│              ▲ Script injection                                     │
+│              │                                                      │
+│  ┌───────────┴─────────────────────────────────────────────────────┐│
+│  │  react-entrypoint (Next.js, ports 3000 / 3001)                  ││
+│  │  Main shell — expenses, budgets, PDF upload & parsing           ││
+│  └──────────────────────────────────┬──────────────────────────────┘│
+│                                     │ rewrites: /api → go-api,       │
+│                                     │ /graphql → nest-graphql        │
+│                                     ▼                                │
 ├─────────────────────────────────────────────────────────────────────┤
 │                          Backend APIs                               │
 │  ┌───────────────────┐          ┌────────────────────────────┐      │
@@ -87,16 +96,19 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 │  └────────┬──────────┘          └─────────┬──────────────────┘      │
 │           │                               │                         │
 │           └──────────┬────────────────────┘                         │
-│                      ▼                                              │
-│           ┌──────────────────────┐                                  │
-│           │  PostgreSQL          │                                  │
-│           │  (port 55000)        │                                  │
-│           └──────────────────────┘                                  │
+│                      ▼                    │                         │
+│           ┌──────────────────────┐        │                         │
+│           │  PostgreSQL          │        │                         │
+│           │  (port 55000)        │        │                         │
+│           └──────────────────────┘        │  OTLP traces            │
+│                                           │  (http/protobuf)        │
+│                                           ▼                         │
 ├─────────────────────────────────────────────────────────────────────┤
 │                      Infrastructure (Docker)                        │
-│  ┌──────────┐   ┌──────────┐   ┌──────────┐                         │
-│  │ Postgres │   │ Redpanda │   │ RabbitMQ │                         │
-│  └──────────┘   └──────────┘   └──────────┘                         │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────────┐    │
+│  │ Postgres │ │ Redpanda │ │ RabbitMQ │ │ Jaeger (traces)      │    │
+│  └──────────┘ └──────────┘ └──────────┘ │ UI 16686 · OTLP 4318 │    │
+│                                         └──────────────────────┘    │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -108,18 +120,45 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 | `apps/react-wrapper` | 5174 | Vite | Shell — full app with nav, integrates remotes as pages |
 | `apps/react-settings` | 8081 | Webpack | Remote — user settings page |
 | `apps/react-resident` | 8082 | Webpack | Remote — resident management CRUD |
+| `apps/react-entrypoint` | 3000 (3001) | Next.js | Main shell — expenses, budgets, PDF upload & parsing |
 | `apps/go-api` | 8080 | Go + Gin | REST API (PostgreSQL, pgx) |
 | `apps/nest-graphql` | 3000 | NestJS + TypeORM | GraphQL API (PostgreSQL) |
 | `apps/nginx-proxy` | 80 | Nginx | Reverse proxy for containerized deployments |
 | `packages/sdk` | — | TypeScript | Shared API client + generated types (REST + GraphQL) |
 
-Dev servers run on the host via Nx. Docker is used only for infrastructure (PostgreSQL, Redpanda, RabbitMQ).
+Dev servers run on the host via Nx. Docker is used only for infrastructure (PostgreSQL, Redpanda, RabbitMQ, Jaeger).
 
 ## Micro-Frontends
 
 Remote MF apps (`react-settings`, `react-resident`) are built as **Webpack UMD** libraries,
 exposed on `window.ext-apps[name]`. Shell apps (`react-launcher`, `react-wrapper`) load them
 at runtime via dynamic `<script>` injection.
+
+## PDF Parsing (Invoices)
+
+`react-entrypoint` can parse PDF invoices and auto-fill the expense form.
+
+**Flow:**
+
+1. User selects a PDF on the expense create page (`/expenses/create`)
+2. The file is uploaded to `POST /api/uploads` — a local Next.js Route Handler (auth-protected, 10 MB limit)
+3. The PDF is saved to `apps/react-entrypoint/pdfs/` (gitignored)
+4. The `invoice-parser` binary (`apps/react-entrypoint/mcps/invoice-parser`) extracts vendor, amount, date, description and category
+5. Parsed data auto-fills the form (amount, month/year, description, category) — the user reviews and submits
+
+The parser runs as a local CLI (`./invoice-parser -file <path>`). See `apps/react-entrypoint/mcps/README.md` for details.
+
+## Observability (Jaeger)
+
+Distributed tracing via **OpenTelemetry**. `nest-graphql` exports traces to Jaeger.
+
+```bash
+docker compose up jaeger
+```
+
+- **Jaeger UI:** http://localhost:16686
+- **OTLP endpoints:** `4317` (gRPC), `4318` (HTTP)
+- **Config:** `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_ENDPOINT` in `docker-compose.yml` / `.env.example`
 
 ## Tools
 

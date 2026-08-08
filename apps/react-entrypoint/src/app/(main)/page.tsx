@@ -8,7 +8,7 @@ export default function Home() {
   const router = useRouter();
 
   const handleNavigateCallback = (app: AppDefinition) => () => {
-    const backendServices = ["openapi", "graphql"];
+    const backendServices = ["openapi", "graphql", "jeager"];
 
     if (backendServices.includes(app.id)) {
       if (process.env.NODE_ENV === "development") {

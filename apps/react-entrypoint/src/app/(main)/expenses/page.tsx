@@ -11,6 +11,9 @@ export default function ExpensesPage() {
     <>
       <Box py="md" />
       <Group justify="flex-end" px="md">
+        <Button variant="outline" onClick={() => router.push("/pdfs/upload")}>
+          Upload PDF
+        </Button>
         <Button onClick={() => router.push("/expenses/create")}>
           Create Expense
         </Button>

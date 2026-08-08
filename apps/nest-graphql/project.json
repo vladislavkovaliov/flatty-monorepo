@@ -15,7 +15,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "nest start --watch",
+        "command": "npm run dev",
         "cwd": "apps/nest-graphql"
       }
     },

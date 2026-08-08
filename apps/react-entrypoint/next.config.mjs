@@ -12,6 +12,10 @@ const nextConfig = {
         destination: "http://localhost:3000/graphql",
       },
       {
+        source: "/api/uploads",
+        destination: "/api/uploads",
+      },
+      {
         source: "/api/:path*",
         destination: "http://localhost:8080/api/:path*",
       },

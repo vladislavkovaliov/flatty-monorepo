@@ -13,19 +13,20 @@ type Config struct {
 	KafkaTopic    string
 	KafkaGroupID  string
 	RABBITMQ_URL  string
+	AppEnv        string
 }
 
 func LoadConfig() *Config {
 	_ = godotenv.Load()
 
 	return &Config{
-		Port:           getEnv("PORT", "8080"),
-		DatabaseUrl:    getEnv("DATABASE_URL", "postgres://postgres:password@localhost:55000/flatty?sslmode=disable"),
-		KafkaBrockers:  getEnv("KAFKA_BROKERS", "localhost:9092"),
-		KafkaTopic:     getEnv("KAFKA_TOPIC", "expense-events"),
-		KafkaGroupID:   getEnv("KAFKA_GROUP_ID", "go-api-stats"),
-		RABBITMQ_URL:   getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672"),
-
+		Port:          getEnv("PORT", "8080"),
+		DatabaseUrl:   getEnv("DATABASE_URL", "postgres://postgres:password@localhost:55000/flatty?sslmode=disable"),
+		KafkaBrockers: getEnv("KAFKA_BROKERS", "localhost:9092"),
+		KafkaTopic:    getEnv("KAFKA_TOPIC", "expense-events"),
+		KafkaGroupID:  getEnv("KAFKA_GROUP_ID", "go-api-stats"),
+		RABBITMQ_URL:  getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672"),
+		AppEnv:        getEnv("APP_ENV", "development"),
 	}
 }
 

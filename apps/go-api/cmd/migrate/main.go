@@ -16,6 +16,7 @@ var migrations = []string{
 	"migrations/002_backfill_monthly_totals.sql",
 	"migrations/003_backfill_monthly_averages.sql",
 	"migrations/005_add_resident_location_to_expense_stats.sql",
+	"migrations/006_add_applications.sql",
 }
 
 func main() {

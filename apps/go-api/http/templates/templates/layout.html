@@ -1,0 +1,18 @@
+{{ define "layout" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Applications Admin</title>
+  <link rel="stylesheet" href="/static/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h1 class="mb-4">Micro-frontend Applications</h1>
+    {{ template "applications_list" . }}
+  </div>
+  <script src="/static/htmx.min.js"></script>
+</body>
+</html>
+{{ end }}

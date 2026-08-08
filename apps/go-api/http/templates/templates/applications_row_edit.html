@@ -1,0 +1,26 @@
+{{ define "applications_row_edit" }}
+<tr id="application-row-{{ .Application.ID }}">
+  <td colspan="9">
+    <form hx-put="/admin/applications/{{ .Application.ID }}"
+          hx-target="#applications-table"
+          hx-swap="outerHTML"
+          class="row g-2 align-items-center">
+      <div class="col"><input type="text" class="form-control form-control-sm" name="name" value="{{ .Application.Name }}" required /></div>
+      <div class="col"><input type="text" class="form-control form-control-sm" name="env" value="{{ .Application.Env }}" required /></div>
+      <div class="col"><input type="text" class="form-control form-control-sm" name="bundle_js" value="{{ .Application.BundleJs }}" required /></div>
+      <div class="col"><input type="text" class="form-control form-control-sm" name="style_url" value="{{ .Application.StyleUrl }}" /></div>
+      <div class="col"><input type="text" class="form-control form-control-sm" name="remote_origin" value="{{ .Application.RemoteOrigin }}" required /></div>
+      <div class="col"><input type="text" class="form-control form-control-sm" name="proxy_base_path" value="{{ .Application.ProxyBasePath }}" required /></div>
+      <div class="col"><input type="text" class="form-control form-control-sm" name="base_path" value="{{ .Application.BasePath }}" /></div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-success">Save</button>
+        <button type="button" class="btn btn-sm btn-secondary"
+                hx-get="/admin/applications"
+                hx-select="#applications-table"
+                hx-target="#applications-table"
+                hx-swap="outerHTML">Cancel</button>
+      </div>
+    </form>
+  </td>
+</tr>
+{{ end }}

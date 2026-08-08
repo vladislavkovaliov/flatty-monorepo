@@ -1,0 +1,22 @@
+{{ define "applications_list" }}
+<section class="mb-4">
+  <div class="card">
+    <div class="card-header">Create application</div>
+    <div class="card-body">
+      <form hx-post="/admin/applications" hx-target="#applications-table" hx-swap="outerHTML">
+        <div class="row g-3">
+          <div class="col"><input type="text" class="form-control" name="name" placeholder="name" required /></div>
+          <div class="col"><input type="text" class="form-control" name="env" placeholder="env" required /></div>
+          <div class="col"><input type="text" class="form-control" name="bundle_js" placeholder="bundle_js" required /></div>
+          <div class="col"><input type="text" class="form-control" name="style_url" placeholder="style_url" /></div>
+          <div class="col"><input type="text" class="form-control" name="remote_origin" placeholder="remote_origin" required /></div>
+          <div class="col"><input type="text" class="form-control" name="proxy_base_path" placeholder="proxy_base_path" required /></div>
+          <div class="col"><input type="text" class="form-control" name="base_path" placeholder="base_path (default /)" /></div>
+          <div class="col-auto"><button type="submit" class="btn btn-primary">Create</button></div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{{ template "applications_table" . }}
+{{ end }}

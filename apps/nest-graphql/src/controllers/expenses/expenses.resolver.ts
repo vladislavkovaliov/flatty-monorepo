@@ -3,7 +3,7 @@ import { ExpenseCountResponse } from './dto/expense-count-response';
 import { ListExpenseResponse } from './dto/list-expense-response';
 import { Expense } from './entities/expense.entity';
 import { ExpenseService } from './expenses.service';
-import { CurrentUser } from 'src/auth/current-user.decorator';
+import { CurrentUser } from '../../auth/current-user.decorator';
 
 @Resolver(() => Expense)
 export class ExpenseResolver {

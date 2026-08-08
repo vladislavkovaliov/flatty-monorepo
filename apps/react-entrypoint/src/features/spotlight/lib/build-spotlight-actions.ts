@@ -12,7 +12,7 @@ export function buildSpotlightActions(
     description: app.description,
     leftSection: app.icon,
     onClick: () => {
-      const backendServices = ["openapi", "graphql"];
+      const backendServices = ["openapi", "graphql", "jeager"];
 
       if (backendServices.includes(app.id)) {
         if (process.env.NODE_ENV === "development") {

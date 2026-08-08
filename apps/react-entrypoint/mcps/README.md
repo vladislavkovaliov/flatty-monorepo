@@ -1,7 +1,7 @@
 # Invoice Parser
 
 Go CLI + MCP инструмент для парсинга email-счетов (.eml) и PDF-квитанций,
-извлечения структурированных данных через RAG pipeline (Ollama), генерации
+извлечения структурированных данных через RAG pipeline (OpenRouter), генерации
 SQL INSERT с валидацией и создания HTML/PDF отчётов.
 
 ---
@@ -48,9 +48,10 @@ go build -o invoice-parser ./cmd/invoice-parser
 
 | Переменная | По умолчанию | Описание |
 |---|---|---|
-| `OLLAMA_BASE_URL` | `http://192.168.1.85:11434` | Адрес Ollama сервера |
-| `OLLAMA_MODEL` | `mistral` | Модель для генерации |
-| `OLLAMA_EMBEDDING_MODEL` | `nomic-embed-text` | Модель для эмбеддингов |
+| `OPENROUTER_BASE_URL` | `https://openrouter.ai/api/v1` | Базовый URL OpenRouter API |
+| `OPENROUTER_MODEL` | `meta-llama/llama-3.3-70b-instruct:free` | Модель для генерации (free) |
+| `OPENROUTER_EMBEDDING_MODEL` | `qwen/qwen3-embedding-4b` | Модель для эмбеддингов (free) |
+| `OPENROUTER_API_KEY` | — (обязательна) | API-ключ OpenRouter — https://openrouter.ai/keys |
 
 ---
 

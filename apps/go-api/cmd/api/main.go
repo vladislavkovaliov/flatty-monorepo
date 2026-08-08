@@ -12,6 +12,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os/signal"
@@ -19,6 +20,8 @@ import (
 	"syscall"
 	"time"
 
+	staticfs "flatty-budget/go-api/http/static"
+	templatesfs "flatty-budget/go-api/http/templates"
 	"flatty-budget/go-api/internal/config"
 	kafkaclient "flatty-budget/go-api/internal/kafka"
 	expensesrepo "flatty-budget/go-api/repos/expenses"
@@ -58,6 +61,8 @@ func main() {
 	go consumer.Run(ctx)
 
 	r := setupRouter(pool, expenseSvc, cfg)
+	r.SetHTMLTemplate(template.Must(template.ParseFS(templatesfs.TemplatesFS, "templates/*.html")))
+	r.StaticFS("/static", http.FS(staticfs.StaticFS))
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,

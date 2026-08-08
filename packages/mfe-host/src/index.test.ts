@@ -19,6 +19,12 @@ describe('@flatty-budget/mfe-host public API', () => {
     expect(mod.APPS_VENDORS_CHUNK_NAME).toBe('apps');
   });
 
+  it('exports useApplications hook', async () => {
+    const mod = await import('./index');
+    expect(mod.useApplications).toBeDefined();
+    expect(typeof mod.useApplications).toBe('function');
+  });
+
   it('does NOT export internal helpers', async () => {
     const mod = await import('./index');
     expect(mod).not.toHaveProperty('isRecord');

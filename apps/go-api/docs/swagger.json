@@ -8,6 +8,162 @@
     },
     "basePath": "/api",
     "paths": {
+        "/applications": {
+            "get": {
+                "description": "Returns the micro-frontend registry for the environment selected by APP_ENV. Public (unauthenticated): shells and the entrypoint boot fetch rely on it.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "List applications for the current APP_ENV",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListApplicationResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add a new application entry to the registry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Create an application registry row",
+                "parameters": [
+                    {
+                        "description": "Application data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateApplicationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ApplicationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{id}": {
+            "put": {
+                "description": "Update an existing application entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Update an application registry row",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Application ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Application data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateApplicationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ApplicationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove an application entry from the registry",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "summary": "Delete an application registry row",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Application ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.DeleteApplicationResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/categories": {
             "get": {
                 "description": "Returns all categories from the database",
@@ -813,6 +969,59 @@
         }
     },
     "definitions": {
+        "dto.ApplicationResponse": {
+            "type": "object",
+            "required": [
+                "bundle_js",
+                "created_at",
+                "env",
+                "id",
+                "name",
+                "proxy_base_path",
+                "remote_origin",
+                "updated_at"
+            ],
+            "properties": {
+                "base_path": {
+                    "type": "string",
+                    "example": "/"
+                },
+                "bundle_js": {
+                    "type": "string",
+                    "example": "resident"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "env": {
+                    "type": "string",
+                    "example": "development"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "resident"
+                },
+                "proxy_base_path": {
+                    "type": "string",
+                    "example": "/external-resident"
+                },
+                "remote_origin": {
+                    "type": "string",
+                    "example": "http://localhost:8082"
+                },
+                "style_url": {
+                    "type": "string",
+                    "example": "styles"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CategoryResponse": {
             "type": "object",
             "required": [
@@ -854,6 +1063,39 @@
                 "total": {
                     "type": "integer",
                     "example": 138
+                }
+            }
+        },
+        "dto.CreateApplicationRequest": {
+            "type": "object",
+            "required": [
+                "bundle_js",
+                "env",
+                "name",
+                "proxy_base_path",
+                "remote_origin"
+            ],
+            "properties": {
+                "base_path": {
+                    "type": "string"
+                },
+                "bundle_js": {
+                    "type": "string"
+                },
+                "env": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "proxy_base_path": {
+                    "type": "string"
+                },
+                "remote_origin": {
+                    "type": "string"
+                },
+                "style_url": {
+                    "type": "string"
                 }
             }
         },
@@ -944,6 +1186,18 @@
                 "street": {
                     "type": "string",
                     "example": "Bobr"
+                }
+            }
+        },
+        "dto.DeleteApplicationResponse": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "integer",
+                    "example": 1
                 }
             }
         },
@@ -1044,6 +1298,20 @@
                 "status": {
                     "type": "string",
                     "example": "ok"
+                }
+            }
+        },
+        "dto.ListApplicationResponse": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ApplicationResponse"
+                    }
                 }
             }
         },
@@ -1241,6 +1509,39 @@
                 "user_id": {
                     "type": "string",
                     "example": "00000000-0000-0000-0000-000000000001"
+                }
+            }
+        },
+        "dto.UpdateApplicationRequest": {
+            "type": "object",
+            "required": [
+                "bundle_js",
+                "env",
+                "name",
+                "proxy_base_path",
+                "remote_origin"
+            ],
+            "properties": {
+                "base_path": {
+                    "type": "string"
+                },
+                "bundle_js": {
+                    "type": "string"
+                },
+                "env": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "proxy_base_path": {
+                    "type": "string"
+                },
+                "remote_origin": {
+                    "type": "string"
+                },
+                "style_url": {
+                    "type": "string"
                 }
             }
         },

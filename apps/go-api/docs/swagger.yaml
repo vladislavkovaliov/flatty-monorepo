@@ -1,5 +1,45 @@
 basePath: /api
 definitions:
+  dto.ApplicationResponse:
+    properties:
+      base_path:
+        example: /
+        type: string
+      bundle_js:
+        example: resident
+        type: string
+      created_at:
+        type: string
+      env:
+        example: development
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: resident
+        type: string
+      proxy_base_path:
+        example: /external-resident
+        type: string
+      remote_origin:
+        example: http://localhost:8082
+        type: string
+      style_url:
+        example: styles
+        type: string
+      updated_at:
+        type: string
+    required:
+    - bundle_js
+    - created_at
+    - env
+    - id
+    - name
+    - proxy_base_path
+    - remote_origin
+    - updated_at
+    type: object
   dto.CategoryResponse:
     properties:
       created_at:
@@ -31,6 +71,29 @@ definitions:
         type: integer
     required:
     - total
+    type: object
+  dto.CreateApplicationRequest:
+    properties:
+      base_path:
+        type: string
+      bundle_js:
+        type: string
+      env:
+        type: string
+      name:
+        type: string
+      proxy_base_path:
+        type: string
+      remote_origin:
+        type: string
+      style_url:
+        type: string
+    required:
+    - bundle_js
+    - env
+    - name
+    - proxy_base_path
+    - remote_origin
     type: object
   dto.CreateCategoryRequest:
     properties:
@@ -98,6 +161,14 @@ definitions:
     - house
     - postal_code
     - street
+    type: object
+  dto.DeleteApplicationResponse:
+    properties:
+      data:
+        example: 1
+        type: integer
+    required:
+    - data
     type: object
   dto.DeleteCategoryResponse:
     properties:
@@ -170,6 +241,15 @@ definitions:
         type: string
     required:
     - status
+    type: object
+  dto.ListApplicationResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.ApplicationResponse'
+        type: array
+    required:
+    - data
     type: object
   dto.ListCategoryResponse:
     properties:
@@ -309,6 +389,29 @@ definitions:
     - street
     - updated_at
     - user_id
+    type: object
+  dto.UpdateApplicationRequest:
+    properties:
+      base_path:
+        type: string
+      bundle_js:
+        type: string
+      env:
+        type: string
+      name:
+        type: string
+      proxy_base_path:
+        type: string
+      remote_origin:
+        type: string
+      style_url:
+        type: string
+    required:
+    - bundle_js
+    - env
+    - name
+    - proxy_base_path
+    - remote_origin
     type: object
   dto.UpdateCategoryRequest:
     properties:
@@ -453,6 +556,111 @@ info:
   title: GO API
   version: "1.0"
 paths:
+  /applications:
+    get:
+      description: 'Returns the micro-frontend registry for the environment selected
+        by APP_ENV. Public (unauthenticated): shells and the entrypoint boot fetch
+        rely on it.'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListApplicationResponse'
+      summary: List applications for the current APP_ENV
+      tags:
+      - applications
+    post:
+      consumes:
+      - application/json
+      description: Add a new application entry to the registry
+      parameters:
+      - description: Application data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateApplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ApplicationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create an application registry row
+      tags:
+      - applications
+  /applications/{id}:
+    delete:
+      description: Remove an application entry from the registry
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.DeleteApplicationResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete an application registry row
+      tags:
+      - applications
+    put:
+      consumes:
+      - application/json
+      description: Update an existing application entry
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Application data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateApplicationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ApplicationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update an application registry row
+      tags:
+      - applications
   /categories:
     get:
       description: Returns all categories from the database

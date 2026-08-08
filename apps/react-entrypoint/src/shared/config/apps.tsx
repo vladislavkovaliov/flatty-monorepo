@@ -8,6 +8,8 @@ import {
   IconReportMoney,
   IconSettings2,
   IconUsers,
+  IconScanTraces,
+  IconBrandMinecraft
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
@@ -88,6 +90,13 @@ export const APPS: AppDefinition[] = [
     label: "Open Jaeger",
     description: "Open Jaeger",
     path: "http://localhost:16686",
-    icon: <IconBrandGraphql size={24} stroke={1.5} />,
+    icon: <IconScanTraces size={24} stroke={1.5} />,
   },
+  {
+    id: "admin",
+    label: "Open admin",
+    description: "Open admin",
+    path: "http://localhost:8080/admin/applications",
+    icon: <IconBrandMinecraft size={24} stroke={1.5} />,
+  }
 ];

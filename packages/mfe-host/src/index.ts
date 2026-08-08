@@ -9,3 +9,7 @@ export { sanitizeConfig } from './remote/sanitize-config';
 // Package-internal (NOT re-exported):
 // isRecord, isAllowedEnv, isAllowedHostType, isNavigate,
 // ALLOWED_ENVS, ALLOWED_HOST_TYPES, AllowedEnvType, AllowedHostType
+
+// Queries — public API
+export { useApplications } from './queries/applications';
+export type { ApplicationConfig, UseApplicationsResult } from './queries/applications';

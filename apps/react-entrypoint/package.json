@@ -10,6 +10,7 @@
     "format": "biome format --write"
   },
   "dependencies": {
+    "@flatty-budget/mfe-host": "*",
     "@flatty-budget/sdk": "*",
     "@mantine/charts": "^9.4.1",
     "@mantine/core": "^9.1.0",

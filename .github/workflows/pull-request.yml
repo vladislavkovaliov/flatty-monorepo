@@ -16,8 +16,6 @@ jobs:
         include:
           - name: react-launcher
             workspace: react-launcher
-          - name: react-wrapper
-            workspace: '@flatty-budget/react-wrapper'
           - name: react-resident
             workspace: '@flatty-budget/react-resident'
           - name: react-settings

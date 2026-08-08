@@ -1,15 +1,15 @@
 import {
   IconApi,
   IconBrandGraphql,
+  IconBrandMinecraft,
   IconCategory2,
   IconCoin,
   IconHome,
   IconHome2,
   IconReportMoney,
+  IconScanTraces,
   IconSettings2,
   IconUsers,
-  IconScanTraces,
-  IconBrandMinecraft
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
@@ -98,5 +98,5 @@ export const APPS: AppDefinition[] = [
     description: "Open admin",
     path: "http://localhost:8080/admin/applications",
     icon: <IconBrandMinecraft size={24} stroke={1.5} />,
-  }
+  },
 ];

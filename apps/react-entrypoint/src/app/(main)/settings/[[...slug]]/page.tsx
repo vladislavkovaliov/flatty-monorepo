@@ -1,10 +1,10 @@
 "use client";
 
-import { Loader } from "@mantine/core";
 import {
-  useApplications,
   type ApplicationConfig,
+  useApplications,
 } from "@flatty-budget/mfe-host";
+import { Loader } from "@mantine/core";
 import dynamic from "next/dynamic";
 
 const MicrofrontendHost = dynamic(

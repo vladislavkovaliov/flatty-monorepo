@@ -1,6 +1,6 @@
 "use client";
 
-import { useCategories, useCategoriesGraphql, useDeleteCategory } from "@flatty-budget/sdk";
+import { useCategoriesGraphql, useDeleteCategory } from "@flatty-budget/sdk";
 import {
   Box,
   Button,
@@ -24,7 +24,7 @@ export function CategoriesTable() {
   // const { data } = useCategories(LIMIT, offset);
   const data = useCategoriesGraphql(LIMIT, offset);
   const deleteMutation = useDeleteCategory();
-  
+
   const total = data.data?.categoryList.total ?? 0;
   const totalPages = Math.ceil(total / LIMIT);
 

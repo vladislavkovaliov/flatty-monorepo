@@ -5,13 +5,15 @@ import { CategoryService } from './categories.service';
 import { ListCategoryResponse } from './dto/list-category-response';
 import { CategoryInput } from './entities/category-input.entity';
 import { DeleteCategoryResponse } from './dto/delete-category-response';
+import { CurrentUser } from '../../auth/current-user.decorator';
 
 @Resolver(() => Category)
 export class CategoryResolver {
     constructor(private readonly categoryService: CategoryService) {}
 
     @Query(() => CategoryCountResponse, { name: 'categoryCount' })
-    async count(): Promise<CategoryCountResponse> {
+    async count(
+    ): Promise<CategoryCountResponse> {
         const count = await this.categoryService.count();
 
         return {

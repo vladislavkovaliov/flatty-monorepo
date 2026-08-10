@@ -98,9 +98,14 @@ services:
       KAFKA_BROKERS: ${GOAPI_KAFKA_BROKERS:-redpanda:9092}
       RABBITMQ_URL: ${GOAPI_RABBITMQ_URL:-amqp://guest:guest@rabbitmq:5672}
       AUTH_SERVICE_URL: ${GOAPI_AUTH_SERVICE_URL:-http://nest-graphql:3000}
+      OTEL_SERVICE_NAME: go-api
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     depends_on:
       init-db:
         condition: service_completed_successfully
+      jaeger:
+        condition: service_started
     restart: unless-stopped
 
   nest-graphql:

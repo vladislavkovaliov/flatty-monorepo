@@ -24,6 +24,7 @@ import (
 	templatesfs "flatty-budget/go-api/http/templates"
 	"flatty-budget/go-api/internal/config"
 	kafkaclient "flatty-budget/go-api/internal/kafka"
+	"flatty-budget/go-api/internal/tracing"
 	expensesrepo "flatty-budget/go-api/repos/expenses"
 	expensesservice "flatty-budget/go-api/services/expenses"
 
@@ -32,6 +33,9 @@ import (
 
 func main() {
 	cfg := config.LoadConfig()
+	if err := tracing.Init(); err != nil {
+		log.Printf("tracing init failed, continuing without tracing: %v", err)
+	}
 	fmt.Println(3)
 
 	pool, err := pgxpool.New(context.Background(), cfg.DatabaseUrl)
@@ -86,5 +90,8 @@ func main() {
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Fatalf("server shutdown error: %v", err)
+	}
+	if err := tracing.Shutdown(shutdownCtx); err != nil {
+		log.Printf("tracing shutdown error: %v", err)
 	}
 }

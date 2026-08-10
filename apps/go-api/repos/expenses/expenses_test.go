@@ -231,8 +231,8 @@ func TestPgxRepository_List(t *testing.T) {
 			}),
 			queryErr: nil,
 			wantExpenses: []*expensedomain.Expense{
-				expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now),
-				expensedomain.NewExpense(2, 10, 21, 75.00, "", 6, 2024, now, now),
+				expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456"),
+				expensedomain.NewExpense(2, 10, 21, 75.00, "", 6, 2024, now, now, "123456"),
 			},
 			wantErr: "",
 		},
@@ -325,7 +325,7 @@ func TestPgxRepository_GetByID(t *testing.T) {
 			name:        "success",
 			row:         newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""}),
 			id:          1,
-			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now),
+			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456"),
 			wantErr:     "",
 		},
 		{
@@ -392,7 +392,7 @@ func TestPgxRepository_Create(t *testing.T) {
 			name:        "success",
 			row:         newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""}),
 			input:       expensedomain.NewExpenseInput(10, 20, 150.50, "", 6, 2024),
-			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now),
+			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456"),
 			wantErr:     "",
 		},
 		{
@@ -456,7 +456,7 @@ func TestPgxRepository_Update(t *testing.T) {
 			row:         newMockRow([]any{int64(1), int64(10), int64(20), 200.00, 7, 2024, now, now, ""}),
 			id:          1,
 			input:       expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
-			wantExpense: expensedomain.NewExpense(1, 10, 20, 200.00, "", 7, 2024, now, now),
+			wantExpense: expensedomain.NewExpense(1, 10, 20, 200.00, "", 7, 2024, now, now, "123456"),
 			wantErr:     "",
 		},
 		{

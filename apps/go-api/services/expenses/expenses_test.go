@@ -115,8 +115,8 @@ func TestService_List(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
-	exp1 := expenses.NewExpense(1, 1, 1, 100.0, "", 1, 2024, now, now)
-	exp2 := expenses.NewExpense(2, 1, 2, 200.0, "", 1, 2024, now, now)
+	exp1 := expenses.NewExpense(1, 1, 1, 100.0, "", 1, 2024, now, now, "123456")
+	exp2 := expenses.NewExpense(2, 1, 2, 200.0, "", 1, 2024, now, now, "123456")
 
 	type listCase struct {
 		name          string
@@ -206,7 +206,7 @@ func TestService_Create(t *testing.T) {
 
 	now := time.Now()
 	input := expenses.NewExpenseInput(1, 2, 150.0, "", 3, 2024)
-	expected := expenses.NewExpense(1, 1, 2, 150.0, "", 3, 2024, now, now)
+	expected := expenses.NewExpense(1, 1, 2, 150.0, "", 3, 2024, now, now, "123456")
 
 	type createCase struct {
 		name        string
@@ -298,9 +298,9 @@ func TestService_Update(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
-	prevExpense := expenses.NewExpense(1, 1, 2, 100.0, "", 3, 2024, now, now)
+	prevExpense := expenses.NewExpense(1, 1, 2, 100.0, "", 3, 2024, now, now, "123456")
 	input := expenses.NewExpenseInput(1, 2, 200.0, "", 3, 2024)
-	updatedExpense := expenses.NewExpense(1, 1, 2, 200.0, "", 3, 2024, now, now)
+	updatedExpense := expenses.NewExpense(1, 1, 2, 200.0, "", 3, 2024, now, now, "123456")
 
 	type updateCase struct {
 		name        string
@@ -413,7 +413,7 @@ func TestService_Delete(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
-	prevExpense := expenses.NewExpense(1, 1, 2, 100.0, "", 3, 2024, now, now)
+	prevExpense := expenses.NewExpense(1, 1, 2, 100.0, "", 3, 2024, now, now, "123456")
 
 	type deleteCase struct {
 		name        string

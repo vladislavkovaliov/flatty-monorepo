@@ -33,18 +33,18 @@ func (m *mockRepo) GetByID(ctx context.Context, id int64) (*expenses.Expense, er
 	return args.Get(0).(*expenses.Expense), args.Error(1)
 }
 
-func (m *mockRepo) Create(ctx context.Context, input *expenses.ExpenseInput) (*expenses.Expense, error) {
-	args := m.Called(ctx, input)
+func (m *mockRepo) Create(ctx context.Context, input *expenses.ExpenseInput, userID string) (*expenses.Expense, error) {
+	args := m.Called(ctx, input, userID)
 	return args.Get(0).(*expenses.Expense), args.Error(1)
 }
 
-func (m *mockRepo) Update(ctx context.Context, id int64, input *expenses.ExpenseInput) (*expenses.Expense, error) {
-	args := m.Called(ctx, id, input)
+func (m *mockRepo) Update(ctx context.Context, id int64, input *expenses.ExpenseInput, userID string) (*expenses.Expense, error) {
+	args := m.Called(ctx, id, input, userID)
 	return args.Get(0).(*expenses.Expense), args.Error(1)
 }
 
-func (m *mockRepo) Delete(ctx context.Context, id int64) (int64, error) {
-	args := m.Called(ctx, id)
+func (m *mockRepo) Delete(ctx context.Context, id int64, userID string) (int64, error) {
+	args := m.Called(ctx, id, userID)
 	return args.Get(0).(int64), args.Error(1)
 }
 
@@ -275,9 +275,10 @@ func TestService_Create(t *testing.T) {
 			}
 
 			svc := New(repo, producer)
-			repo.On("Create", mock.Anything, tc.input).Return(tc.repoRes, tc.repoErr)
+			userID := "test-user-id"
+			repo.On("Create", mock.Anything, tc.input, userID).Return(tc.repoRes, tc.repoErr)
 
-			got, err := svc.Create(context.Background(), tc.input)
+			got, err := svc.Create(context.Background(), tc.input, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -369,7 +370,8 @@ func TestService_Update(t *testing.T) {
 
 			repo.On("GetByID", mock.Anything, tc.id).Return(tc.getRepoRes, tc.getRepoErr)
 			if tc.getRepoErr == nil {
-				repo.On("Update", mock.Anything, tc.id, tc.input).Return(tc.updRepoRes, tc.updRepoErr)
+				userID := "test-user-id"
+				repo.On("Update", mock.Anything, tc.id, tc.input, userID).Return(tc.updRepoRes, tc.updRepoErr)
 			}
 
 			if !tc.producerNil && tc.getRepoErr == nil && tc.updRepoErr == nil {
@@ -390,7 +392,8 @@ func TestService_Update(t *testing.T) {
 
 			svc := New(repo, producer)
 
-			got, err := svc.Update(context.Background(), tc.id, tc.input)
+			userID := "test-user-id"
+			got, err := svc.Update(context.Background(), tc.id, tc.input, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -474,7 +477,8 @@ func TestService_Delete(t *testing.T) {
 
 			repo.On("GetByID", mock.Anything, tc.id).Return(tc.getRepoRes, tc.getRepoErr)
 			if tc.getRepoErr == nil {
-				repo.On("Delete", mock.Anything, tc.id).Return(tc.delRepoRes, tc.delRepoErr)
+				userID := "test-user-id"
+				repo.On("Delete", mock.Anything, tc.id, userID).Return(tc.delRepoRes, tc.delRepoErr)
 			}
 
 			if !tc.producerNil && tc.getRepoErr == nil && tc.delRepoErr == nil {
@@ -494,7 +498,8 @@ func TestService_Delete(t *testing.T) {
 
 			svc := New(repo, producer)
 
-			got, err := svc.Delete(context.Background(), tc.id)
+			userID := "test-user-id"
+			got, err := svc.Delete(context.Background(), tc.id, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)

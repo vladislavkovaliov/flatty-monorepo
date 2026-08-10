@@ -47,8 +47,8 @@ func (s *Service) List(ctx context.Context, residentLocationID int64, userID str
 	return items, total, nil
 }
 
-func (s *Service) Create(ctx context.Context, input *expensedomain.ExpenseInput) (*expensedomain.Expense, error) {
-	expense, err := s.repo.Create(ctx, input)
+func (s *Service) Create(ctx context.Context, input *expensedomain.ExpenseInput, userID string) (*expensedomain.Expense, error) {
+	expense, err := s.repo.Create(ctx, input, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -70,13 +70,13 @@ func (s *Service) Create(ctx context.Context, input *expensedomain.ExpenseInput)
 	return expense, nil
 }
 
-func (s *Service) Update(ctx context.Context, id int64, input *expensedomain.ExpenseInput) (*expensedomain.Expense, error) {
+func (s *Service) Update(ctx context.Context, id int64, input *expensedomain.ExpenseInput, userID string) (*expensedomain.Expense, error) {
 	prevExpense, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	expense, err := s.repo.Update(ctx, id, input)
+	expense, err := s.repo.Update(ctx, id, input, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -99,13 +99,13 @@ func (s *Service) Update(ctx context.Context, id int64, input *expensedomain.Exp
 	return expense, nil
 }
 
-func (s *Service) Delete(ctx context.Context, id int64) (int64, error) {
+func (s *Service) Delete(ctx context.Context, id int64, userID string) (int64, error) {
 	prevExpense, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return 0, err
 	}
 
-	returningID, err := s.repo.Delete(ctx, id)
+	returningID, err := s.repo.Delete(ctx, id, userID)
 	if err != nil {
 		return 0, err
 	}

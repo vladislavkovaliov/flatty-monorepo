@@ -12,6 +12,7 @@ type ExpenseResponse struct {
 	Year               int       `json:"year,omitempty" example:"2026" binding:"required"`
 	CreatedAt          time.Time `json:"created_at,omitempty" example:"2026-07-13T12:00:00Z" binding:"required"`
 	UpdatedAt          time.Time `json:"updated_at,omitempty" example:"2026-07-13T12:00:00Z" binding:"required"`
+	UserID             string    `json:"userID" example:"123458697" binding:"required"`
 }
 
 type ListExpenseResponse struct {

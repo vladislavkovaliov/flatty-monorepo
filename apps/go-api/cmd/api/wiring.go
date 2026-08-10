@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -31,6 +32,7 @@ import (
 
 func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *config.Config) *gin.Engine {
 	r := gin.Default()
+	r.Use(otelgin.Middleware("go-api"))
 
 	authMw := auth.AuthMiddleware(pool)
 

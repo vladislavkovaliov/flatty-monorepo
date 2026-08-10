@@ -150,7 +150,7 @@ The parser runs as a local CLI (`./invoice-parser -file <path>`). See `apps/reac
 
 ## Observability (Jaeger)
 
-Distributed tracing via **OpenTelemetry**. `nest-graphql` exports traces to Jaeger.
+Distributed tracing via **OpenTelemetry**. `nest-graphql` and `go-api` export traces to Jaeger.
 
 ```bash
 docker compose up jaeger
@@ -158,7 +158,7 @@ docker compose up jaeger
 
 - **Jaeger UI:** http://localhost:16686
 - **OTLP endpoints:** `4317` (gRPC), `4318` (HTTP)
-- **Config:** `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_ENDPOINT` in `docker-compose.yml` / `.env.example`
+- **Config:** `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` in `docker-compose.yml` / `.env.example`
 
 ## Tools
 

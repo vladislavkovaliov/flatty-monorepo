@@ -220,6 +220,9 @@ definitions:
       updated_at:
         example: "2026-07-13T12:00:00Z"
         type: string
+      userID:
+        example: "123458697"
+        type: string
       year:
         example: 2026
         type: integer
@@ -232,6 +235,7 @@ definitions:
     - month
     - resident_location_id
     - updated_at
+    - userID
     - year
     type: object
   dto.HealthResponse:

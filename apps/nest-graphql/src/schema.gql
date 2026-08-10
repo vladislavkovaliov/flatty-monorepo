@@ -56,6 +56,7 @@ type DeleteCategoryResponse {
 type Expense {
   id: Int!
   residentLocationId: Int!
+  userId: String!
   categoryId: Int!
   category: Category
   amount: Float!

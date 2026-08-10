@@ -13,6 +13,10 @@ export class Expense {
   @Column({ name: 'resident_location_id' })
   residentLocationId!: number;
 
+  @Column({ name: 'user_id' })
+  @Field(() => String)
+  userId!: string;
+
   @Field(() => Int)
   @Column({ name: 'category_id' })
   categoryId!: number;

@@ -12,6 +12,7 @@ type Expense struct {
 	createdAt          time.Time
 	updatedAt          time.Time
 	description        string
+	userID             string
 }
 
 func (e *Expense) ID() int64 {
@@ -50,12 +51,17 @@ func (e *Expense) Description() string {
 	return e.description
 }
 
+func (e *Expense) UserID() string {
+	return e.userID
+}
+
 func NewExpense(
 	id, residentLocationID, categoryID int64,
 	amount float64,
 	description string,
 	month, year int,
 	createdAt, updatedAt time.Time,
+	userID string,
 ) *Expense {
 	return &Expense{
 		id:                 id,
@@ -67,5 +73,6 @@ func NewExpense(
 		year:               year,
 		createdAt:          createdAt,
 		updatedAt:          updatedAt,
+		userID:             userID,
 	}
 }

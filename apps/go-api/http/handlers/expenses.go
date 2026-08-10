@@ -110,6 +110,7 @@ func (h *ExpenseHandler) List(c *gin.Context) {
 			CreatedAt:          e.CreatedAt(),
 			UpdatedAt:          e.UpdatedAt(),
 			Description:        e.Description(),
+			UserID:             e.UserID(),
 		})
 	}
 
@@ -138,6 +139,8 @@ func (h *ExpenseHandler) Create(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
@@ -148,7 +151,7 @@ func (h *ExpenseHandler) Create(c *gin.Context) {
 		req.Description,
 		req.Month,
 		req.Year,
-	))
+	), userID)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -165,6 +168,7 @@ func (h *ExpenseHandler) Create(c *gin.Context) {
 		CreatedAt:          expense.CreatedAt(),
 		UpdatedAt:          expense.UpdatedAt(),
 		Description:        expense.Description(),
+		UserID:             expense.UserID(),
 	})
 }
 
@@ -197,6 +201,8 @@ func (h *ExpenseHandler) Update(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
@@ -207,7 +213,7 @@ func (h *ExpenseHandler) Update(c *gin.Context) {
 		req.Description,
 		req.Month,
 		req.Year,
-	))
+	), userID)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -228,6 +234,7 @@ func (h *ExpenseHandler) Update(c *gin.Context) {
 		CreatedAt:          expense.CreatedAt(),
 		UpdatedAt:          expense.UpdatedAt(),
 		Description:        expense.Description(),
+		UserID:             expense.UserID(),
 	})
 }
 
@@ -252,10 +259,12 @@ func (h *ExpenseHandler) Delete(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetString("userID")
+
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 
-	returningID, err := h.service.Delete(ctx, id)
+	returningID, err := h.service.Delete(ctx, id, userID)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

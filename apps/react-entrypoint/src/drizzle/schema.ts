@@ -98,6 +98,7 @@ export const expenses = pgTable(
       sql`CURRENT_TIMESTAMP`,
     ),
     description: text().default(""),
+    userId: text("user_id").notNull(),
   },
   (table) => [
     foreignKey({
@@ -110,6 +111,15 @@ export const expenses = pgTable(
       foreignColumns: [categories.id],
       name: "expenses_category_id_fkey",
     }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [user.id],
+      name: "expenses_user_id_fkey",
+    }).onDelete("cascade"),
+    index("expenses_user_id_idx").using(
+      "btree",
+      table.userId.asc().nullsLast().op("text_ops"),
+    ),
     unique("expenses_resident_location_id_category_id_month_year_key").on(
       table.year,
       table.residentLocationId,

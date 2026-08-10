@@ -1255,6 +1255,7 @@ const docTemplate = `{
                 "month",
                 "resident_location_id",
                 "updated_at",
+                "userID",
                 "year"
             ],
             "properties": {
@@ -1289,6 +1290,10 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string",
                     "example": "2026-07-13T12:00:00Z"
+                },
+                "userID": {
+                    "type": "string",
+                    "example": "123458697"
                 },
                 "year": {
                     "type": "integer",

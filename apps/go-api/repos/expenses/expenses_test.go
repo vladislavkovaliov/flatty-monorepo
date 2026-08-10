@@ -410,12 +410,13 @@ func TestPgxRepository_Create(t *testing.T) {
 			repo := NewPgxRepository(pool)
 
 			ctx := context.Background()
+			userID := "test-user-id"
 
 			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
-				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description()},
+				[]any{userID, tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description()},
 			).Return(tc.row)
 
-			expense, err := repo.Create(ctx, tc.input)
+			expense, err := repo.Create(ctx, tc.input, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -482,12 +483,13 @@ func TestPgxRepository_Update(t *testing.T) {
 			repo := NewPgxRepository(pool)
 
 			ctx := context.Background()
+			userID := "test-user-id"
 
 			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
-				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description(), tc.id},
+				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description(), tc.id, userID},
 			).Return(tc.row)
 
-			expense, err := repo.Update(ctx, tc.id, tc.input)
+			expense, err := repo.Update(ctx, tc.id, tc.input, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)
@@ -547,11 +549,12 @@ func TestPgxRepository_Delete(t *testing.T) {
 			repo := NewPgxRepository(pool)
 
 			ctx := context.Background()
+			userID := "test-user-id"
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{tc.id}).
+			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{tc.id, userID}).
 				Return(tc.row)
 
-			got, err := repo.Delete(ctx, tc.id)
+			got, err := repo.Delete(ctx, tc.id, userID)
 
 			if tc.wantErr != "" {
 				assert.Error(t, err)

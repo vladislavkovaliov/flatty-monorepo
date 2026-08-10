@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Inject, Logger } from "@nestjs/common"
+import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { CategoryRepository } from './categories.repository';
 import { CategoryInput } from './entities/category-input.entity';
 import { Category } from './entities/category.entity';
 import { ListCategoryResponse } from './dto/list-category-response';
+import { CategoryServiceKeysManager } from './categories-keys.manager';
 
 @Injectable()
 export class CategoryService {
@@ -17,36 +17,62 @@ export class CategoryService {
     ) {}
 
     async count(): Promise<number> {
-        const key = `CategoryResolver.name:count`;
+        const version = await this.getCacheVersion();
 
-        const countFromCache = await this.cacheManager.get<number>(key);
-        let count: number | undefined = undefined;
+        const ttl = CategoryServiceKeysManager.SECONDS_30;
+        const key = CategoryServiceKeysManager.getKeyCount(version);
 
-        if (countFromCache === undefined) {
-            this.logger.log(`No category count in cache = ${countFromCache}`);
+        let cached = await this.cacheManager.get<number>(key);
 
-            count = await this.categoryRepository.count();
+        if (cached !== undefined) {
+            this.logger.log(`Return category count from cache = ${cached}`);
 
-            this.cacheManager.set(`CategoryResolver.name:count`, count, 30000);
-
-            this.logger.log(`Category count is written in cache = ${count}`);
-        } else {
-            count = countFromCache;
-
-            this.logger.log(`Return category count from cacha = ${countFromCache}`);
+            return cached;
         }
 
-        return Promise.resolve(count);
+        this.logger.log(`No category count in cache`);
+
+        const count = await this.categoryRepository.count();
+
+        void this.cacheManager.set(key, count, ttl).catch((error) => {
+            this.logger.error('Failed to write category count to cache', error);
+        });
+
+        this.logger.log(`Category count is written in cache = ${count}`);
+
+        return count;
     }
 
     async list(limit = 10, offset = 0): Promise<ListCategoryResponse> {
+        const version = await this.getCacheVersion();
+
+        const key = CategoryServiceKeysManager.getKeyList(limit, offset, version);
+        const ttl = CategoryServiceKeysManager.SECONDS_30;
+        
+        type ReturnData = { data: Category[]; total: number; limit: number; offset: number; };
+
+        const cached = await this.cacheManager.get<ReturnData>(key);
+
+        if (cached !== undefined) {
+            return cached;
+        }
+        
         const [data, total] = await this.categoryRepository.list(limit, offset);
+
+        void this.cacheManager.set<ReturnData>(key, { data, total, limit, offset }, ttl).catch((error) => {
+            this.logger.error(`Failed to write category list to cache`, error);
+        });
+    
 
         return { data, total };
     }
 
     async create(categoryData: CategoryInput): Promise<Category> {
-        return await this.categoryRepository.create(categoryData);
+        const category = await this.categoryRepository.create(categoryData);
+        
+        await this.incrementCacheVersion();
+
+        return category;
     }
 
     async update(id: number, categoryData: CategoryInput): Promise<Category> {
@@ -55,6 +81,8 @@ export class CategoryService {
         if (!entity) {
             throw new NotFoundException(`category with id ${id} not found`);
         }
+
+        await this.incrementCacheVersion();
 
         return entity;
     }
@@ -66,6 +94,23 @@ export class CategoryService {
             throw new NotFoundException(`category with id ${id} not found`);
         }
 
+        await this.incrementCacheVersion();
+
         return { data: id };
+    }
+
+    private async getCacheVersion() {
+        return await this.cacheManager.get<number>(CategoryServiceKeysManager.getKeyVersion()) || 0;
+    }
+
+    private async incrementCacheVersion() {
+        const cachedVersion = await this.getCacheVersion();
+        
+        const key = CategoryServiceKeysManager.getKeyVersion();
+        const ttl = CategoryServiceKeysManager.WEEK;
+        
+        await this.cacheManager.set(key, cachedVersion + 1, ttl);
+
+        this.logger.log(`Version is updated from ${cachedVersion} to ${cachedVersion + 1}`);
     }
 }

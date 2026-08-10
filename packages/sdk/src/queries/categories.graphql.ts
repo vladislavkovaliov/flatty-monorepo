@@ -10,7 +10,7 @@ import { graphqlRequest } from '../lib/graphql';
 
 const LIST_CATEGORY = `
 query categoryList($limit: Int, $offset: Int) {
-    list(limit: $limit, offset: $offset) {
+    categoryList(limit: $limit, offset: $offset) {
       data {
         updatedAt
         name

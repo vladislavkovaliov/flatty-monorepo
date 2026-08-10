@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExpenseMonthlyTotal } from './entities/expense-monthly-total.entity';
@@ -34,13 +34,20 @@ export class ExpenseStatsService {
     await this.assertOwnership(residentLocationId, userId);
 
     const where: Record<string, number> = { residentLocationId };
-    if (month !== undefined) where.month = month;
-    if (year !== undefined) where.year = year;
+
+    if (month !== undefined) {
+      where.month = month;
+    }
+
+    if (year !== undefined) {
+      where.year = year;
+    }
 
     const data = await this.totalsRepo.find({
       where,
       order: { year: 'DESC', month: 'DESC' },
     });
+
     return { data };
   }
 
@@ -63,3 +70,5 @@ export class ExpenseStatsService {
     return { data };
   }
 }
+
+

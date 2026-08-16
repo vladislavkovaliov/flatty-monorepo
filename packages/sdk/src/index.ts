@@ -42,6 +42,12 @@ export type {
   ExpensesCreateData,
   ExpensesDeleteData,
   ExpensesDeleteParams,
+  DtoYearAndMonthResponse,
+  DtoListYearAndMonthResponse,
+  GetYearsAndMonthsListParams,
+  GetYearsAndMonthsListData,
+  GetByYearMonthListParams,
+  GetByYearMonthListData,
 
   // User types
   DtoUserResponse,
@@ -98,6 +104,8 @@ export {
   useExpenses,
   useCreateExpense,
   useDeleteExpense,
+  useExpensesYearsAndMonths,
+  useExpensesByYearMonth,
 } from './queries/expenses.queries';
 
 export {

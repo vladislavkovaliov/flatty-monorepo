@@ -1,3 +1,3 @@
 "use client";
 
-export { ExpenseCreatePage as default } from "@/pages/expenses-create";
+export { ExpenseCreatePage as default } from "@/features/expenses-create";

@@ -101,7 +101,9 @@ export interface YearMonthGroup {
   months: MonthSummary[];
 }
 
-export function groupYearsAndMonths(items: YearAndMonthInput[]): YearMonthGroup[] {
+export function groupYearsAndMonths(
+  items: YearAndMonthInput[],
+): YearMonthGroup[] {
   const groupsByYear = new Map<number, YearMonthGroup>();
 
   for (const item of items) {

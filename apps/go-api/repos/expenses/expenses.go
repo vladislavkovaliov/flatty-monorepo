@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	categorydomain "flatty-budget/go-api/domains/category"
 	expensedomain "flatty-budget/go-api/domains/expenses"
 )
 
@@ -37,10 +38,25 @@ func (r *PgxRepository) Count(ctx context.Context, residentLocationID int64, use
 	return count, err
 }
 
-func (r *PgxRepository) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.Expense, error) {
+func (r *PgxRepository) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.ExpenseWithCategory, error) {
 	rows, err := r.pool.Query(ctx, `
-		SELECT id, resident_location_id, category_id, amount, month, year, created_at, updated_at, description, user_id
-		FROM expenses
+		SELECT 
+			e.id, 
+			e.resident_location_id, 
+			e.category_id, 
+			e.amount, 
+			e.month,
+			e.year, 
+			e.created_at, 
+			e.updated_at, 
+			e.description, 
+			e.user_id, 
+			c.name as category_name, 
+			c.description as category_description,
+			c.created_at as category_created_at,
+			c.updated_at as category_updated_at
+		FROM expenses e
+		LEFT JOIN categories c ON e.category_id = c.id
 		WHERE resident_location_id = $1 AND user_id = $2
 		ORDER BY id 
 		LIMIT $3 OFFSET $4
@@ -52,7 +68,7 @@ func (r *PgxRepository) List(ctx context.Context, residentLocationID int64, user
 
 	defer rows.Close()
 
-	var expenses []*expensedomain.Expense
+	var expenses []*expensedomain.ExpenseWithCategory
 
 	for rows.Next() {
 		var id int64
@@ -66,12 +82,50 @@ func (r *PgxRepository) List(ctx context.Context, residentLocationID int64, user
 		var updatedAt time.Time
 		var _userID string
 
-		if err := rows.Scan(&id, &residentLocationID, &categoryID, &amount, &month, &year, &createdAt, &updatedAt, &description, &_userID); err != nil {
+		var categoryName string
+		var categoryDescription string
+		var categoryCreatedAt time.Time
+		var categoryUpdatedAt time.Time
+
+		if err := rows.Scan(
+			&id,
+			&residentLocationID,
+			&categoryID,
+			&amount,
+			&month,
+			&year,
+			&createdAt,
+			&updatedAt,
+			&description,
+			&_userID,
+			&categoryName,
+			&categoryDescription,
+			&categoryCreatedAt,
+			&categoryUpdatedAt,
+		); err != nil {
 			return nil, err
 		}
 
 		expenses = append(expenses,
-			expensedomain.NewExpense(id, residentLocationID, categoryID, amount, description, month, year, createdAt, updatedAt, _userID),
+			expensedomain.NewExpenseWithCategory(
+				id,
+				residentLocationID,
+				categoryID,
+				amount,
+				description,
+				month,
+				year,
+				createdAt,
+				updatedAt,
+				_userID,
+				*categorydomain.NewCategory(
+					categoryID,
+					categoryName,
+					categoryDescription,
+					categoryCreatedAt,
+					categoryUpdatedAt,
+				),
+			),
 		)
 	}
 
@@ -226,3 +280,179 @@ func (r *PgxRepository) Delete(ctx context.Context, id int64, userID string) (in
 
 	return returningID, nil
 }
+
+func (r *PgxRepository) GetYearsAndMonths(ctx context.Context, residentLocationID int64, userID string) ([]*expensedomain.YearAndMonth, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT year, month, COUNT(*) as "expcenses" FROM expenses 
+		WHERE resident_location_id = $1 AND user_id = $2
+		GROUP BY year, month
+		ORDER BY year ASC, month ASC
+		LIMIT 100;
+	`, residentLocationID, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var yearsAndMounths []*expensedomain.YearAndMonth
+
+	for rows.Next() {
+		var year int64
+		var month int64
+		var expenses int64
+
+		if err := rows.Scan(&year, &month, &expenses); err != nil {
+			return nil, err
+		}
+
+		yearsAndMounths = append(yearsAndMounths, expensedomain.NewYearAndMonth(
+			year,
+			month,
+			expenses,
+		))
+	}
+
+	return yearsAndMounths, nil
+}
+
+func (r *PgxRepository) GetExpensesByYearMonth(ctx context.Context, residentLocationID, year, month int64, userID string) ([]*expensedomain.ExpenseWithCategory, error) {
+	rows, err := r.pool.Query(ctx, `
+		SELECT 
+			e.id, 
+			e.resident_location_id, 
+			e.category_id, 
+			e.amount, 
+			e.month,
+			e.year, 
+			e.created_at, 
+			e.updated_at, 
+			e.description, 
+			e.user_id, 
+			c.name as category_name, 
+			c.description as category_description,
+			c.created_at as category_created_at,
+			c.updated_at as category_updated_at
+		FROM expenses e
+		LEFT JOIN categories c ON e.category_id = c.id
+		WHERE 
+			e.resident_location_id = $1 
+			AND e.user_id = $2
+			AND e.year = $3 
+			AND e.month = $4
+		ORDER BY e.year ASC, e.month ASC
+	`, residentLocationID, userID, year, month)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var expenses []*expensedomain.ExpenseWithCategory
+
+	for rows.Next() {
+		var id int64
+		var residentLocationID int64
+		var categoryID int64
+		var amount float64
+		var description string
+		var month int
+		var year int
+		var createdAt time.Time
+		var updatedAt time.Time
+		var _userID string
+
+		var categoryName string
+		var categoryDescription string
+		var categoryCreatedAt time.Time
+		var categoryUpdatedAt time.Time
+
+		if err := rows.Scan(
+			&id,
+			&residentLocationID,
+			&categoryID,
+			&amount,
+			&month,
+			&year,
+			&createdAt,
+			&updatedAt,
+			&description,
+			&_userID,
+			&categoryName,
+			&categoryDescription,
+			&categoryCreatedAt,
+			&categoryUpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+
+		expenses = append(expenses,
+			expensedomain.NewExpenseWithCategory(
+				id,
+				residentLocationID,
+				categoryID,
+				amount,
+				description,
+				month,
+				year,
+				createdAt,
+				updatedAt,
+				_userID,
+				*categorydomain.NewCategory(
+					categoryID,
+					categoryName,
+					categoryDescription,
+					categoryCreatedAt,
+					categoryUpdatedAt,
+				),
+			),
+		)
+	}
+
+	return expenses, nil
+}
+
+// func scanExpense(row pgx.CollectableRow) (*expensedomain.Expense, error) {
+//     var (
+//         id                 int64
+//         residentLocationID int64
+//         categoryID         int64
+//         amount             float64
+//         month              int
+//         year               int
+//         createdAt          time.Time
+//         updatedAt          time.Time
+//         description        string
+//         userID             string
+//     )
+
+//     if err := row.Scan(
+//         &id,
+//         &residentLocationID,
+//         &categoryID,
+//         &amount,
+//         &month,
+//         &year,
+//         &createdAt,
+//         &updatedAt,
+//         &description,
+//         &userID,
+//     ); err != nil {
+//         return nil, err
+//     }
+
+//     return expensedomain.NewExpense(
+//         id,
+//         residentLocationID,
+//         categoryID,
+//         amount,
+//         description,
+//         month,
+//         year,
+//         createdAt,
+//         updatedAt,
+//         userID,
+//     ), nil
+// }

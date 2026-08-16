@@ -238,6 +238,53 @@ definitions:
     - userID
     - year
     type: object
+  dto.ExpenseWithCategoryResponse:
+    properties:
+      amount:
+        example: 150.5
+        type: number
+      category:
+        $ref: '#/definitions/dto.CategoryResponse'
+      category_id:
+        example: 1
+        type: integer
+      created_at:
+        example: "2026-07-13T12:00:00Z"
+        type: string
+      description:
+        example: Some text
+        type: string
+      id:
+        example: 1
+        type: integer
+      month:
+        example: 7
+        type: integer
+      resident_location_id:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2026-07-13T12:00:00Z"
+        type: string
+      userID:
+        example: "123458697"
+        type: string
+      year:
+        example: 2026
+        type: integer
+    required:
+    - amount
+    - category
+    - category_id
+    - created_at
+    - description
+    - id
+    - month
+    - resident_location_id
+    - updated_at
+    - userID
+    - year
+    type: object
   dto.HealthResponse:
     properties:
       status:
@@ -267,11 +314,11 @@ definitions:
     - data
     - total
     type: object
-  dto.ListExpenseResponse:
+  dto.ListExpenseWithCategoryResponse:
     properties:
       data:
         items:
-          $ref: '#/definitions/dto.ExpenseResponse'
+          $ref: '#/definitions/dto.ExpenseWithCategoryResponse'
         type: array
       total:
         type: integer
@@ -316,6 +363,15 @@ definitions:
     required:
     - data
     - total
+    type: object
+  dto.ListYearAndMonthResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.YearAndMonthResponse'
+        type: array
+    required:
+    - data
     type: object
   dto.MonthlyAverageResponse:
     properties:
@@ -553,6 +609,22 @@ definitions:
       user_id:
         example: 00000000-0000-0000-0000-000000000001
         type: string
+    type: object
+  dto.YearAndMonthResponse:
+    properties:
+      expenses:
+        example: 66
+        type: integer
+      month:
+        example: 1
+        type: integer
+      year:
+        example: 2020
+        type: integer
+    required:
+    - expenses
+    - month
+    - year
     type: object
 info:
   contact: {}
@@ -808,7 +880,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.ListExpenseResponse'
+            $ref: '#/definitions/dto.ListExpenseWithCategoryResponse'
       summary: List all expenses
       tags:
       - expenses
@@ -914,6 +986,53 @@ paths:
           schema:
             $ref: '#/definitions/dto.CountResponse'
       summary: Count all expenses
+      tags:
+      - expenses
+  /expenses/get-by-year-month:
+    get:
+      description: Returns all expenses by year and month from the database
+      parameters:
+      - description: Resident location ID
+        in: query
+        name: residentLocationId
+        required: true
+        type: integer
+      - description: Year
+        in: query
+        name: year
+        required: true
+        type: integer
+      - description: Month
+        in: query
+        name: month
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListExpenseWithCategoryResponse'
+      summary: List all expenses by year and month
+      tags:
+      - expenses
+  /expenses/get-years-and-months:
+    get:
+      description: Returns all grouped expenses by year and month from the database
+      parameters:
+      - description: Resident location ID
+        in: query
+        name: residentLocationId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ListYearAndMonthResponse'
+      summary: List all grouped expenses by year and month
       tags:
       - expenses
   /expenses/stats/averages:

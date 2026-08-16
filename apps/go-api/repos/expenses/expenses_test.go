@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	categorydomain "flatty-budget/go-api/domains/category"
 	expensedomain "flatty-budget/go-api/domains/expenses"
 
 	"github.com/jackc/pgx/v5"
@@ -141,11 +142,23 @@ func assertExpenseEqual(t *testing.T, want, got *expensedomain.Expense) {
 	assert.True(t, want.UpdatedAt().Equal(got.UpdatedAt()), "UpdatedAt mismatch")
 }
 
-func assertExpenseSliceEqual(t *testing.T, want, got []*expensedomain.Expense) {
+func assertExpenseSliceEqual(t *testing.T, want, got []*expensedomain.ExpenseWithCategory) {
 	t.Helper()
 	assert.Equal(t, len(want), len(got))
 	for i := range want {
-		assertExpenseEqual(t, want[i], got[i])
+		assert.Equal(t, want[i].ID(), got[i].ID())
+		assert.Equal(t, want[i].ResidentLocationID(), got[i].ResidentLocationID())
+		assert.Equal(t, want[i].CategoryID(), got[i].CategoryID())
+		assert.Equal(t, want[i].Amount(), got[i].Amount())
+		assert.Equal(t, want[i].Month(), got[i].Month())
+		assert.Equal(t, want[i].Year(), got[i].Year())
+		assert.True(t, want[i].CreatedAt().Equal(got[i].CreatedAt()), "CreatedAt mismatch at index %d", i)
+		assert.True(t, want[i].UpdatedAt().Equal(got[i].UpdatedAt()), "UpdatedAt mismatch at index %d", i)
+		assert.Equal(t, want[i].Description(), got[i].Description())
+		wantCat := want[i].Category()
+		gotCat := got[i].Category()
+		assert.Equal(t, wantCat.ID(), gotCat.ID())
+		assert.Equal(t, wantCat.Name(), gotCat.Name())
 	}
 }
 
@@ -218,7 +231,7 @@ func TestPgxRepository_List(t *testing.T) {
 		name         string
 		rows         *mockRows
 		queryErr     error
-		wantExpenses []*expensedomain.Expense
+		wantExpenses []*expensedomain.ExpenseWithCategory
 		wantErr      string
 	}
 
@@ -226,13 +239,13 @@ func TestPgxRepository_List(t *testing.T) {
 		{
 			name: "success",
 			rows: newMockRows([][]any{
-				{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""},
-				{int64(2), int64(10), int64(21), 75.00, 6, 2024, now, now, ""},
+				{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, "", "123456", "Food", "", now, now},
+				{int64(2), int64(10), int64(21), 75.00, 6, 2024, now, now, "", "123456", "Transport", "", now, now},
 			}),
 			queryErr: nil,
-			wantExpenses: []*expensedomain.Expense{
-				expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456"),
-				expensedomain.NewExpense(2, 10, 21, 75.00, "", 6, 2024, now, now, "123456"),
+			wantExpenses: []*expensedomain.ExpenseWithCategory{
+				expensedomain.NewExpenseWithCategory(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456", *categorydomain.NewCategory(20, "Food", "", now, now)),
+				expensedomain.NewExpenseWithCategory(2, 10, 21, 75.00, "", 6, 2024, now, now, "123456", *categorydomain.NewCategory(21, "Transport", "", now, now)),
 			},
 			wantErr: "",
 		},
@@ -254,7 +267,7 @@ func TestPgxRepository_List(t *testing.T) {
 			name: "scan_error",
 			rows: func() *mockRows {
 				r := newMockRows([][]any{
-					{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now},
+					{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, "", "123456", "Food", "", now},
 				})
 				r.scanErr = errors.New("scan failed")
 				return r

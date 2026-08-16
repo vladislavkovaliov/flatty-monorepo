@@ -41,3 +41,13 @@ type UpdateExpenseRequest struct {
 type DeleteExpenseResponse struct {
 	Data int64 `json:"data" example:"1" binding:"required"`
 }
+
+type YearAndMonthResponse struct {
+	Year     int64 `json:"year" example:"2020" binding:"required"`
+	Month    int64 `json:"month" example:"1" binding:"required"`
+	Expenses int64 `json:"expenses" example:"66" binding:"required"`
+}
+
+type ListYearAndMonthResponse struct {
+	Data []YearAndMonthResponse `json:"data" binding:"required"`
+}

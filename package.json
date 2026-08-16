@@ -12,6 +12,7 @@
     "dev:resident": "nx run-many --target=serve --projects=react-launcher,react-resident --parallel=2",
     "dev:settings": "nx run-many --target=serve --projects=react-launcher,react-settings --parallel=2",
     "dev:launcher": "nx run-many --target=serve --projects=react-launcher --parallel=1",
+    "dev:entrypoint": "nx run-many --target=serve --projects=react-entrypoint --parallel=1",
     "dev:backend": "nx run-many --target=serve --projects=go-api,nest-graphql --parallel=2",
     "build": "nx run-many --target=build --all",
     "test": "nx run-many --target=test --all",

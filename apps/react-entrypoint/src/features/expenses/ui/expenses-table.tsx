@@ -28,7 +28,7 @@ const MONTH: Record<number, string> = {
 } as const;
 
 export function ExpensesTable() {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const page = Number(searchParams.get("page") || "1");
@@ -38,7 +38,11 @@ export function ExpensesTable() {
   const residentLocationId =
     residentLocationsData?.residentLocationList?.data?.[0]?.id;
 
-  const { data } = useExpensesGraphql(residentLocationId, LIMIT, offset);
+  const { data } = useExpensesGraphql(
+    residentLocationId as number,
+    LIMIT,
+    offset,
+  );
   const queryClient = useQueryClient();
   const deleteMutation = useDeleteExpense();
 

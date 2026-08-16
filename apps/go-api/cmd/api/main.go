@@ -11,7 +11,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -36,7 +35,6 @@ func main() {
 	if err := tracing.Init(); err != nil {
 		log.Printf("tracing init failed, continuing without tracing: %v", err)
 	}
-	fmt.Println(3)
 
 	pool, err := pgxpool.New(context.Background(), cfg.DatabaseUrl)
 

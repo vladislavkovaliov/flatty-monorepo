@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	categorydomain "flatty-budget/go-api/domains/category"
 	"flatty-budget/go-api/domains/expenses"
 	kafkaclient "flatty-budget/go-api/internal/kafka"
 
@@ -23,9 +24,9 @@ func (m *mockRepo) Count(ctx context.Context, residentLocationID int64, userID s
 	return args.Int(0), args.Error(1)
 }
 
-func (m *mockRepo) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expenses.Expense, error) {
+func (m *mockRepo) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expenses.ExpenseWithCategory, error) {
 	args := m.Called(ctx, residentLocationID, userID, limit, offset)
-	return args.Get(0).([]*expenses.Expense), args.Error(1)
+	return args.Get(0).([]*expenses.ExpenseWithCategory), args.Error(1)
 }
 
 func (m *mockRepo) GetByID(ctx context.Context, id int64) (*expenses.Expense, error) {
@@ -46,6 +47,16 @@ func (m *mockRepo) Update(ctx context.Context, id int64, input *expenses.Expense
 func (m *mockRepo) Delete(ctx context.Context, id int64, userID string) (int64, error) {
 	args := m.Called(ctx, id, userID)
 	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *mockRepo) GetYearsAndMonths(ctx context.Context, residentLocationID int64, userID string) ([]*expenses.YearAndMonth, error) {
+	args := m.Called(ctx, residentLocationID, userID)
+	return args.Get(0).([]*expenses.YearAndMonth), args.Error(1)
+}
+
+func (m *mockRepo) GetExpensesByYearMonth(ctx context.Context, residentLocationID, year, month int64, userID string) ([]*expenses.ExpenseWithCategory, error) {
+	args := m.Called(ctx, residentLocationID, year, month, userID)
+	return args.Get(0).([]*expenses.ExpenseWithCategory), args.Error(1)
 }
 
 // mockProducer implements kafkaclient.ProducerInterface.
@@ -115,20 +126,22 @@ func TestService_List(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
-	exp1 := expenses.NewExpense(1, 1, 1, 100.0, "", 1, 2024, now, now, "123456")
-	exp2 := expenses.NewExpense(2, 1, 2, 200.0, "", 1, 2024, now, now, "123456")
+	cat1 := categorydomain.NewCategory(1, "Food", "", now, now)
+	cat2 := categorydomain.NewCategory(2, "Transport", "", now, now)
+	exp1 := expenses.NewExpenseWithCategory(1, 1, 1, 100.0, "", 1, 2024, now, now, "123456", *cat1)
+	exp2 := expenses.NewExpenseWithCategory(2, 1, 2, 200.0, "", 1, 2024, now, now, "123456", *cat2)
 
 	type listCase struct {
 		name          string
 		limit, offset int
 
 		listRepoErr error
-		listRepoRes []*expenses.Expense
+		listRepoRes []*expenses.ExpenseWithCategory
 
 		countRepoErr error
 		countRepoRes int
 
-		want      []*expenses.Expense
+		want      []*expenses.ExpenseWithCategory
 		wantTotal int
 		wantErr   string
 	}
@@ -139,10 +152,10 @@ func TestService_List(t *testing.T) {
 			limit:  10,
 			offset: 0,
 
-			listRepoRes:  []*expenses.Expense{exp1, exp2},
+			listRepoRes:  []*expenses.ExpenseWithCategory{exp1, exp2},
 			countRepoRes: 2,
 
-			want:      []*expenses.Expense{exp1, exp2},
+			want:      []*expenses.ExpenseWithCategory{exp1, exp2},
 			wantTotal: 2,
 		},
 		{
@@ -159,7 +172,7 @@ func TestService_List(t *testing.T) {
 			limit:  10,
 			offset: 0,
 
-			listRepoRes:  []*expenses.Expense{exp1},
+			listRepoRes:  []*expenses.ExpenseWithCategory{exp1},
 			countRepoErr: errors.New("count error"),
 
 			wantErr: "count error",

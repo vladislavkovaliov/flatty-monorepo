@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { groupByYear, groupYearsAndMonths, mergeMonthlyStats } from "../monthly-stats";
+import {
+  groupByYear,
+  groupYearsAndMonths,
+  mergeMonthlyStats,
+} from "../monthly-stats";
 
 describe("mergeMonthlyStats", () => {
   it("merges totals and averages by year-month key", () => {

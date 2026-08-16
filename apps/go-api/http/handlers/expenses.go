@@ -62,7 +62,7 @@ func (h *ExpenseHandler) Count(c *gin.Context) {
 //	@Description	Returns all expenses from the database
 //	@Tags			expenses
 //	@Produce		json
-//	@Success		200	{object}	dto.ListExpenseResponse
+//	@Success		200	{object}	dto.ListExpenseWithCategoryResponse
 //	@Router			/expenses [get]
 //
 //	@Param			residentLocationId	query	int	false	"Resident location ID"
@@ -97,10 +97,20 @@ func (h *ExpenseHandler) List(c *gin.Context) {
 		return
 	}
 
-	res := make([]dto.ExpenseResponse, 0, len(expenses))
+	res := make([]dto.ExpenseWithCategoryResponse, 0, len(expenses))
 
 	for _, e := range expenses {
-		res = append(res, dto.ExpenseResponse{
+		category := e.Category()
+
+		categoryRes := dto.CategoryResponse{
+			ID:          category.ID(),
+			Name:        category.Name(),
+			Description: category.Description(),
+			CreatedAt:   category.CreatedAt(),
+			UpdatedAt:   category.UpdatedAt(),
+		}
+
+		res = append(res, dto.ExpenseWithCategoryResponse{
 			ID:                 e.ID(),
 			ResidentLocationID: e.ResidentLocationID(),
 			CategoryID:         e.CategoryID(),
@@ -111,10 +121,11 @@ func (h *ExpenseHandler) List(c *gin.Context) {
 			UpdatedAt:          e.UpdatedAt(),
 			Description:        e.Description(),
 			UserID:             e.UserID(),
+			Category:           categoryRes,
 		})
 	}
 
-	c.JSON(http.StatusOK, dto.ListExpenseResponse{
+	c.JSON(http.StatusOK, dto.ListExpenseWithCategoryResponse{
 		Data:  res,
 		Total: total,
 	})
@@ -277,5 +288,124 @@ func (h *ExpenseHandler) Delete(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.DeleteExpenseResponse{
 		Data: returningID,
+	})
+}
+
+// GetYearsAndMonths godoc
+//
+//	@Summary		List all grouped expenses by year and month
+//	@Description	Returns all grouped expenses by year and month from the database
+//	@Tags			expenses
+//	@Produce		json
+//	@Success		200	{object}	dto.ListYearAndMonthResponse
+//	@Router			/expenses/get-years-and-months [get]
+//
+//	@Param			residentLocationId	query	int	false	"Resident location ID"
+func (h *ExpenseHandler) GetYearsAndMonths(c *gin.Context) {
+	residentLocationID, ok := parseResidentLocationID(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "residentLocationId is required"})
+		return
+	}
+	userID := c.GetString("userID")
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	items, err := h.service.GetYearsAndMonths(ctx, residentLocationID, userID)
+	if err != nil {
+		internalError(c, err)
+		return
+	}
+
+	res := make([]dto.YearAndMonthResponse, 0, len(items))
+
+	for _, y := range items {
+		res = append(res, dto.YearAndMonthResponse{
+			Year:     y.Year(),
+			Month:    y.Month(),
+			Expenses: y.Expenses(),
+		})
+	}
+
+	c.JSON(http.StatusOK, dto.ListYearAndMonthResponse{
+		Data: res,
+	})
+}
+
+// GetExpensesByYearMonth godoc
+//
+//	@Summary		List all expenses by year and month
+//	@Description	Returns all expenses by year and month from the database
+//	@Tags			expenses
+//	@Produce		json
+//	@Success		200	{object}	dto.ListExpenseWithCategoryResponse
+//	@Router			/expenses/get-by-year-month [get]
+//
+//	@Param			residentLocationId	query	int	true	"Resident location ID"
+//	@Param			year	            query	int	true	"Year"
+//	@Param			month	            query	int	true	"Month"
+func (h *ExpenseHandler) GetExpensesByYearMonth(c *gin.Context) {
+	residentLocationID, ok := parseResidentLocationID(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "residentLocationId is required"})
+		return
+	}
+
+	year, ok := parseYear(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "year is required"})
+		return
+	}
+
+	month, ok := parseMonth(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "month is required"})
+		return
+	}
+
+	userID := c.GetString("userID")
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	expenses, err := h.service.GetExpensesByYearMonth(ctx, residentLocationID, year, month, userID)
+
+	if err != nil {
+		internalError(c, err)
+		return
+	}
+
+	res := make([]dto.ExpenseWithCategoryResponse, 0, len(expenses))
+
+	for _, e := range expenses {
+		category := e.Category()
+
+		categoryRes := dto.CategoryResponse{
+			ID:          category.ID(),
+			Name:        category.Name(),
+			Description: category.Description(),
+			CreatedAt:   category.CreatedAt(),
+			UpdatedAt:   category.UpdatedAt(),
+		}
+
+		res = append(res, dto.ExpenseWithCategoryResponse{
+			ID:                 e.ID(),
+			ResidentLocationID: e.ResidentLocationID(),
+			CategoryID:         e.CategoryID(),
+			Amount:             e.Amount(),
+			Month:              e.Month(),
+			Year:               e.Year(),
+			CreatedAt:          e.CreatedAt(),
+			UpdatedAt:          e.UpdatedAt(),
+			Description:        e.Description(),
+			UserID:             e.UserID(),
+			Category:           categoryRes,
+		})
+	}
+
+	c.JSON(http.StatusOK, dto.ListExpenseWithCategoryResponse{
+		Data:  res,
+		Total: len(expenses),
 	})
 }

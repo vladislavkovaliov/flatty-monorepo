@@ -39,6 +39,5 @@ export const EXPENSES_GRAPHQL_QUERIES = {
 };
 
 export function useExpensesGraphql(residentLocationId: number, limit = 10, offset = 0) {
-  console.log(residentLocationId)
   return useQuery(EXPENSES_GRAPHQL_QUERIES.list(residentLocationId, limit, offset));
 }

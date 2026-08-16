@@ -31,7 +31,7 @@ func (s *Service) Count(ctx context.Context, residentLocationID int64, userID st
 	return count, nil
 }
 
-func (s *Service) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.Expense, int, error) {
+func (s *Service) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.ExpenseWithCategory, int, error) {
 	items, err := s.repo.List(ctx, residentLocationID, userID, limit, offset)
 
 	if err != nil {
@@ -125,4 +125,24 @@ func (s *Service) Delete(ctx context.Context, id int64, userID string) (int64, e
 	}
 
 	return returningID, nil
+}
+
+func (s *Service) GetYearsAndMonths(ctx context.Context, residentLocationID int64, userID string) ([]*expensedomain.YearAndMonth, error) {
+	items, err := s.repo.GetYearsAndMonths(ctx, residentLocationID, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
+}
+
+func (s *Service) GetExpensesByYearMonth(ctx context.Context, residentLocationID, year, month int64, userID string) ([]*expensedomain.ExpenseWithCategory, error) {
+	items, err := s.repo.GetExpensesByYearMonth(ctx, residentLocationID, year, month, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return items, nil
 }

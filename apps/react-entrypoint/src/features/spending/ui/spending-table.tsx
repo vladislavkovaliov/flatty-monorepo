@@ -58,7 +58,7 @@ function SortIcon({
 }
 
 export function SpendingTable({ data }: SpendingTableProps) {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams() ?? new URLSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const page = Number(searchParams.get("page") || "1");

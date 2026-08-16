@@ -21,10 +21,29 @@ func parseMonthYear(c *gin.Context) (*int, *int) {
 	return month, year
 }
 
+func parseYear(c *gin.Context) (int64, bool) {
+	y, err := strconv.ParseInt(c.Query("year"), 10, 64)
+	if err != nil || y < 0 {
+		return 0, false
+	}
+
+	return y, true
+}
+
+func parseMonth(c *gin.Context) (int64, bool) {
+	m, err := strconv.ParseInt(c.Query("month"), 10, 64)
+	if err != nil || m < 1 || m > 12 {
+		return 0, false
+	}
+
+	return m, true
+}
+
 func parseResidentLocationID(c *gin.Context) (int64, bool) {
 	id, err := strconv.ParseInt(c.Query("residentLocationId"), 10, 64)
 	if err != nil || id <= 0 {
 		return 0, false
 	}
+
 	return id, true
 }

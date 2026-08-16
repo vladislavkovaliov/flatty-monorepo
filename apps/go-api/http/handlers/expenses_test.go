@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	categorydomain "flatty-budget/go-api/domains/category"
 	expensedomain "flatty-budget/go-api/domains/expenses"
 	expensesservice "flatty-budget/go-api/services/expenses"
 
@@ -27,9 +28,9 @@ func (m *mockRepo) Count(ctx context.Context, residentLocationID int64, userID s
 	return args.Int(0), args.Error(1)
 }
 
-func (m *mockRepo) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.Expense, error) {
+func (m *mockRepo) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.ExpenseWithCategory, error) {
 	args := m.Called(ctx, residentLocationID, userID, limit, offset)
-	return args.Get(0).([]*expensedomain.Expense), args.Error(1)
+	return args.Get(0).([]*expensedomain.ExpenseWithCategory), args.Error(1)
 }
 
 func (m *mockRepo) GetByID(ctx context.Context, id int64) (*expensedomain.Expense, error) {
@@ -50,6 +51,16 @@ func (m *mockRepo) Update(ctx context.Context, id int64, input *expensedomain.Ex
 func (m *mockRepo) Delete(ctx context.Context, id int64, userID string) (int64, error) {
 	args := m.Called(ctx, id, userID)
 	return args.Get(0).(int64), args.Error(1)
+}
+
+func (m *mockRepo) GetYearsAndMonths(ctx context.Context, residentLocationID int64, userID string) ([]*expensedomain.YearAndMonth, error) {
+	args := m.Called(ctx, residentLocationID, userID)
+	return args.Get(0).([]*expensedomain.YearAndMonth), args.Error(1)
+}
+
+func (m *mockRepo) GetExpensesByYearMonth(ctx context.Context, residentLocationID, year, month int64, userID string) ([]*expensedomain.ExpenseWithCategory, error) {
+	args := m.Called(ctx, residentLocationID, year, month, userID)
+	return args.Get(0).([]*expensedomain.ExpenseWithCategory), args.Error(1)
 }
 
 func newTestHandler(repo expensedomain.Repository) *ExpenseHandler {
@@ -89,9 +100,10 @@ func TestExpenseHandler_List_UsesUserIDFromContext(t *testing.T) {
 	handler := newTestHandler(repo)
 
 	now := time.Now()
-	exp := expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456")
+	cat := categorydomain.NewCategory(20, "Food", "", now, now)
+	exp := expensedomain.NewExpenseWithCategory(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456", *cat)
 
-	repo.On("List", mock.Anything, int64(10), "user-123", 10, 0).Return([]*expensedomain.Expense{exp}, nil)
+	repo.On("List", mock.Anything, int64(10), "user-123", 10, 0).Return([]*expensedomain.ExpenseWithCategory{exp}, nil)
 	repo.On("Count", mock.Anything, int64(10), "user-123").Return(1, nil)
 
 	w := httptest.NewRecorder()

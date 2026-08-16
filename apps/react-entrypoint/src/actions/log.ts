@@ -11,5 +11,5 @@ export async function logMessage(email: string): Promise<ListUserResponse> {
     .from(schema.user)
     .where(ilike(schema.user.email, `%${email}%`));
 
-  return users;
+  return { data: users, total: users.length };
 }

@@ -100,6 +100,8 @@ func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool, svc *expensesservice.
 	protected.PUT("/expenses/:id", h.Update)
 	protected.DELETE("/expenses/:id", h.Delete)
 	protected.GET("/expenses/count", h.Count)
+	protected.GET("/expenses/get-years-and-months", h.GetYearsAndMonths)
+	protected.GET("/expenses/get-by-year-month", h.GetExpensesByYearMonth)
 }
 
 func wireExpenseStats(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {

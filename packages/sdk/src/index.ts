@@ -36,7 +36,7 @@ export type {
 
   // New types for expenses
   DtoExpenseResponse,
-  DtoListExpenseResponse,
+  DtoListExpenseWithCategoryResponse,
   DtoCreateExpenseRequest,
   ExpensesListData,
   ExpensesCreateData,

@@ -51,7 +51,7 @@ const DELETE_CATEGORY = `
   }
 `;
 
-type GqlListData = { list: ListCategoryResponse };
+type GqlListData = { categoryList: ListCategoryResponse };
 type GqlCreateData = { create: Category };
 type GqlUpdateData = { update: Category };
 type GqlDeleteData = { delete: DeleteCategoryResponse };

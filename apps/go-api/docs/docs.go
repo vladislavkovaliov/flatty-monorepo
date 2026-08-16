@@ -389,7 +389,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ListExpenseResponse"
+                            "$ref": "#/definitions/dto.ListExpenseWithCategoryResponse"
                         }
                     }
                 }
@@ -459,6 +459,77 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.CountResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/get-by-year-month": {
+            "get": {
+                "description": "Returns all expenses by year and month from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "List all expenses by year and month",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resident location ID",
+                        "name": "residentLocationId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Year",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Month",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListExpenseWithCategoryResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/get-years-and-months": {
+            "get": {
+                "description": "Returns all grouped expenses by year and month from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "List all grouped expenses by year and month",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Resident location ID",
+                        "name": "residentLocationId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ListYearAndMonthResponse"
                         }
                     }
                 }
@@ -1301,6 +1372,67 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ExpenseWithCategoryResponse": {
+            "type": "object",
+            "required": [
+                "amount",
+                "category",
+                "category_id",
+                "created_at",
+                "description",
+                "id",
+                "month",
+                "resident_location_id",
+                "updated_at",
+                "userID",
+                "year"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "example": 150.5
+                },
+                "category": {
+                    "$ref": "#/definitions/dto.CategoryResponse"
+                },
+                "category_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "created_at": {
+                    "type": "string",
+                    "example": "2026-07-13T12:00:00Z"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "Some text"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "month": {
+                    "type": "integer",
+                    "example": 7
+                },
+                "resident_location_id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2026-07-13T12:00:00Z"
+                },
+                "userID": {
+                    "type": "string",
+                    "example": "123458697"
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2026
+                }
+            }
+        },
         "dto.HealthResponse": {
             "type": "object",
             "required": [
@@ -1345,7 +1477,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ListExpenseResponse": {
+        "dto.ListExpenseWithCategoryResponse": {
             "type": "object",
             "required": [
                 "data",
@@ -1355,7 +1487,7 @@ const docTemplate = `{
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ExpenseResponse"
+                        "$ref": "#/definitions/dto.ExpenseWithCategoryResponse"
                     }
                 },
                 "total": {
@@ -1418,6 +1550,20 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "dto.ListYearAndMonthResponse": {
+            "type": "object",
+            "required": [
+                "data"
+            ],
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.YearAndMonthResponse"
+                    }
                 }
             }
         },
@@ -1739,6 +1885,28 @@ const docTemplate = `{
                 "user_id": {
                     "type": "string",
                     "example": "00000000-0000-0000-0000-000000000001"
+                }
+            }
+        },
+        "dto.YearAndMonthResponse": {
+            "type": "object",
+            "required": [
+                "expenses",
+                "month",
+                "year"
+            ],
+            "properties": {
+                "expenses": {
+                    "type": "integer",
+                    "example": 66
+                },
+                "month": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2020
                 }
             }
         }

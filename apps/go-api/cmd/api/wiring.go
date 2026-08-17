@@ -79,7 +79,8 @@ func wireResidentLocation(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.Ha
 func wireCategory(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
 
 	repo := categoryrepo.NewPgxRepository(pool)
-	svc := categoryservice.New(repo)
+	cached := categoryrepo.NewCachedRepository(repo)
+	svc := categoryservice.New(cached)
 
 	h := handlers.NewCategoryHandler(svc)
 

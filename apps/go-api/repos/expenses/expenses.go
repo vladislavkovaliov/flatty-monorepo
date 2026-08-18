@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 
-	categorydomain "flatty-budget/go-api/domains/category"
 	expensedomain "flatty-budget/go-api/domains/expenses"
 )
 
@@ -30,37 +28,13 @@ func NewPgxRepository(pool pgxPool) *PgxRepository {
 func (r *PgxRepository) Count(ctx context.Context, residentLocationID int64, userID string) (int, error) {
 	var count int
 
-	err := r.pool.QueryRow(ctx, `
-		SELECT COUNT(*) FROM expenses
-		WHERE resident_location_id = $1 AND user_id = $2
-	`, residentLocationID, userID).Scan(&count)
+	err := r.pool.QueryRow(ctx, sqlExpensesCount, residentLocationID, userID).Scan(&count)
 
 	return count, err
 }
 
 func (r *PgxRepository) List(ctx context.Context, residentLocationID int64, userID string, limit, offset int) ([]*expensedomain.ExpenseWithCategory, error) {
-	rows, err := r.pool.Query(ctx, `
-		SELECT 
-			e.id, 
-			e.resident_location_id, 
-			e.category_id, 
-			e.amount, 
-			e.month,
-			e.year, 
-			e.created_at, 
-			e.updated_at, 
-			e.description, 
-			e.user_id, 
-			c.name as category_name, 
-			c.description as category_description,
-			c.created_at as category_created_at,
-			c.updated_at as category_updated_at
-		FROM expenses e
-		LEFT JOIN categories c ON e.category_id = c.id
-		WHERE resident_location_id = $1 AND user_id = $2
-		ORDER BY id 
-		LIMIT $3 OFFSET $4
-	`, residentLocationID, userID, limit, offset)
+	rows, err := r.pool.Query(ctx, sqlExpensesList, residentLocationID, userID, limit, offset)
 
 	if err != nil {
 		return nil, err
@@ -68,115 +42,33 @@ func (r *PgxRepository) List(ctx context.Context, residentLocationID int64, user
 
 	defer rows.Close()
 
-	var expenses []*expensedomain.ExpenseWithCategory
-
-	for rows.Next() {
-		var id int64
-		var residentLocationID int64
-		var categoryID int64
-		var amount float64
-		var description string
-		var month int
-		var year int
-		var createdAt time.Time
-		var updatedAt time.Time
-		var _userID string
-
-		var categoryName string
-		var categoryDescription string
-		var categoryCreatedAt time.Time
-		var categoryUpdatedAt time.Time
-
-		if err := rows.Scan(
-			&id,
-			&residentLocationID,
-			&categoryID,
-			&amount,
-			&month,
-			&year,
-			&createdAt,
-			&updatedAt,
-			&description,
-			&_userID,
-			&categoryName,
-			&categoryDescription,
-			&categoryCreatedAt,
-			&categoryUpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-
-		expenses = append(expenses,
-			expensedomain.NewExpenseWithCategory(
-				id,
-				residentLocationID,
-				categoryID,
-				amount,
-				description,
-				month,
-				year,
-				createdAt,
-				updatedAt,
-				_userID,
-				*categorydomain.NewCategory(
-					categoryID,
-					categoryName,
-					categoryDescription,
-					categoryCreatedAt,
-					categoryUpdatedAt,
-				),
-			),
-		)
-	}
-
-	return expenses, nil
+	return pgx.CollectRows(rows, scanExpenseWithCategory)
 }
 
 func (r *PgxRepository) GetByID(ctx context.Context, id int64) (*expensedomain.Expense, error) {
-	var expenseID int64
-	var residentLocationID int64
-	var categoryID int64
-	var amount float64
-	var description string
-	var month int
-	var year int
-	var createdAt time.Time
-	var updatedAt time.Time
-	var _userID string
+	rows, err := r.pool.Query(ctx, sqlGetExpenseByID, id)
 
-	err := r.pool.QueryRow(ctx, `
-		SELECT id, resident_location_id, category_id, amount, month, year, created_at, updated_at, description, user_id
-		FROM expenses
-		WHERE id = $1
-	`, id).Scan(&expenseID, &residentLocationID, &categoryID, &amount, &month, &year, &createdAt, &updatedAt, &description, &_userID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	expense, err := pgx.CollectOneRow(rows, scanExpense)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, fmt.Errorf("expense with id %d not found: %w", id, pgx.ErrNoRows)
 		}
+
 		return nil, err
 	}
 
-	return expensedomain.NewExpense(expenseID, residentLocationID, categoryID, amount, description, month, year, createdAt, updatedAt, _userID), nil
+	return expense, nil
 }
 
 func (r *PgxRepository) Create(ctx context.Context, input *expensedomain.ExpenseInput, userID string) (*expensedomain.Expense, error) {
-	var id int64
-	var residentLocationID int64
-	var categoryID int64
-	var amount float64
-	var description string
-	var month int
-	var year int
-	var createdAt time.Time
-	var updatedAt time.Time
-	var _userID string
-
-	err := r.pool.QueryRow(ctx, `
-		INSERT INTO expenses (user_id, resident_location_id, category_id, amount, month, year, description)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, resident_location_id, category_id, amount, month, year, created_at, updated_at, description, user_id
-	`,
+	rows, err := r.pool.Query(ctx, sqlExpenseCreate,
 		userID,
 		input.ResidentLocationID(),
 		input.CategoryID(),
@@ -184,51 +76,19 @@ func (r *PgxRepository) Create(ctx context.Context, input *expensedomain.Expense
 		input.Month(),
 		input.Year(),
 		input.Description(),
-	).Scan(
-		&id,
-		&residentLocationID,
-		&categoryID,
-		&amount,
-		&month,
-		&year,
-		&createdAt,
-		&updatedAt,
-		&description,
-		&_userID,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return expensedomain.NewExpense(id, residentLocationID, categoryID, amount, description, month, year, createdAt, updatedAt, _userID), nil
+	defer rows.Close()
+
+	return pgx.CollectOneRow(rows, scanExpense)
 }
 
 func (r *PgxRepository) Update(ctx context.Context, id int64, input *expensedomain.ExpenseInput, userID string) (*expensedomain.Expense, error) {
-	var returningID int64
-	var residentLocationID int64
-	var categoryID int64
-	var amount float64
-	var description string
-	var month int
-	var year int
-	var createdAt time.Time
-	var updatedAt time.Time
-	var _userID string
-
-	err := r.pool.QueryRow(ctx, `
-		UPDATE expenses
-		SET
-			resident_location_id = $1,
-			category_id = $2,
-			amount = $3,
-			month = $4,
-			year = $5,
-			updated_at = NOW(),
-			description = $6
-		WHERE id = $7 AND user_id = $8
-		RETURNING id, resident_location_id, category_id, amount, month, year, created_at, updated_at, description, user_id
-	`,
+	rows, err := r.pool.Query(ctx, sqlExpenseUpdate,
 		input.ResidentLocationID(),
 		input.CategoryID(),
 		input.Amount(),
@@ -237,18 +97,15 @@ func (r *PgxRepository) Update(ctx context.Context, id int64, input *expensedoma
 		input.Description(),
 		id,
 		userID,
-	).Scan(
-		&returningID,
-		&residentLocationID,
-		&categoryID,
-		&amount,
-		&month,
-		&year,
-		&createdAt,
-		&updatedAt,
-		&description,
-		&_userID,
 	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	expense, err := pgx.CollectOneRow(rows, scanExpense)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -258,17 +115,13 @@ func (r *PgxRepository) Update(ctx context.Context, id int64, input *expensedoma
 		return nil, err
 	}
 
-	return expensedomain.NewExpense(returningID, residentLocationID, categoryID, amount, description, month, year, createdAt, updatedAt, _userID), nil
+	return expense, nil
 }
 
 func (r *PgxRepository) Delete(ctx context.Context, id int64, userID string) (int64, error) {
 	var returningID int64
 
-	err := r.pool.QueryRow(ctx, `
-		DELETE FROM expenses
-		WHERE id = $1 AND user_id = $2
-		RETURNING id
-	`, id, userID).Scan(&returningID)
+	err := r.pool.QueryRow(ctx, sqlExpenseDelete, id, userID).Scan(&returningID)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -282,13 +135,7 @@ func (r *PgxRepository) Delete(ctx context.Context, id int64, userID string) (in
 }
 
 func (r *PgxRepository) GetYearsAndMonths(ctx context.Context, residentLocationID int64, userID string) ([]*expensedomain.YearAndMonth, error) {
-	rows, err := r.pool.Query(ctx, `
-		SELECT year, month, COUNT(*) as "expcenses" FROM expenses 
-		WHERE resident_location_id = $1 AND user_id = $2
-		GROUP BY year, month
-		ORDER BY year ASC, month ASC
-		LIMIT 100;
-	`, residentLocationID, userID)
+	rows, err := r.pool.Query(ctx, sqlGetYearsAndMonths, residentLocationID, userID)
 
 	if err != nil {
 		return nil, err
@@ -296,53 +143,11 @@ func (r *PgxRepository) GetYearsAndMonths(ctx context.Context, residentLocationI
 
 	defer rows.Close()
 
-	var yearsAndMounths []*expensedomain.YearAndMonth
-
-	for rows.Next() {
-		var year int64
-		var month int64
-		var expenses int64
-
-		if err := rows.Scan(&year, &month, &expenses); err != nil {
-			return nil, err
-		}
-
-		yearsAndMounths = append(yearsAndMounths, expensedomain.NewYearAndMonth(
-			year,
-			month,
-			expenses,
-		))
-	}
-
-	return yearsAndMounths, nil
+	return pgx.CollectRows(rows, scanYearAndMonth)
 }
 
 func (r *PgxRepository) GetExpensesByYearMonth(ctx context.Context, residentLocationID, year, month int64, userID string) ([]*expensedomain.ExpenseWithCategory, error) {
-	rows, err := r.pool.Query(ctx, `
-		SELECT 
-			e.id, 
-			e.resident_location_id, 
-			e.category_id, 
-			e.amount, 
-			e.month,
-			e.year, 
-			e.created_at, 
-			e.updated_at, 
-			e.description, 
-			e.user_id, 
-			c.name as category_name, 
-			c.description as category_description,
-			c.created_at as category_created_at,
-			c.updated_at as category_updated_at
-		FROM expenses e
-		LEFT JOIN categories c ON e.category_id = c.id
-		WHERE 
-			e.resident_location_id = $1 
-			AND e.user_id = $2
-			AND e.year = $3 
-			AND e.month = $4
-		ORDER BY e.year ASC, e.month ASC
-	`, residentLocationID, userID, year, month)
+	rows, err := r.pool.Query(ctx, sqlGetExpenseByYearMonth, residentLocationID, userID, year, month)
 
 	if err != nil {
 		return nil, err
@@ -350,109 +155,5 @@ func (r *PgxRepository) GetExpensesByYearMonth(ctx context.Context, residentLoca
 
 	defer rows.Close()
 
-	var expenses []*expensedomain.ExpenseWithCategory
-
-	for rows.Next() {
-		var id int64
-		var residentLocationID int64
-		var categoryID int64
-		var amount float64
-		var description string
-		var month int
-		var year int
-		var createdAt time.Time
-		var updatedAt time.Time
-		var _userID string
-
-		var categoryName string
-		var categoryDescription string
-		var categoryCreatedAt time.Time
-		var categoryUpdatedAt time.Time
-
-		if err := rows.Scan(
-			&id,
-			&residentLocationID,
-			&categoryID,
-			&amount,
-			&month,
-			&year,
-			&createdAt,
-			&updatedAt,
-			&description,
-			&_userID,
-			&categoryName,
-			&categoryDescription,
-			&categoryCreatedAt,
-			&categoryUpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-
-		expenses = append(expenses,
-			expensedomain.NewExpenseWithCategory(
-				id,
-				residentLocationID,
-				categoryID,
-				amount,
-				description,
-				month,
-				year,
-				createdAt,
-				updatedAt,
-				_userID,
-				*categorydomain.NewCategory(
-					categoryID,
-					categoryName,
-					categoryDescription,
-					categoryCreatedAt,
-					categoryUpdatedAt,
-				),
-			),
-		)
-	}
-
-	return expenses, nil
+	return pgx.CollectRows(rows, scanExpenseWithCategory)
 }
-
-// func scanExpense(row pgx.CollectableRow) (*expensedomain.Expense, error) {
-//     var (
-//         id                 int64
-//         residentLocationID int64
-//         categoryID         int64
-//         amount             float64
-//         month              int
-//         year               int
-//         createdAt          time.Time
-//         updatedAt          time.Time
-//         description        string
-//         userID             string
-//     )
-
-//     if err := row.Scan(
-//         &id,
-//         &residentLocationID,
-//         &categoryID,
-//         &amount,
-//         &month,
-//         &year,
-//         &createdAt,
-//         &updatedAt,
-//         &description,
-//         &userID,
-//     ); err != nil {
-//         return nil, err
-//     }
-
-//     return expensedomain.NewExpense(
-//         id,
-//         residentLocationID,
-//         categoryID,
-//         amount,
-//         description,
-//         month,
-//         year,
-//         createdAt,
-//         updatedAt,
-//         userID,
-//     ), nil
-// }

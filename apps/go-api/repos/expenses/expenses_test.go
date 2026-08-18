@@ -305,7 +305,7 @@ func TestPgxRepository_List(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if tc.wantExpenses == nil {
-					assert.Nil(t, expenses)
+					assert.Empty(t, expenses)
 				} else {
 					assertExpenseSliceEqual(t, tc.wantExpenses, expenses)
 				}
@@ -327,7 +327,8 @@ func TestPgxRepository_GetByID(t *testing.T) {
 
 	type getCase struct {
 		name        string
-		row         *mockRow
+		rows        *mockRows
+		queryErr    error
 		id          int64
 		wantExpense *expensedomain.Expense
 		wantErr     string
@@ -335,25 +336,25 @@ func TestPgxRepository_GetByID(t *testing.T) {
 
 	cases := []getCase{
 		{
-			name:        "success",
-			row:         newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""}),
+			name: "success",
+			rows: newMockRows([][]any{
+				{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, "", "123456"},
+			}),
 			id:          1,
 			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456"),
 			wantErr:     "",
 		},
 		{
-			name:        "not_found",
-			row:         newMockRowWithError(pgx.ErrNoRows),
-			id:          999,
-			wantExpense: nil,
-			wantErr:     "expense with id 999 not found: no rows in result set",
+			name:    "not_found",
+			rows:    newMockRows(nil),
+			id:      999,
+			wantErr: "expense with id 999 not found: no rows in result set",
 		},
 		{
-			name:        "query_error",
-			row:         newMockRowWithError(errors.New("db error")),
-			id:          1,
-			wantExpense: nil,
-			wantErr:     "db error",
+			name:     "query_error",
+			queryErr: errors.New("db error"),
+			id:       1,
+			wantErr:  "db error",
 		},
 	}
 
@@ -364,8 +365,12 @@ func TestPgxRepository_GetByID(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{tc.id}).
-				Return(tc.row)
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{tc.id}).
+				Return(rows, tc.queryErr)
 
 			expense, err := repo.GetByID(ctx, tc.id)
 
@@ -394,7 +399,8 @@ func TestPgxRepository_Create(t *testing.T) {
 
 	type createCase struct {
 		name        string
-		row         *mockRow
+		rows        *mockRows
+		queryErr    error
 		input       *expensedomain.ExpenseInput
 		wantExpense *expensedomain.Expense
 		wantErr     string
@@ -402,18 +408,19 @@ func TestPgxRepository_Create(t *testing.T) {
 
 	cases := []createCase{
 		{
-			name:        "success",
-			row:         newMockRow([]any{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, ""}),
+			name: "success",
+			rows: newMockRows([][]any{
+				{int64(1), int64(10), int64(20), 150.50, 6, 2024, now, now, "", "123456"},
+			}),
 			input:       expensedomain.NewExpenseInput(10, 20, 150.50, "", 6, 2024),
 			wantExpense: expensedomain.NewExpense(1, 10, 20, 150.50, "", 6, 2024, now, now, "123456"),
 			wantErr:     "",
 		},
 		{
-			name:        "query_error",
-			row:         newMockRowWithError(errors.New("insert failed")),
-			input:       expensedomain.NewExpenseInput(10, 20, 150.50, "", 6, 2024),
-			wantExpense: nil,
-			wantErr:     "insert failed",
+			name:     "query_error",
+			queryErr: errors.New("insert failed"),
+			input:    expensedomain.NewExpenseInput(10, 20, 150.50, "", 6, 2024),
+			wantErr:  "insert failed",
 		},
 	}
 
@@ -425,9 +432,13 @@ func TestPgxRepository_Create(t *testing.T) {
 			ctx := context.Background()
 			userID := "test-user-id"
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"),
 				[]any{userID, tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description()},
-			).Return(tc.row)
+			).Return(rows, tc.queryErr)
 
 			expense, err := repo.Create(ctx, tc.input, userID)
 
@@ -456,7 +467,8 @@ func TestPgxRepository_Update(t *testing.T) {
 
 	type updateCase struct {
 		name        string
-		row         *mockRow
+		rows        *mockRows
+		queryErr    error
 		id          int64
 		input       *expensedomain.ExpenseInput
 		wantExpense *expensedomain.Expense
@@ -465,28 +477,28 @@ func TestPgxRepository_Update(t *testing.T) {
 
 	cases := []updateCase{
 		{
-			name:        "success",
-			row:         newMockRow([]any{int64(1), int64(10), int64(20), 200.00, 7, 2024, now, now, ""}),
+			name: "success",
+			rows: newMockRows([][]any{
+				{int64(1), int64(10), int64(20), 200.00, 7, 2024, now, now, "", "123456"},
+			}),
 			id:          1,
 			input:       expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
 			wantExpense: expensedomain.NewExpense(1, 10, 20, 200.00, "", 7, 2024, now, now, "123456"),
 			wantErr:     "",
 		},
 		{
-			name:        "not_found",
-			row:         newMockRowWithError(pgx.ErrNoRows),
-			id:          999,
-			input:       expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
-			wantExpense: nil,
-			wantErr:     "expense with id 999 not found: no rows in result set",
+			name:    "not_found",
+			rows:    newMockRows(nil),
+			id:      999,
+			input:   expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
+			wantErr: "expense with id 999 not found: no rows in result set",
 		},
 		{
-			name:        "query_error",
-			row:         newMockRowWithError(errors.New("update failed")),
-			id:          1,
-			input:       expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
-			wantExpense: nil,
-			wantErr:     "update failed",
+			name:     "query_error",
+			queryErr: errors.New("update failed"),
+			id:       1,
+			input:    expensedomain.NewExpenseInput(10, 20, 200.00, "", 7, 2024),
+			wantErr:  "update failed",
 		},
 	}
 
@@ -498,9 +510,13 @@ func TestPgxRepository_Update(t *testing.T) {
 			ctx := context.Background()
 			userID := "test-user-id"
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"),
 				[]any{tc.input.ResidentLocationID(), tc.input.CategoryID(), tc.input.Amount(), tc.input.Month(), tc.input.Year(), tc.input.Description(), tc.id, userID},
-			).Return(tc.row)
+			).Return(rows, tc.queryErr)
 
 			expense, err := repo.Update(ctx, tc.id, tc.input, userID)
 

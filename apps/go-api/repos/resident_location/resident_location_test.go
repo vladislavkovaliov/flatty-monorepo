@@ -297,7 +297,7 @@ func TestPgxRepository_List(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if tc.wantResidentLocations == nil {
-					assert.Nil(t, locations)
+					assert.Empty(t, locations)
 				} else {
 					assertResidentLocationSliceEqual(t, tc.wantResidentLocations, locations)
 				}
@@ -319,7 +319,8 @@ func TestPgxRepository_Create(t *testing.T) {
 
 	type createCase struct {
 		name       string
-		row        *mockRow
+		rows       *mockRows
+		queryErr   error
 		input      *residentlocationdomain.ResidentLocationInput
 		wantResult *residentlocationdomain.ResidentLocation
 		wantErr    string
@@ -328,7 +329,9 @@ func TestPgxRepository_Create(t *testing.T) {
 	cases := []createCase{
 		{
 			name: "success",
-			row:  newMockRow([]any{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now}),
+			rows: newMockRows([][]any{
+				{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now},
+			}),
 			input: residentlocationdomain.NewResidentLocationInput(
 				"US", "New York", "10001", "Broadway", "123", "4B",
 			),
@@ -336,8 +339,8 @@ func TestPgxRepository_Create(t *testing.T) {
 			wantErr:    "",
 		},
 		{
-			name: "query_error",
-			row:  newMockRowWithError(errors.New("insert failed")),
+			name:     "query_error",
+			queryErr: errors.New("insert failed"),
 			input: residentlocationdomain.NewResidentLocationInput(
 				"US", "New York", "10001", "Broadway", "123", "4B",
 			),
@@ -353,9 +356,13 @@ func TestPgxRepository_Create(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"),
 				[]any{"test-user-id", tc.input.Country(), tc.input.City(), tc.input.PostalCode(), tc.input.Street(), tc.input.House(), tc.input.Apartment()},
-			).Return(tc.row)
+			).Return(rows, tc.queryErr)
 
 			result, err := repo.Create(ctx, tc.input, "test-user-id")
 
@@ -384,7 +391,8 @@ func TestPgxRepository_Update(t *testing.T) {
 
 	type updateCase struct {
 		name       string
-		row        *mockRow
+		rows       *mockRows
+		queryErr   error
 		id         int64
 		input      *residentlocationdomain.ResidentLocationInput
 		wantResult *residentlocationdomain.ResidentLocation
@@ -394,8 +402,10 @@ func TestPgxRepository_Update(t *testing.T) {
 	cases := []updateCase{
 		{
 			name: "success",
-			row:  newMockRow([]any{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now}),
-			id:   1,
+			rows: newMockRows([][]any{
+				{int64(1), "test-user-id", "US", "New York", "10001", "Broadway", "123", "4B", now, now},
+			}),
+			id: 1,
 			input: residentlocationdomain.NewResidentLocationInput(
 				"US", "New York", "10001", "Broadway", "123", "4B",
 			),
@@ -404,7 +414,7 @@ func TestPgxRepository_Update(t *testing.T) {
 		},
 		{
 			name: "not_found",
-			row:  newMockRowWithError(pgx.ErrNoRows),
+			rows: newMockRows(nil),
 			id:   999,
 			input: residentlocationdomain.NewResidentLocationInput(
 				"US", "New York", "10001", "Broadway", "123", "4B",
@@ -413,9 +423,9 @@ func TestPgxRepository_Update(t *testing.T) {
 			wantErr:    "resident location with id 999 not found: no rows in result set",
 		},
 		{
-			name: "query_error",
-			row:  newMockRowWithError(errors.New("update failed")),
-			id:   1,
+			name:     "query_error",
+			queryErr: errors.New("update failed"),
+			id:       1,
 			input: residentlocationdomain.NewResidentLocationInput(
 				"US", "New York", "10001", "Broadway", "123", "4B",
 			),
@@ -431,9 +441,13 @@ func TestPgxRepository_Update(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"),
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"),
 				[]any{tc.input.Country(), tc.input.City(), tc.input.PostalCode(), tc.input.Street(), tc.input.House(), tc.input.Apartment(), tc.id, "test-user-id"},
-			).Return(tc.row)
+			).Return(rows, tc.queryErr)
 
 			result, err := repo.Update(ctx, tc.id, tc.input, "test-user-id")
 

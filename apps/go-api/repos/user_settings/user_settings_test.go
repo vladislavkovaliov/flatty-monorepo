@@ -10,6 +10,7 @@ import (
 	user_settings_domain "flatty-budget/go-api/domains/user_settings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -31,38 +32,60 @@ func (m *mockPgxPool) QueryRow(ctx context.Context, sql string, args ...any) pgx
 	return row
 }
 
-type mockRow struct {
-	scanValues []any
-	scanErr    error
+// mockRows implements pgx.Rows for testing.
+// When scanErr is set Scan returns it immediately without copying values.
+type mockRows struct {
+	rows    [][]any
+	index   int
+	scanErr error
 }
 
-func newMockRow(values []any) *mockRow {
-	return &mockRow{scanValues: values}
+func newMockRows(data [][]any) *mockRows {
+	return &mockRows{rows: data, index: -1}
 }
 
-func newMockRowWithError(err error) *mockRow {
-	return &mockRow{scanErr: err}
+func (m *mockRows) Next() bool {
+	m.index++
+	return m.index < len(m.rows)
 }
 
-func (m *mockRow) Scan(dest ...any) error {
+func (m *mockRows) Scan(dest ...any) error {
 	if m.scanErr != nil {
 		return m.scanErr
 	}
+	if m.index < 0 || m.index >= len(m.rows) {
+		return errors.New("scan called without Next or out of bounds")
+	}
+	row := m.rows[m.index]
 	for i, d := range dest {
-		if i >= len(m.scanValues) {
+		if i >= len(row) {
 			break
 		}
 		v := reflect.ValueOf(d)
 		if v.Kind() != reflect.Ptr {
 			continue
 		}
-		srcVal := reflect.ValueOf(m.scanValues[i])
+		srcVal := reflect.ValueOf(row[i])
 		if srcVal.IsValid() {
 			v.Elem().Set(srcVal)
 		}
 	}
 	return nil
 }
+
+func (m *mockRows) Close() {}
+
+func (m *mockRows) Err() error { return m.scanErr }
+
+func (m *mockRows) CommandTag() pgconn.CommandTag { return pgconn.CommandTag{} }
+
+func (m *mockRows) FieldDescriptions() []pgconn.FieldDescription { return nil }
+
+func (m *mockRows) Values() ([]any, error) { return nil, nil }
+
+func (m *mockRows) RawValues() [][]byte { return nil }
+
+func (m *mockRows) Conn() *pgx.Conn { return nil }
 
 func assertUserSettingsEqual(t *testing.T, want, got *user_settings_domain.UserSettings) {
 	t.Helper()
@@ -82,7 +105,8 @@ func TestPgxRepository_GetByUserID(t *testing.T) {
 
 	type getCase struct {
 		name     string
-		row      *mockRow
+		rows     *mockRows
+		queryErr error
 		want     *user_settings_domain.UserSettings
 		wantErr  string
 	}
@@ -90,23 +114,23 @@ func TestPgxRepository_GetByUserID(t *testing.T) {
 	cases := []getCase{
 		{
 			name: "success",
-			row: newMockRow([]any{
-				"user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now,
+			rows: newMockRows([][]any{
+				{"user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now},
 			}),
-			want: user_settings_domain.NewUserSettings("user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now),
+			want:    user_settings_domain.NewUserSettings("user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now),
 			wantErr: "",
 		},
 		{
 			name:    "not_found",
-			row:     newMockRowWithError(pgx.ErrNoRows),
+			rows:    newMockRows(nil),
 			want:    nil,
 			wantErr: "",
 		},
 		{
-			name:    "query_error",
-			row:     newMockRowWithError(errors.New("db error")),
-			want:    nil,
-			wantErr: "db error",
+			name:     "query_error",
+			queryErr: errors.New("db error"),
+			want:     nil,
+			wantErr:  "db error",
 		},
 	}
 
@@ -118,8 +142,12 @@ func TestPgxRepository_GetByUserID(t *testing.T) {
 			ctx := context.Background()
 			userID := "user-1"
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{userID}).
-				Return(tc.row)
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{userID}).
+				Return(rows, tc.queryErr)
 
 			got, err := repo.GetByUserID(ctx, userID)
 
@@ -147,12 +175,13 @@ func TestPgxRepository_Upsert(t *testing.T) {
 	now := time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)
 
 	type upsertCase struct {
-		name    string
-		userID  string
-		input   *user_settings_domain.UserSettingsInput
-		row     *mockRow
-		want    *user_settings_domain.UserSettings
-		wantErr string
+		name     string
+		userID   string
+		input    *user_settings_domain.UserSettingsInput
+		rows     *mockRows
+		queryErr error
+		want     *user_settings_domain.UserSettings
+		wantErr  string
 	}
 
 	cases := []upsertCase{
@@ -160,19 +189,19 @@ func TestPgxRepository_Upsert(t *testing.T) {
 			name:   "success",
 			userID: "user-1",
 			input:  user_settings_domain.NewUserSettingsInput("en", "dark", "America/New_York", "MM/DD/YYYY"),
-			row: newMockRow([]any{
-				"user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now,
+			rows: newMockRows([][]any{
+				{"user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now},
 			}),
-			want: user_settings_domain.NewUserSettings("user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now),
+			want:    user_settings_domain.NewUserSettings("user-1", "en", "dark", "America/New_York", "MM/DD/YYYY", now, now),
 			wantErr: "",
 		},
 		{
-			name:    "query_error",
-			userID:  "user-1",
-			input:   user_settings_domain.NewUserSettingsInput("en", "dark", "America/New_York", "MM/DD/YYYY"),
-			row:     newMockRowWithError(errors.New("db error")),
-			want:    nil,
-			wantErr: "db error",
+			name:     "query_error",
+			userID:   "user-1",
+			input:    user_settings_domain.NewUserSettingsInput("en", "dark", "America/New_York", "MM/DD/YYYY"),
+			queryErr: errors.New("db error"),
+			want:     nil,
+			wantErr:  "db error",
 		},
 	}
 
@@ -183,13 +212,17 @@ func TestPgxRepository_Upsert(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{
 				tc.userID,
 				tc.input.Language(),
 				tc.input.Theme(),
 				tc.input.Timezone(),
 				tc.input.DateFormat(),
-			}).Return(tc.row)
+			}).Return(rows, tc.queryErr)
 
 			got, err := repo.Upsert(ctx, tc.userID, tc.input)
 

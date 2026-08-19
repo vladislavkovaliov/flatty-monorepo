@@ -65,7 +65,7 @@ func wireConfig(rg *gin.RouterGroup) {
 
 func wireResidentLocation(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
 
-	repo := residentlocationrepo.NewPgxRepository(pool)
+	repo := residentlocationrepo.NewCachedRepository(residentlocationrepo.NewPgxRepository(pool))
 	svc := residentlocationservice.New(repo)
 
 	h := handlers.NewResidentLocationHandler(svc)

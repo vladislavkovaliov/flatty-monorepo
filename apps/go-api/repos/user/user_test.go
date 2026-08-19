@@ -92,40 +92,6 @@ func (m *mockRows) RawValues() [][]byte { return nil }
 
 func (m *mockRows) Conn() *pgx.Conn { return nil }
 
-// mockRow implements pgx.Row for testing.
-type mockRow struct {
-	scanValues []any
-	scanErr    error
-}
-
-func newMockRow(values []any) *mockRow {
-	return &mockRow{scanValues: values}
-}
-
-func newMockRowWithError(err error) *mockRow {
-	return &mockRow{scanErr: err}
-}
-
-func (m *mockRow) Scan(dest ...any) error {
-	if m.scanErr != nil {
-		return m.scanErr
-	}
-	for i, d := range dest {
-		if i >= len(m.scanValues) {
-			break
-		}
-		v := reflect.ValueOf(d)
-		if v.Kind() != reflect.Ptr {
-			continue
-		}
-		srcVal := reflect.ValueOf(m.scanValues[i])
-		if srcVal.IsValid() {
-			v.Elem().Set(srcVal)
-		}
-	}
-	return nil
-}
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -204,20 +170,7 @@ func TestPgxRepository_List(t *testing.T) {
 			wantErr:   "connection failed",
 		},
 		{
-			name: "scan_err_no_rows",
-			rows: func() *mockRows {
-				r := newMockRows([][]any{
-					{"user-1", "Alice", "alice@test.com", true, strPtr("alice.jpg"), now, now},
-				})
-				r.scanErr = pgx.ErrNoRows
-				return r
-			}(),
-			queryErr:  nil,
-			wantUsers: nil,
-			wantErr:   "",
-		},
-		{
-			name: "scan_other_error",
+			name: "scan_error",
 			rows: func() *mockRows {
 				r := newMockRows([][]any{
 					{"user-1", "Alice", "alice@test.com", true, strPtr("alice.jpg"), now, now},
@@ -225,14 +178,9 @@ func TestPgxRepository_List(t *testing.T) {
 				r.scanErr = errors.New("scan failed")
 				return r
 			}(),
-			queryErr: nil,
-			// When Scan returns a non-ErrNoRows error, the code falls through and
-			// appends a user with the zero-valued variables (which were declared
-			// before Scan and never assigned). This documents the current behaviour.
-			wantUsers: []*userdomain.User{
-				userdomain.NewUser("", "", "", false, nil, time.Time{}, time.Time{}),
-			},
-			wantErr: "",
+			queryErr:  nil,
+			wantUsers: nil,
+			wantErr:   "scan failed",
 		},
 	}
 
@@ -263,7 +211,7 @@ func TestPgxRepository_List(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if tc.wantUsers == nil {
-					assert.Nil(t, users)
+					assert.Empty(t, users)
 				} else {
 					assertUserSliceEqual(t, tc.wantUsers, users)
 				}
@@ -285,7 +233,8 @@ func TestPgxRepository_GetUserByID(t *testing.T) {
 
 	type getCase struct {
 		name     string
-		row      *mockRow
+		rows     *mockRows
+		queryErr error
 		wantUser *userdomain.User
 		wantErr  string
 	}
@@ -293,21 +242,21 @@ func TestPgxRepository_GetUserByID(t *testing.T) {
 	cases := []getCase{
 		{
 			name: "success",
-			row: newMockRow([]any{
-				"user-1", "Alice", "alice@test.com", true, strPtr("alice.jpg"), now, now,
+			rows: newMockRows([][]any{
+				{"user-1", "Alice", "alice@test.com", true, strPtr("alice.jpg"), now, now},
 			}),
 			wantUser: userdomain.NewUser("user-1", "Alice", "alice@test.com", true, strPtr("alice.jpg"), now, now),
 			wantErr:  "",
 		},
 		{
 			name:     "not_found",
-			row:      newMockRowWithError(pgx.ErrNoRows),
+			rows:     newMockRows(nil),
 			wantUser: nil,
 			wantErr:  "",
 		},
 		{
 			name:     "query_error",
-			row:      newMockRowWithError(errors.New("db error")),
+			queryErr: errors.New("db error"),
 			wantUser: nil,
 			wantErr:  "db error",
 		},
@@ -321,8 +270,12 @@ func TestPgxRepository_GetUserByID(t *testing.T) {
 			ctx := context.Background()
 			userID := "some-user-id"
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{userID}).
-				Return(tc.row)
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{userID}).
+				Return(rows, tc.queryErr)
 
 			user, err := repo.GetUserByID(ctx, userID)
 

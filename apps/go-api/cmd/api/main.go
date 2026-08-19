@@ -53,7 +53,7 @@ func main() {
 	consumer := kafkaclient.NewConsumer(brokers, cfg.KafkaTopic, cfg.KafkaGroupID, statsUpdater)
 	defer consumer.Close()
 
-	expenseRepo := expensesrepo.NewPgxRepository(pool)
+	expenseRepo := expensesrepo.NewCachedRepository(expensesrepo.NewPgxRepository(pool))
 	expenseSvc := expensesservice.New(expenseRepo, producer)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)

@@ -134,7 +134,7 @@ func wireUser(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
 }
 
 func wireUserSettings(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
-	repo := user_settings_repo.NewPgxRepository(pool)
+	repo := user_settings_repo.NewCachedRepository(user_settings_repo.NewPgxRepository(pool))
 	svc := user_settings_service.NewService(repo)
 
 	h := handlers.NewUserSettingsHandler(svc)

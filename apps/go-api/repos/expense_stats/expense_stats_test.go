@@ -255,7 +255,7 @@ func TestPgxMonthlyTotalRepository_List(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if tc.want == nil {
-					assert.Nil(t, got)
+					assert.Empty(t, got)
 				} else {
 					assertMonthlyTotalSliceEqual(t, tc.want, got)
 				}
@@ -447,7 +447,7 @@ func TestPgxMonthlyAverageRepository_List(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if tc.want == nil {
-					assert.Nil(t, got)
+					assert.Empty(t, got)
 				} else {
 					assertMonthlyAverageSliceEqual(t, tc.want, got)
 				}

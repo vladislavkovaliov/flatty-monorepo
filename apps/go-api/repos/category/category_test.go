@@ -153,10 +153,10 @@ func TestPgxRepository_Count(t *testing.T) {
 	t.Parallel()
 
 	type countCase struct {
-		name     string
-		row      *mockRow
-		want     int
-		wantErr  string
+		name    string
+		row     *mockRow
+		want    int
+		wantErr string
 	}
 
 	cases := []countCase{
@@ -209,11 +209,11 @@ func TestPgxRepository_List(t *testing.T) {
 	now := time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)
 
 	type listCase struct {
-		name          string
-		rows          *mockRows
-		queryErr      error
+		name           string
+		rows           *mockRows
+		queryErr       error
 		wantCategories []*categorydomain.Category
-		wantErr       string
+		wantErr        string
 	}
 
 	cases := []listCase{
@@ -231,18 +231,18 @@ func TestPgxRepository_List(t *testing.T) {
 			wantErr: "",
 		},
 		{
-			name:          "empty",
-			rows:          newMockRows(nil),
-			queryErr:      nil,
+			name:           "empty",
+			rows:           newMockRows(nil),
+			queryErr:       nil,
 			wantCategories: nil,
-			wantErr:       "",
+			wantErr:        "",
 		},
 		{
-			name:          "query_error",
-			rows:          nil,
-			queryErr:      errors.New("connection failed"),
+			name:           "query_error",
+			rows:           nil,
+			queryErr:       errors.New("connection failed"),
 			wantCategories: nil,
-			wantErr:       "connection failed",
+			wantErr:        "connection failed",
 		},
 		{
 			name: "scan_error",
@@ -253,9 +253,9 @@ func TestPgxRepository_List(t *testing.T) {
 				r.scanErr = errors.New("scan failed")
 				return r
 			}(),
-			queryErr:      nil,
+			queryErr:       nil,
 			wantCategories: nil,
-			wantErr:       "scan failed",
+			wantErr:        "scan failed",
 		},
 	}
 
@@ -284,7 +284,7 @@ func TestPgxRepository_List(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 				if tc.wantCategories == nil {
-					assert.Nil(t, categories)
+					assert.Empty(t, categories)
 				} else {
 					assertCategorySliceEqual(t, tc.wantCategories, categories)
 				}
@@ -306,7 +306,8 @@ func TestPgxRepository_Create(t *testing.T) {
 
 	type createCase struct {
 		name         string
-		row          *mockRow
+		rows         *mockRows
+		queryErr     error
 		input        *categorydomain.CategoryInput
 		wantCategory *categorydomain.Category
 		wantErr      string
@@ -314,18 +315,21 @@ func TestPgxRepository_Create(t *testing.T) {
 
 	cases := []createCase{
 		{
-			name:  "success",
-			row:   newMockRow([]any{int64(1), "Utilities", "Gas & electricity", now, now}),
-			input: categorydomain.NewCategoryInput("Utilities", "Gas & electricity"),
+			name: "success",
+			rows: newMockRows([][]any{
+				{int64(1), "Utilities", "Gas & electricity", now, now},
+			}),
+			input:        categorydomain.NewCategoryInput("Utilities", "Gas & electricity"),
 			wantCategory: categorydomain.NewCategory(1, "Utilities", "Gas & electricity", now, now),
-			wantErr: "",
+			wantErr:      "",
 		},
 		{
-			name:    "query_error",
-			row:     newMockRowWithError(errors.New("insert failed")),
-			input:   categorydomain.NewCategoryInput("Utilities", "Gas & electricity"),
+			name:         "query_error",
+			rows:         nil,
+			queryErr:     errors.New("insert failed"),
+			input:        categorydomain.NewCategoryInput("Utilities", "Gas & electricity"),
 			wantCategory: nil,
-			wantErr: "insert failed",
+			wantErr:      "insert failed",
 		},
 	}
 
@@ -336,8 +340,12 @@ func TestPgxRepository_Create(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{tc.input.Name(), tc.input.Description()}).
-				Return(tc.row)
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{tc.input.Name(), tc.input.Description()}).
+				Return(rows, tc.queryErr)
 
 			category, err := repo.Create(ctx, tc.input)
 
@@ -366,7 +374,8 @@ func TestPgxRepository_Update(t *testing.T) {
 
 	type updateCase struct {
 		name         string
-		row          *mockRow
+		rows         *mockRows
+		queryErr     error
 		id           int64
 		input        *categorydomain.CategoryInput
 		wantCategory *categorydomain.Category
@@ -375,28 +384,31 @@ func TestPgxRepository_Update(t *testing.T) {
 
 	cases := []updateCase{
 		{
-			name:  "success",
-			row:   newMockRow([]any{int64(1), "Updated Name", "Updated desc", now, now}),
-			id:    1,
-			input: categorydomain.NewCategoryInput("Updated Name", "Updated desc"),
+			name: "success",
+			rows: newMockRows([][]any{
+				{int64(1), "Updated Name", "Updated desc", now, now},
+			}),
+			id:           1,
+			input:        categorydomain.NewCategoryInput("Updated Name", "Updated desc"),
 			wantCategory: categorydomain.NewCategory(1, "Updated Name", "Updated desc", now, now),
-			wantErr: "",
+			wantErr:      "",
 		},
 		{
-			name:    "not_found",
-			row:     newMockRowWithError(pgx.ErrNoRows),
-			id:      999,
-			input:   categorydomain.NewCategoryInput("Updated Name", "Updated desc"),
+			name:         "not_found",
+			rows:         newMockRows(nil),
+			id:           999,
+			input:        categorydomain.NewCategoryInput("Updated Name", "Updated desc"),
 			wantCategory: nil,
-			wantErr: "category with id 999 not found: no rows in result set",
+			wantErr:      "category with id 999 not found: no rows in result set",
 		},
 		{
-			name:    "query_error",
-			row:     newMockRowWithError(errors.New("update failed")),
-			id:      1,
-			input:   categorydomain.NewCategoryInput("Updated Name", "Updated desc"),
+			name:         "query_error",
+			rows:         nil,
+			queryErr:     errors.New("update failed"),
+			id:           1,
+			input:        categorydomain.NewCategoryInput("Updated Name", "Updated desc"),
 			wantCategory: nil,
-			wantErr: "update failed",
+			wantErr:      "update failed",
 		},
 	}
 
@@ -407,8 +419,12 @@ func TestPgxRepository_Update(t *testing.T) {
 
 			ctx := context.Background()
 
-			pool.On("QueryRow", ctx, mock.AnythingOfType("string"), []any{tc.input.Name(), tc.input.Description(), tc.id}).
-				Return(tc.row)
+			var rows pgx.Rows
+			if tc.rows != nil {
+				rows = tc.rows
+			}
+			pool.On("Query", ctx, mock.AnythingOfType("string"), []any{tc.input.Name(), tc.input.Description(), tc.id}).
+				Return(rows, tc.queryErr)
 
 			category, err := repo.Update(ctx, tc.id, tc.input)
 

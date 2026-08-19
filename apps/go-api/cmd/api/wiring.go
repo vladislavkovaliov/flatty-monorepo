@@ -108,8 +108,8 @@ func wireExpenses(rg *gin.RouterGroup, pool *pgxpool.Pool, svc *expensesservice.
 }
 
 func wireExpenseStats(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
-	totalRepo := expensestatsrepo.NewPgxMonthlyTotalRepository(pool)
-	avgRepo := expensestatsrepo.NewPgxMonthlyAverageRepository(pool)
+	totalRepo := expensestatsrepo.NewCachedMonthlyTotalRepository(expensestatsrepo.NewPgxMonthlyTotalRepository(pool))
+	avgRepo := expensestatsrepo.NewCachedMonthlyAverageRepository(expensestatsrepo.NewPgxMonthlyAverageRepository(pool))
 
 	totalSvc := expensestatsservice.NewMonthlyTotalService(totalRepo)
 	avgSvc := expensestatsservice.NewMonthlyAverageService(avgRepo)

@@ -9,6 +9,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	applicationsdomain "flatty-budget/go-api/domains/applications"
 	"flatty-budget/go-api/http/handlers"
 	"flatty-budget/go-api/internal/auth"
 	"flatty-budget/go-api/internal/config"
@@ -35,6 +36,7 @@ func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *c
 	r.Use(otelgin.Middleware("go-api"))
 
 	authMw := auth.AuthMiddleware(pool)
+	appsRepo := applicationsrepo.NewCachedRepository(applicationsrepo.NewPgxRepository(pool))
 
 	api := r.Group("/api")
 
@@ -47,8 +49,8 @@ func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *c
 	wireExpenseStats(api, pool, authMw)
 	wireUser(api, pool, authMw)
 	wireUserSettings(api, pool, authMw)
-	wireApplications(api, pool, cfg, authMw)
-	wireAdminApplications(r, pool, authMw)
+	wireApplications(api, appsRepo, cfg, authMw)
+	wireAdminApplications(r, appsRepo, authMw)
 
 	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -142,8 +144,7 @@ func wireUserSettings(rg *gin.RouterGroup, pool *pgxpool.Pool, authMw gin.Handle
 	protected.PUT("/user/me/settings", h.UpdateSettings)
 }
 
-func wireApplications(rg *gin.RouterGroup, pool *pgxpool.Pool, cfg *config.Config, authMw gin.HandlerFunc) {
-	repo := applicationsrepo.NewPgxRepository(pool)
+func wireApplications(rg *gin.RouterGroup, repo applicationsdomain.Repository, cfg *config.Config, authMw gin.HandlerFunc) {
 	svc := applicationsservice.New(repo)
 
 	h := handlers.NewApplicationsHandler(svc, cfg)
@@ -157,8 +158,7 @@ func wireApplications(rg *gin.RouterGroup, pool *pgxpool.Pool, cfg *config.Confi
 	protected.DELETE("/applications/:id", h.Delete)
 }
 
-func wireAdminApplications(r *gin.Engine, pool *pgxpool.Pool, authMw gin.HandlerFunc) {
-	repo := applicationsrepo.NewPgxRepository(pool)
+func wireAdminApplications(r *gin.Engine, repo applicationsdomain.Repository, authMw gin.HandlerFunc) {
 	svc := applicationsservice.New(repo)
 
 	h := handlers.NewAdminApplicationsHandler(svc)

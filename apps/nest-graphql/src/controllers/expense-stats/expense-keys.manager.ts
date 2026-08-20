@@ -1,9 +1,8 @@
-
 export class ExpenseKeyManager {
-    static getKeyVersion = () => `expense:version`;
-    static getKeyListTotal = (version: number) => `expense:listTotal:v${version}`
-    static getKeyListAverages = (version: number) => `expense:listAverages:v${version}`
+  static getKeyListTotal = (userId: string, residentLocationId: number, month?: number, year?: number) =>
+    `expense:listTotal:${userId}:${residentLocationId}:${month ?? '*'}:${year ?? '*'}`;
+  static getKeyListAverages = (userId: string, residentLocationId: number, month?: number, year?: number) =>
+    `expense:listAverages:${userId}:${residentLocationId}:${month ?? '*'}:${year ?? '*'}`;
 
-    static SECONDS_30 = 30_000;
-    static WEEK = 7 * 24 * 60 * 60 * 1000;
-} 
+  static SECONDS_30 = 30_000;
+}

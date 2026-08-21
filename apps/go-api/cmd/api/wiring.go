@@ -13,6 +13,7 @@ import (
 	"flatty-budget/go-api/http/handlers"
 	"flatty-budget/go-api/internal/auth"
 	"flatty-budget/go-api/internal/config"
+	"flatty-budget/go-api/internal/metrics"
 	"flatty-budget/go-api/internal/secure"
 	applicationsrepo "flatty-budget/go-api/repos/applications"
 	categoryrepo "flatty-budget/go-api/repos/category"
@@ -34,6 +35,8 @@ import (
 func setupRouter(pool *pgxpool.Pool, expenseSvc *expensesservice.Service, cfg *config.Config) *gin.Engine {
 	r := gin.Default()
 	r.Use(otelgin.Middleware("go-api"))
+	r.Use(metrics.Middleware())
+	r.GET("/metrics", metrics.Handler())
 
 	authMw := auth.AuthMiddleware(pool)
 	appsRepo := applicationsrepo.NewCachedRepository(applicationsrepo.NewPgxRepository(pool))

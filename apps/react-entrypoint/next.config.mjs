@@ -1,20 +1,23 @@
 /** @type {import('next').NextConfig} */
 
-const GO_API_ORIGIN = "http://localhost:8080";
+const GO_API_ORIGIN = process.env.GO_API_ORIGIN || "http://localhost:8080";
+const NEST_ORIGIN = process.env.NEST_ORIGIN || "http://localhost:3000";
+const SETTINGS_ORIGIN = process.env.SETTINGS_ORIGIN || "http://localhost:8081";
+const RESIDENT_ORIGIN = process.env.RESIDENT_ORIGIN || "http://localhost:8082";
 
 // Fallback entries when the registry fetch fails at boot (go-api down, DB down, empty registry).
 const HARDCODED_APP_REWRITES = [
   {
     source: "/external-settings/:path*",
-    destination: "http://localhost:8081/:path*",
+    destination: `${SETTINGS_ORIGIN}/:path*`,
   },
   {
     source: "/external-resident/:path*",
-    destination: "http://localhost:8082/:path*",
+    destination: `${RESIDENT_ORIGIN}/:path*`,
   },
   {
     source: "/external-app/:path*",
-    destination: "http://localhost:8080/:path*",
+    destination: `${GO_API_ORIGIN}/:path*`,
   },
 ];
 
@@ -43,16 +46,17 @@ function fetchApplications() {
 }
 
 const nextConfig = {
+  output: "standalone",
   reactCompiler: true,
   async rewrites() {
     const base = [
       {
         source: "/api/auth/:path*",
-        destination: "http://localhost:3000/api/auth/:path*",
+        destination: `${NEST_ORIGIN}/api/auth/:path*`,
       },
       {
         source: "/graphql",
-        destination: "http://localhost:3000/graphql",
+        destination: `${NEST_ORIGIN}/graphql`,
       },
       {
         source: "/api/uploads",
@@ -62,10 +66,10 @@ const nextConfig = {
         source: "/api/:path*",
         destination: `${GO_API_ORIGIN}/api/:path*`,
       },
-      // {
-      //   source: "/admin/applications",
-      //   destination: `http://localhost:8080/admin/applications`
-      // }
+      {
+        source: "/admin/:path*",
+        destination: `${GO_API_ORIGIN}/admin/:path*`,
+      },
     ];
 
     const apps = await fetchApplications();

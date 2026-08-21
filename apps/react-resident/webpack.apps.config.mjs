@@ -83,7 +83,7 @@ export default (env, argv) => {
             ],
         },
         devServer: {
-            port: 8082,
+            port: 8083,
         },
         // externals: {
         //     'react': {

@@ -1,0 +1,86 @@
+name: Performance
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  smoke:
+    name: Smoke load test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start stack
+        run: docker compose up -d --build
+
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost/api/health && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: Seed load-test user
+        run: |
+          curl -s -X POST http://localhost/api/auth/sign-up/email \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"loadtest@flatty.local","password":"LoadTest123!"}' || true
+
+      - name: Run k6 smoke
+        run: |
+          mkdir -p tools/load-test/reports
+          docker compose --profile load-test run --rm \
+            -e K6_BASE_URL=http://localhost \
+            k6 run /scripts/smoke.js
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-smoke-report
+          path: tools/load-test/reports/
+
+  nightly-load:
+    name: Nightly load test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start stack
+        run: docker compose up -d --build
+
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost/api/health && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: Seed load-test user
+        run: |
+          curl -s -X POST http://localhost/api/auth/sign-up/email \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"loadtest@flatty.local","password":"LoadTest123!"}' || true
+
+      - name: Run k6 load (streams to Prometheus)
+        run: |
+          mkdir -p tools/load-test/reports
+          docker compose --profile load-test run --rm \
+            -e K6_BASE_URL=http://localhost \
+            k6 run --out experimental-prometheus-rw /scripts/load.js
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-load-report
+          path: tools/load-test/reports/

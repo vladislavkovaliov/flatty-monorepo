@@ -8,6 +8,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { Observable } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
+import { graphqlResolverDuration } from '../metrics/metrics';
 
 @Injectable()
 export class GraphQLTracingInterceptor implements NestInterceptor {
@@ -19,6 +20,7 @@ export class GraphQLTracingInterceptor implements NestInterceptor {
     const info = gqlContext.getInfo();
 
     const span = this.tracer.startSpan(info.fieldName);
+    const start = Date.now();
 
     return next.handle().pipe(
       catchError((error) => {
@@ -32,6 +34,9 @@ export class GraphQLTracingInterceptor implements NestInterceptor {
       }),
       finalize(() => {
         span.end();
+        graphqlResolverDuration
+          .labels(info.fieldName)
+          .observe((Date.now() - start) / 1000);
       }),
     );
   }

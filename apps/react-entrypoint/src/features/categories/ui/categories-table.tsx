@@ -1,6 +1,10 @@
 "use client";
 
-import { type Category, useCategoriesGraphql, useDeleteCategory } from "@flatty-budget/sdk";
+import {
+  type Category,
+  useCategoriesGraphql,
+  useDeleteCategory,
+} from "@flatty-budget/sdk";
 import {
   Box,
   Button,

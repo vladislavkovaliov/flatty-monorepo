@@ -12,12 +12,10 @@ export function buildSpotlightActions(
     description: app.description,
     leftSection: app.icon,
     onClick: () => {
-      const backendServices = ["openapi", "graphql", "jeager", "admin"];
+      const backendServices = ["openapi", "graphql", "jaeger", "admin"];
 
       if (backendServices.includes(app.id)) {
-        if (process.env.NODE_ENV === "development") {
-          window.open(app.path, "_blank");
-        }
+        window.open(app.path, "_blank");
       } else {
         navigate(app);
         closeSpotlight();

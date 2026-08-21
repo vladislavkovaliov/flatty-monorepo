@@ -2,7 +2,7 @@
 
 Webpack UMD remote micro-frontend.
 
-- **Port:** 8082
+- **Port:** 8083
 - **Stack:** React, TypeScript, Mantine v8, TanStack Query
 - **Bundler:** Webpack
 - **Role:** Remote MF — exposes `window.ext-apps.resident`

@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:16
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   init-db:
-    image: postgres:latest
+    image: postgres:16
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,10 +61,18 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
-  react-wrapper:
+  react-entrypoint:
     build:
       context: .
-      dockerfile: apps/react-wrapper/Dockerfile
+      dockerfile: apps/react-entrypoint/Dockerfile
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/flatty
+      GO_API_ORIGIN: http://go-api:8080
+      NEST_ORIGIN: http://nest-graphql:3000
+      SETTINGS_ORIGIN: http://react-settings:80
+      RESIDENT_ORIGIN: http://react-resident:80
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-change-me-to-a-random-secret-at-least-32-chars}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:80}
     depends_on:
       init-db:
         condition: service_completed_successfully
@@ -118,7 +126,7 @@ services:
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-change-me-to-a-random-secret-at-least-32-chars}
       BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:80}
       OTEL_SERVICE_NAME: nest-graphql
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/json
       OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
     depends_on:
       init-db:
@@ -151,9 +159,52 @@ services:
     ports: ["80:80"]
     depends_on:
       - react-launcher
-      - react-wrapper
+      - react-entrypoint
       - react-settings
       - react-resident
       - go-api
       - nest-graphql
     restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports: ["9090:9090"]
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+    volumes:
+      - ./tools/load-test/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports: ["3001:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./tools/load-test/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # On-demand k6 runner. Started explicitly with:
+  #   docker compose --profile load-test run --rm k6 run /scripts/smoke.js
+  k6:
+    image: grafana/k6:latest
+    profiles: ["load-test"]
+    working_dir: /scripts
+    environment:
+      K6_BASE_URL: ${K6_BASE_URL:-http://nginx-proxy}
+      K6_EMAIL: ${K6_EMAIL:-loadtest@flatty.local}
+      K6_PASSWORD: ${K6_PASSWORD:-LoadTest123!}
+      K6_RESIDENT_LOCATION_ID: ${K6_RESIDENT_LOCATION_ID:-9}
+      K6_TRACING_ENDPOINT: http://jaeger:4318/v1/traces
+      K6_PROMETHEUS_RW_SERVER_URL: http://prometheus:9090/api/v1/write
+      K6_PROMETHEUS_RW_TREND_STATS: p(95),p(99)
+    volumes:
+      - ./tools/load-test:/scripts
+    depends_on:
+      - prometheus
+      - jaeger
+      - nginx-proxy
+    restart: "no"

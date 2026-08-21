@@ -22,10 +22,10 @@ export function CategoriesTable() {
   const offset = (page - 1) * LIMIT;
 
   // const { data } = useCategories(LIMIT, offset);
-  const data = useCategoriesGraphql(LIMIT, offset);
+  const { data } = useCategoriesGraphql(LIMIT, offset);
   const deleteMutation = useDeleteCategory();
 
-  const total = data.data?.categoryList.total ?? 0;
+  const total = data?.categoryList.total ?? 0;
   const totalPages = Math.ceil(total / LIMIT);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function CategoriesTable() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const rows = (data?.data?.categoryList.data || []).map((element) => (
+  const rows = (data?.categoryList.data ?? []).map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>{element.id}</Table.Td>
       <Table.Td>{element.name}</Table.Td>

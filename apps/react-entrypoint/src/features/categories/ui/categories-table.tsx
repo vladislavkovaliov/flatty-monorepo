@@ -1,6 +1,6 @@
 "use client";
 
-import { useCategoriesGraphql, useDeleteCategory } from "@flatty-budget/sdk";
+import { type Category, useCategoriesGraphql, useDeleteCategory } from "@flatty-budget/sdk";
 import {
   Box,
   Button,
@@ -42,7 +42,7 @@ export function CategoriesTable() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const rows = (data?.categoryList.data ?? []).map((element) => (
+  const rows = (data?.categoryList.data ?? []).map((element: Category) => (
     <Table.Tr key={element.id}>
       <Table.Td>{element.id}</Table.Td>
       <Table.Td>{element.name}</Table.Td>

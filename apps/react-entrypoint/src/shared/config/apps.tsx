@@ -86,7 +86,7 @@ export const APPS: AppDefinition[] = [
     icon: <IconBrandGraphql size={24} stroke={1.5} />,
   },
   {
-    id: "jeager",
+    id: "jaeger",
     label: "Open Jaeger",
     description: "Open Jaeger",
     path: "http://localhost:16686",
@@ -96,7 +96,7 @@ export const APPS: AppDefinition[] = [
     id: "admin",
     label: "Open admin",
     description: "Open admin",
-    path: "http://localhost:8080/admin/applications",
+    path: "/admin/applications",
     icon: <IconBrandMinecraft size={24} stroke={1.5} />,
   },
 ];

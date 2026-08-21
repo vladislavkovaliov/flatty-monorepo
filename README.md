@@ -13,7 +13,7 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 
 ```bash
 # 1. Start infrastructure (PostgreSQL, Redpanda, RabbitMQ, Jaeger)
-docker compose up postgres redpanda rabbitmq jaeger
+docker compose --env-file .env.dev up -d postgres redpanda rabbitmq jaeger
 
 # 2. Create the database table (run once)
 psql postgres://postgres:password@localhost:55000/flatty -f db.sql
@@ -24,6 +24,13 @@ npm install
 # 4. Run everything
 npm run dev
 ```
+
+**Docker environments:**
+
+| Mode | Command |
+|------|---------|
+| Dev | `docker compose --env-file .env.dev up -d` |
+| Prod | `docker compose --env-file .env.prod up -d` |
 
 ## NPM Commands
 
@@ -73,7 +80,7 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 │  │              Webpack UMD Micro-Frontends                     │   │
 │  │  ┌───────────────────┐     ┌────────────────────────────┐    │   │
 │  │  │  react-settings   │     │  react-resident            │    │   │
-│  │  │  (port 8081)      │     │  (port 8082)               │    │   │
+│  │  │  (port 8081)      │     │  (port 8083)               │    │   │
 │  │  │  User settings    │     │  Resident management       │    │   │
 │  │  └───────────────────┘     └────────────────────────────┘    │   │
 │  └──────────────────────────────────────────────────────────────┘   │
@@ -159,6 +166,95 @@ docker compose up jaeger
 - **Jaeger UI:** http://localhost:16686
 - **OTLP endpoints:** `4317` (gRPC), `4318` (HTTP)
 - **Config:** `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_PROTOCOL`, `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` in `docker-compose.yml` / `.env.example`
+
+## Performance Testing (k6)
+
+Automated load testing with k6, Prometheus, and Grafana. Scripts live in `tools/load-test/`.
+
+### Prerequisites
+
+- k6 >= 0.50 (install locally or use the Docker image)
+- A running backend (Docker compose **or** `npm run dev:backend` on host)
+- A load-test user — seed once:
+
+```bash
+curl -X POST http://localhost/api/auth/sign-up/email \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"loadtest@flatty.local","password":"LoadTest123!"}'
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `K6_BASE_URL` | `http://localhost` | Backend URL to test against |
+| `K6_EMAIL` | *(required)* | Load-test user email |
+| `K6_PASSWORD` | *(required)* | Load-test user password |
+| `K6_RESIDENT_LOCATION_ID` | `1` | Resident location ID for queries |
+
+### Run — Docker Compose
+
+Tests run inside the compose network (nginx → backends):
+
+```bash
+# Smoke (5 VU, 1 min)
+docker compose --profile load-test run --rm k6 run /scripts/smoke.js
+
+# Load (ramp to 50 VU) — streams results to Prometheus
+docker compose --profile load-test run --rm k6 run --out experimental-prometheus-rw /scripts/load.js
+
+# Stress / spike — on-demand
+docker compose --profile load-test run --rm k6 run /scripts/stress.js
+docker compose --profile load-test run --rm k6 run /scripts/spike.js
+```
+
+### Run — Local k6 (any backend URL)
+
+Run k6 on your host and point it at any running backend (local dev, staging, etc.):
+
+```bash
+# Against dev backend (nginx on port 80)
+K6_BASE_URL=http://localhost:80 \
+K6_EMAIL=loadtest@flatty.local \
+K6_PASSWORD=LoadTest123! \
+k6 run tools/load-test/smoke.js
+
+# Against go-api directly (port 8080, no nginx)
+K6_BASE_URL=http://localhost:8080 \
+K6_EMAIL=loadtest@flatty.local \
+K6_PASSWORD=LoadTest123! \
+k6 run tools/load-test/smoke.js
+
+# Against a remote server
+K6_BASE_URL=https://staging.example.com \
+K6_EMAIL=loadtest@flatty.local \
+K6_PASSWORD=LoadTest123! \
+k6 run tools/load-test/load.js
+```
+
+Reports are written to `tools/load-test/reports/` (gitignored). Load-test requests
+appear as traces in Jaeger beside server spans.
+
+### Dashboards
+
+- **Prometheus:** http://localhost:9090
+- **Grafana:** http://localhost:3001 (admin / `GRAFANA_ADMIN_PASSWORD`, default `admin`) — k6 dashboard + Prometheus/Jaeger datasources
+- **Jaeger:** http://localhost:16686
+
+### Thresholds
+
+| Scenario | p95 | p99 | error rate |
+|----------|-----|-----|------------|
+| smoke | < 500 ms | — | < 1% |
+| load | < 800 ms | < 1500 ms | < 1% |
+| stress / spike | < 2000 ms | — | < 5% |
+
+A breached threshold exits k6 with code 1 (CI gate).
+
+### CI
+
+- **PRs:** smoke test against the compose stack (`.github/workflows/performance.yml`)
+- **Nightly (02:00 UTC):** full load test; JSON report uploaded as an artifact; results streamed to Prometheus for trend dashboards
 
 ## Tools
 

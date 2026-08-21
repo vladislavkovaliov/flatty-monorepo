@@ -113,7 +113,7 @@ async function bootstrap() {
     },
   }));
 
-  app.setGlobalPrefix('api')
+  app.setGlobalPrefix('api', { exclude: ['metrics'] })
 
   app.useGlobalInterceptors(
     new GraphQLTracingInterceptor(),

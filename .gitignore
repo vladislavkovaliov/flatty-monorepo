@@ -4,7 +4,8 @@ tmp/
 .vscode/
 .idea/
 *.local
-.env
+.env.dev
+.env.prod
 apps/*/.env
 packages/*/.env
 .DS_Store
@@ -13,3 +14,4 @@ pgdata/
 .nx
 .angular
 thoughts
+tools/load-test/reports/

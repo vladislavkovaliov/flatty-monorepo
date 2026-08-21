@@ -56,14 +56,13 @@ export function useExpensesByYearMonth(
   year: number | undefined,
   month: number | undefined,
 ) {
-  return useQuery({
-    ...EXPENSES_QUERIES.byYearMonth(
+  return useQuery(
+    EXPENSES_QUERIES.byYearMonth(
       residentLocationId as number,
       year as number,
       month as number,
     ),
-    enabled: residentLocationId != null && year != null && month != null,
-  });
+  );
 }
 
 export function useCreateExpense() {

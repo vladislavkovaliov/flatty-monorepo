@@ -1,5 +1,6 @@
 "use client";
 
+import type { GetByYearMonthListData } from "@flatty-budget/sdk";
 import {
   useDeleteExpense,
   useExpensesByYearMonth,
@@ -44,6 +45,8 @@ interface MonthExpensesTableProps {
   month: number;
 }
 
+type ExpenseRow = GetByYearMonthListData["data"][number];
+
 function MonthExpensesTable({
   residentLocationId,
   year,
@@ -65,7 +68,7 @@ function MonthExpensesTable({
     );
   }
 
-  const rows = (expenses?.data || []).map((element) => (
+  const rows = ((expenses?.data ?? []) as ExpenseRow[]).map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>{element.id}</Table.Td>
       <Table.Td>{element.amount}</Table.Td>

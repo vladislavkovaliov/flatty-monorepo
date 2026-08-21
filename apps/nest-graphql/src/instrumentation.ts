@@ -1,16 +1,20 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 
-const traceExporter = new OTLPTraceExporter({
-  url:
-    process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ??
-    'http://localhost:4318/v1/traces',
+// Prevent unhandled async errors from OTel protobuf serializer from crashing the process
+process.on('uncaughtException', (error) => {
+  console.error('[OTel] Uncaught exception (suppressed):', error.message);
 });
+process.on('unhandledRejection', (error) => {
+  console.error('[OTel] Unhandled rejection (suppressed):', error);
+});
+
+const traceExporter = new OTLPTraceExporter();
 
 const resource = resourceFromAttributes({
   [ATTR_SERVICE_NAME]: 'nest-graphql',

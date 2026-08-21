@@ -3,6 +3,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigController } from './config/config.controller';
+import { MetricsController } from './metrics/metrics.controller';
 import { ConfigService } from './config/config.service';
 import { ResidentLocationModule } from './controllers/resident-location/resident-location.module'
 import { CategoriesModule } from './controllers/categories/categories.module'
@@ -19,7 +20,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 
 
 @Module({
-  controllers: [ConfigController],
+  controllers: [ConfigController, MetricsController],
   providers: [ConfigService],
   imports: [
     CacheModule.register({

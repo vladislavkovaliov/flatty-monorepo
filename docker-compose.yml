@@ -135,14 +135,14 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  api-whisperer:
-    build:
-      context: tools/api-whisperer
-      dockerfile: Dockerfile
-    volumes:
-      - ./tools/api-whisperer/bin:/out
-    command: cp /api-whisperer /out/
-    restart: no
+  # api-whisperer:
+  #   build:
+  #     context: tools/api-whisperer
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./tools/api-whisperer/bin:/out
+  #   command: cp /api-whisperer /out/
+  #   restart: no
 
   jaeger:
     image: cr.jaegertracing.io/jaegertracing/jaeger:2.20.0

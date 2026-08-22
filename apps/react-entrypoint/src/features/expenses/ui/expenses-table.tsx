@@ -5,6 +5,7 @@ import {
   useExpensesGraphql,
   useResidentLocationGraphql,
 } from "@flatty-budget/sdk";
+import type { ListExpenseResponse } from "@flatty-budget/sdk";
 import { Box, Button, Container, Pagination, Table } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +27,8 @@ const MONTH: Record<number, string> = {
   11: "Nov",
   12: "Dec",
 } as const;
+
+type ExpenseRow = ListExpenseResponse["data"][number];
 
 export function ExpensesTable() {
   const searchParams = useSearchParams() ?? new URLSearchParams();
@@ -73,7 +76,7 @@ export function ExpensesTable() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const rows = (data?.expenseList?.data || []).map((element) => (
+  const rows = ((data?.expenseList?.data ?? []) as ExpenseRow[]).map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>{element.id}</Table.Td>
       <Table.Td>{element.amount}</Table.Td>

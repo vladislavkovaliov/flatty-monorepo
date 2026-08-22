@@ -1,12 +1,15 @@
 "use client";
 
 import { useUsersGraphql } from "@flatty-budget/sdk";
+import type { ListUserResponse } from "@flatty-budget/sdk";
 import { Badge, Box, Container, Pagination, Table } from "@mantine/core";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 const LIMIT = 10;
+
+type UserRow = ListUserResponse["data"][number];
 
 export function UsersTable() {
   const searchParams = useSearchParams() ?? new URLSearchParams();
@@ -35,7 +38,7 @@ export function UsersTable() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const rows = (responseData?.data || []).map((element) => (
+  const rows = ((responseData?.data ?? []) as UserRow[]).map((element) => (
     <Table.Tr key={element.id}>
       <Table.Td>
         <Link href={`/users/${element.id}`}>{element.id.slice(0, 8)}</Link>

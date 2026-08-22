@@ -1,6 +1,10 @@
 "use client";
 
-import { useCategories, useCreateExpense } from "@flatty-budget/sdk";
+import {
+  type DtoCategoryResponse,
+  useCategories,
+  useCreateExpense,
+} from "@flatty-budget/sdk";
 import {
   Button,
   FileInput,
@@ -35,7 +39,7 @@ export function ExpenseForm({ onPdfUrlChange }: ExpenseFormProps) {
   const { data: categoriesData } = useCategories();
 
   const categoryOptions: CategoryOption[] = (categoriesData?.data ?? []).map(
-    (c) => ({
+    (c: DtoCategoryResponse) => ({
       value: String(c.id),
       label: c.description,
       name: c.name,

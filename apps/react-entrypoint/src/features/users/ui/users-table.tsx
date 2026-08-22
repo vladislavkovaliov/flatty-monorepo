@@ -1,7 +1,7 @@
 "use client";
 
-import { useUsersGraphql } from "@flatty-budget/sdk";
 import type { ListUserResponse } from "@flatty-budget/sdk";
+import { useUsersGraphql } from "@flatty-budget/sdk";
 import { Badge, Box, Container, Pagination, Table } from "@mantine/core";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";

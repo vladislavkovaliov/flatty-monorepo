@@ -19,6 +19,8 @@ export type DeleteResidentLocationResponse = any;
 export type Expense = any;
 export type ListCategoryResponse = any;
 export type ListExpenseResponse = any;
+export type ExpenseMonthlyAverage = any;
+export type ExpenseMonthlyTotal = any;
 export type ListResidentLocationResponse = any;
 export type ListUserResponse = any;
 

@@ -5,7 +5,7 @@ COPY package.json package-lock.json nx.json ./
 COPY apps/ apps/
 COPY packages/ packages/
 
-RUN test -f packages/sdk/src/types/api.ts
+RUN test -f packages/sdk/src/types/api.d.ts
 
 RUN npm ci
 

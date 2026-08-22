@@ -1,12 +1,12 @@
 "use client";
 
+import type { GetByYearMonthListData } from "@flatty-budget/sdk";
 import {
   useDeleteExpense,
   useExpensesByYearMonth,
   useExpensesYearsAndMonths,
   useResidentLocationGraphql,
 } from "@flatty-budget/sdk";
-import type { GetByYearMonthListData } from "@flatty-budget/sdk";
 
 import {
   Accordion,

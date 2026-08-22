@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir -p tools/load-test/reports
           docker compose --profile load-test run --rm \
-            -e K6_BASE_URL=http://localhost \
+            -e K6_BASE_URL=http://nginx-proxy \
             k6 run /scripts/smoke.js
 
       - name: Upload report
@@ -81,7 +81,7 @@ jobs:
         run: |
           mkdir -p tools/load-test/reports
           docker compose --profile load-test run --rm \
-            -e K6_BASE_URL=http://localhost \
+            -e K6_BASE_URL=http://nginx-proxy \
             k6 run --out experimental-prometheus-rw /scripts/load.js
 
       - name: Upload report

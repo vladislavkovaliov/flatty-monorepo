@@ -15,6 +15,9 @@ jobs:
     if: github.event_name != 'schedule'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
 
       - name: Start stack
         run: docker compose up -d --build
@@ -53,6 +56,9 @@ jobs:
     if: github.event_name == 'schedule'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
 
       - name: Start stack
         run: docker compose up -d --build

@@ -1,11 +1,11 @@
 "use client";
 
+import type { ListExpenseResponse } from "@flatty-budget/sdk";
 import {
   useDeleteExpense,
   useExpensesGraphql,
   useResidentLocationGraphql,
 } from "@flatty-budget/sdk";
-import type { ListExpenseResponse } from "@flatty-budget/sdk";
 import { Box, Button, Container, Pagination, Table } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -76,27 +76,29 @@ export function ExpensesTable() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const rows = ((data?.expenseList?.data ?? []) as ExpenseRow[]).map((element) => (
-    <Table.Tr key={element.id}>
-      <Table.Td>{element.id}</Table.Td>
-      <Table.Td>{element.amount}</Table.Td>
-      <Table.Td>{element.description}</Table.Td>
-      <Table.Td>{element.category?.description}</Table.Td>
-      <Table.Td>{MONTH[element.month]}</Table.Td>
-      <Table.Td>{element.year}</Table.Td>
-      <Table.Td>
-        <Button
-          size="xs"
-          variant="light"
-          color="red"
-          loading={deleteMutation.isPending}
-          onClick={() => handleDelete(element.id)}
-        >
-          Delete
-        </Button>
-      </Table.Td>
-    </Table.Tr>
-  ));
+  const rows = ((data?.expenseList?.data ?? []) as ExpenseRow[]).map(
+    (element) => (
+      <Table.Tr key={element.id}>
+        <Table.Td>{element.id}</Table.Td>
+        <Table.Td>{element.amount}</Table.Td>
+        <Table.Td>{element.description}</Table.Td>
+        <Table.Td>{element.category?.description}</Table.Td>
+        <Table.Td>{MONTH[element.month]}</Table.Td>
+        <Table.Td>{element.year}</Table.Td>
+        <Table.Td>
+          <Button
+            size="xs"
+            variant="light"
+            color="red"
+            loading={deleteMutation.isPending}
+            onClick={() => handleDelete(element.id)}
+          >
+            Delete
+          </Button>
+        </Table.Td>
+      </Table.Tr>
+    ),
+  );
 
   return (
     <>

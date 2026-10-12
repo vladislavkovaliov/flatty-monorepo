@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigController } from './config/config.controller';
 import { MetricsController } from './metrics/metrics.controller';
 import { ConfigService } from './config/config.service';
@@ -21,8 +23,15 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 
 @Module({
   controllers: [ConfigController, MetricsController],
-  providers: [ConfigService],
+  providers: [
+    ConfigService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 60_000,
+      limit: 60,
+    }]),
     CacheModule.register({
       isGlobal: true,
     }),
@@ -41,7 +50,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: false,
       introspection: true,
-      csrfPrevention: false,
+      csrfPrevention: true,
       context: ({ req }: { req: Request }) => ({
         req,
         userID: (req as any).userID,

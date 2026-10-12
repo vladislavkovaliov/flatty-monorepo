@@ -21,21 +21,14 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       sendMagicLink: async ({ email, url }) => {
-        console.log('\n═══════════════════════════════════════════════════')
-        console.log('  MAGIC LINK for', email)
-        console.log('  ───────────────────────────────────────────────')
-        console.log('  ', url)
-        console.log('═══════════════════════════════════════════════════\n')
-
         try {
           await sendEmail({
             to: email,
             subject: 'Sign in to Flatty Budget',
             html: `<a href="${url}">Click here to sign in to Flatty Budget</a>`,
           })
-          console.log(`[MagicLink] Email also sent to ${email}`)
         } catch (err) {
-          console.error(`[MagicLink] Email send failed (ignored in dev): ${err}`)
+          // Email send failure is non-fatal in development
         }
       },
     }),

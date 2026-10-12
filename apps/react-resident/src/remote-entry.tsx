@@ -7,7 +7,6 @@ const roots = new Map<HTMLElement, Root>();
 const app: IAppComponent = {
   initialize(element: HTMLElement, _config: IAppConfig): void {
 
-    console.log('init')
     const root = createRoot(element);
     root.render(<App />);
     roots.set(element, root);

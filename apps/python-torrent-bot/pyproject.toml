@@ -1,0 +1,34 @@
+[project]
+name = "python-torrent-bot"
+version = "0.1.0"
+description = "Telegram bot for torrent downloads (Phase 0: UI + fake queue)"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.25,<4",
+    "python-dotenv>=1.0",
+    "psycopg[binary,pool]>=3.3,<4",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.54,<1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# markdown только документация — не форматировать code blocks в доках/плане
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["app"]
+# namespace packages без __init__.py: явные базы, чтобы не было дублей имён модулей
+mypy_path = "."
+explicit_package_bases = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"

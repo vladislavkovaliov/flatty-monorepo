@@ -23,8 +23,8 @@ export function Launcher() {
       } else {
         return null;
       }
-    } catch (error) {
-      console.log("Failed to load config from local storage", error);
+    } catch {
+      // Invalid JSON in localStorage — ignore and return null
     }
   });
   const [drawerOpened, setDrawerOpened] = useState(false);

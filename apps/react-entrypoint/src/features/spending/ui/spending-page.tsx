@@ -25,8 +25,6 @@ export function SpendingPage() {
   const residentLocationId =
     residentLocationsData?.residentLocationList?.data?.[0]?.id;
 
-  console.log({ residentLocationsData });
-
   const { data: totalsData } =
     useExpenseMonthlyTotalsGraphql(residentLocationId);
   const { data: averagesData } =

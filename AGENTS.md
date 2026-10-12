@@ -13,6 +13,7 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 | nest-graphql | GraphQL API | NestJS | 3000 | [→](apps/nest-graphql/AGENTS.md) |
 | nginx-proxy | Reverse proxy | Nginx | 80 | [→](apps/nginx-proxy/AGENTS.md) |
 | react-entrypoint | Shell host (Vite) | Nestjs | 3000 (3001) | [→](apps/react-entrypoint/AGENTS.md) |
+| python-torrent-bot | Telegram-бот торрент-загрузок | Python, aiogram, FastAPI | 8090 | [→](apps/python-torrent-bot/AGENTS.md) |
 
 ## Tools
 

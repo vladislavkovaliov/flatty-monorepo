@@ -1,0 +1,44 @@
+{
+  "name": "python-torrent-bot",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/python-torrent-bot/app",
+  "targets": {
+    "setup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+        "cwd": "apps/python-torrent-bot"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": ".venv/bin/python -m app.main",
+        "cwd": "apps/python-torrent-bot"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": ".venv/bin/pytest",
+        "cwd": "apps/python-torrent-bot"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": ".venv/bin/ruff check .",
+        "cwd": "apps/python-torrent-bot"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": ".venv/bin/mypy app",
+        "cwd": "apps/python-torrent-bot"
+      }
+    }
+  },
+  "tags": ["scope:backend", "type:bot"]
+}

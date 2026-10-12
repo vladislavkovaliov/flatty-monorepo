@@ -14,7 +14,6 @@ export class ExpenseResolver {
     @CurrentUser() userId: string,
     @Args('residentLocationId', { type: () => Int }) residentLocationId: number,
   ): Promise<ExpenseCountResponse> {
-    console.log({residentLocationId, userId})
     const total = await this.expenseService.count(residentLocationId, userId);
     return { total };
   }

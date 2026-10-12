@@ -4,6 +4,7 @@ import {
   type ApplicationConfig,
   useApplications,
 } from "@flatty-budget/mfe-host";
+import { ErrorBoundary } from "@/components/error-boundary/error-boundary";
 import { Loader } from "@mantine/core";
 import dynamic from "next/dynamic";
 
@@ -27,7 +28,6 @@ const LEGACY_APP = {
 
 export default function ResidentPage() {
   const { data, loading } = useApplications();
-  console.log({ data });
   if (loading) {
     return <Loader />;
   }
@@ -37,13 +37,15 @@ export default function ResidentPage() {
   const app = data?.find((row) => row.name === "resident") ?? LEGACY_APP;
 
   return (
-    <MicrofrontendHost
-      bundleName={app.bundleJs ?? LEGACY_APP.bundleJs}
-      cssBundleName={app.styleUrl ?? LEGACY_APP.styleUrl}
-      proxyBasePath={app.proxyBasePath ?? LEGACY_APP.proxyBasePath}
-      basePath={app.basePath ?? LEGACY_APP.basePath}
-      remoteOrigin={app.remoteOrigin ?? LEGACY_APP.remoteOrigin}
-      config={{ env: "qa", featureFlags: {}, hostType: "react" }}
-    />
+    <ErrorBoundary fallbackLabel="Reload resident">
+      <MicrofrontendHost
+        bundleName={app.bundleJs ?? LEGACY_APP.bundleJs}
+        cssBundleName={app.styleUrl ?? LEGACY_APP.styleUrl}
+        proxyBasePath={app.proxyBasePath ?? LEGACY_APP.proxyBasePath}
+        basePath={app.basePath ?? LEGACY_APP.basePath}
+        remoteOrigin={app.remoteOrigin ?? LEGACY_APP.remoteOrigin}
+        config={{ env: "qa", featureFlags: {}, hostType: "react" }}
+      />
+    </ErrorBoundary>
   );
 }

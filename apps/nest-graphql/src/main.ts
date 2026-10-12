@@ -8,6 +8,7 @@ import { ExpressAdapter } from '@nestjs/platform-express'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 import { auth, ensureMigrations } from './lib/auth'
+import { toWebHeaders, readRawBody } from './lib/express-helpers'
 import { GraphQLTracingInterceptor } from './common/graphql-tracing.interceptor';
 
 async function bootstrap() {
@@ -19,12 +20,7 @@ async function bootstrap() {
   // Must be before the better-auth catch-all to take routing precedence
   expressApp.post('/api/auth/set-password', async (req, res) => {
     try {
-      // Read raw body (express.json() hasn't been applied yet)
-      const chunks: Buffer[] = []
-      for await (const chunk of req) {
-        chunks.push(chunk)
-      }
-      const rawBody = Buffer.concat(chunks).toString()
+      const rawBody = await readRawBody(req)
       const { newPassword } = JSON.parse(rawBody)
 
       if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 1) {
@@ -33,12 +29,7 @@ async function bootstrap() {
       }
 
       // Forward headers from the incoming request (includes session cookie)
-      const headers = new Headers()
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (value) {
-          headers.set(key, Array.isArray(value) ? value.join(', ') : value)
-        }
-      }
+      const headers = toWebHeaders(req)
 
       await auth.api.setPassword({
         body: { newPassword },
@@ -66,19 +57,8 @@ async function bootstrap() {
   expressApp.use('/api/auth', async (req, res, next) => {
     try {
       const url = new URL(req.originalUrl, `http://${req.headers.host ?? 'localhost:3000'}`)
-      const headers = new Headers()
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (value) {
-          headers.set(key, Array.isArray(value) ? value.join(', ') : value)
-        }
-      }
-
-      // Read raw body from the incoming request (express.json() hasn't been applied yet)
-      const chunks: Buffer[] = []
-      for await (const chunk of req) {
-        chunks.push(chunk)
-      }
-      const rawBody = Buffer.concat(chunks).toString()
+      const headers = toWebHeaders(req)
+      const rawBody = await readRawBody(req)
 
       const response = await auth.handler(
         new Request(url, {

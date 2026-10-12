@@ -276,7 +276,7 @@ Worker:
 
 ---
 
-## 10. qBittorrent (будущее, FEAT-011)
+## 10. qBittorrent (FEAT-011)
 
 ```text
 TorrentService → TorrentProvider → QBittorrentProvider → qBittorrent Web API

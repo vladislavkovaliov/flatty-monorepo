@@ -28,9 +28,14 @@ CREATE TABLE IF NOT EXISTS torrents (
     eta_seconds BIGINT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     completed_at TIMESTAMPTZ,
+    -- id торрента у провайдера (FEAT-011); пусто = ещё не зарегистрирован
+    provider_id TEXT,
     -- duplicate detection как constraint (design §Components)
     UNIQUE (user_id, info_hash)
 );
+
+-- миграция для существующих БД (Phase 1) — идемпотентно, как весь schema.sql
+ALTER TABLE torrents ADD COLUMN IF NOT EXISTS provider_id TEXT;
 
 CREATE TABLE IF NOT EXISTS torrent_events (
     id BIGSERIAL PRIMARY KEY,

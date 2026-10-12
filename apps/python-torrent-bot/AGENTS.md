@@ -6,7 +6,7 @@ Telegram-бот для торрент-загрузок: magnet-ссылка → 
 - **Порт:** 8090 (HTTP API, только localhost, без аутентификации)
 - **Стек:** Python 3.12, aiogram 3, FastAPI, PostgreSQL (psycopg 3)
 - **Entry:** `python -m app.main`
-- **Режим:** Phase 0/1 — `TEST_MODE=true` обязателен, реальный qBittorrent не подключён
+- **Режим:** Phase 0–2 — `TEST_MODE=true` (FakeTorrentProvider) или `false` + `QBITTORRENT_URL` (реальный QBittorrentProvider)
 
 ## Commands
 
@@ -27,7 +27,7 @@ Telegram-бот для торрент-загрузок: magnet-ссылка → 
   (БД `torrent_bot` создаётся автоматически через
   `podman-compose -f docker-compose.yml --env-file .env.dev up -d postgres init-db`)
 - `API_PORT=8090` — порт свободен; 8080 занят go-api
-- `TEST_MODE=true` — fail-fast, если false (реальные провайдеры не реализованы)
+- `TEST_MODE=true` — симуляция FakeTorrentProvider; `false` требует `QBITTORRENT_URL` (fail-fast)
 
 Подробности: [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 

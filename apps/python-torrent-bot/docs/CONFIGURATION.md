@@ -36,13 +36,25 @@ API_USER_ID=1
 `LOG_LEVEL` — `DEBUG|INFO|WARNING|ERROR|CRITICAL`, default `INFO`; логи также
 пишутся в `logs/bot.log` (ротация 2 МБ × 3).
 
-`TEST_MODE=true` на MVP:
+`TEST_MODE=true` (FakeTorrentProvider):
 
-- запрещает подключение к qBittorrent;
 - запрещает реальные torrent downloads;
 - запрещает доступ к NAS и запись файлов;
 - запрещает перемещение медиа;
 - разрешает только симуляцию загрузки.
+
+`TEST_MODE=false` (FEAT-011, QBittorrentProvider) требует `QBITTORRENT_URL`
+(fail-fast: "QBITTORRENT_URL is required when TEST_MODE=false"). Username/password
+опциональны (LAN без auth). Пути `SAVE_PATH_MOVIES`/`SAVE_PATH_TV` передаются
+qBittorrent как есть — они должны быть видимы с его стороны (NFS/relative его конфига).
+
+```text
+QBITTORRENT_URL=http://192.168.1.50:8080
+QBITTORRENT_USERNAME=
+QBITTORRENT_PASSWORD=
+SAVE_PATH_MOVIES=Movies/
+SAVE_PATH_TV=TV/
+```
 
 `API_HOST`/`API_PORT`/`API_USER_ID` (FEAT-020) — адрес HTTP API (Swagger UI: `http://127.0.0.1:8080/docs`).
 `API_HOST` принимает только localhost (`127.0.0.1`/`localhost`/`::1`) — API без аутентификации,
@@ -57,10 +69,6 @@ ownership через него (поведение = Telegram). Несовпад�
 ## Будущая конфигурация
 
 ```text
-QBITTORRENT_URL=
-QBITTORRENT_USERNAME=
-QBITTORRENT_PASSWORD=
-
 DOWNLOAD_PATH=/mnt/dns320/Downloads
 MOVIES_PATH=/mnt/dns320/Movies
 TV_PATH=/mnt/dns320/TV
@@ -68,4 +76,4 @@ TV_PATH=/mnt/dns320/TV
 REDIS_URL=redis://localhost:6379/0
 ```
 
-Эти переменные вводятся только соответствующими feature (FEAT-011, FEAT-012) — не раньше.
+Эти переменные вводятся только соответствующими feature (FEAT-012 и др.) — не раньше.

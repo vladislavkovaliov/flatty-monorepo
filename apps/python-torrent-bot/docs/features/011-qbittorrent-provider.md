@@ -2,13 +2,11 @@
 
 ## Status
 
-Planned
+Done (2026-10-13)
 
 ## Goal
 
 Подключить реальный торрент-клиент через `TorrentProvider`, не меняя Telegram UI и service layer.
-
-> **Phase gate:** не начинать, пока пользователь явно не переведёт проект на Phase 2.
 
 ## User Story
 
@@ -76,16 +74,16 @@ Telegram layer не знает деталей qBittorrent.
 
 ## Implementation Tasks
 
-- [ ] `QBittorrentProvider`
-- [ ] Маппинг статусов/прогресса
-- [ ] Интеграция с `TorrentService`
-- [ ] Тесты
+- [x] `QBittorrentProvider`
+- [x] Маппинг статусов/прогресса
+- [x] Интеграция с `TorrentService`
+- [x] Тесты
 
 ## Acceptance Criteria
 
-- [ ] Через UI запускается реальная загрузка
-- [ ] Прогресс/скорость/ETA реальные
-- [ ] Handlers не обращаются к qBittorrent напрямую
+- [ ] Через UI запускается реальная загрузка (ручная проверка с живым qBittorrent — вне CI)
+- [x] Прогресс/скорость/ETA реальные (контракт `get_info -> TorrentInfo`, unit-тесты с моком Client)
+- [x] Handlers не обращаются к qBittorrent напрямую
 
 ## Related Documentation
 

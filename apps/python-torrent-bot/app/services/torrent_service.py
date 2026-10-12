@@ -4,7 +4,7 @@ import json
 import logging
 from datetime import UTC, datetime
 
-from app.models.media import SAVE_PATHS, MediaType, Quality
+from app.models.media import MediaType, Quality
 from app.models.torrent import TorrentStatus, TorrentTask
 from app.providers.base import TorrentProvider
 from app.repositories import TorrentRepository
@@ -12,7 +12,10 @@ from app.services.magnet_parser import MagnetInfo
 
 logger = logging.getLogger(__name__)
 
-_PROGRESS_STEP = 12.5
+_DEFAULT_SAVE_PATHS: dict[MediaType, str] = {
+    MediaType.MOVIE: "Movies/",
+    MediaType.SERIES: "TV/",
+}
 # PAUSED/COMPLETED/FAILED/CANCELLED не опрашиваются у provider (нет ложных переходов)
 _TERMINAL = frozenset(
     {
@@ -31,13 +34,18 @@ class TorrentService:
     Без Telegram-кода (docs/API.md §3).
     """
 
-    def __init__(self, provider: TorrentProvider, repository: TorrentRepository) -> None:
+    def __init__(
+        self,
+        provider: TorrentProvider,
+        repository: TorrentRepository,
+        save_paths: dict[MediaType, str] | None = None,
+    ) -> None:
         self._provider = provider
         self._repo = repository
-        # ponytail: provider_id — session state, колонки в БД нет (design §Components),
-        # FakeTorrentProvider живёт в памяти процесса; upgrade path — FEAT-011 добавит
-        # колонку torrents.provider_id и регистрацию в qBittorrent при загрузке из БД
-        self._provider_ids: dict[int, str] = {}
+        self._save_paths = save_paths or dict(_DEFAULT_SAVE_PATHS)
+
+    def save_path_for(self, media_type: MediaType) -> str:
+        return self._save_paths[media_type]
 
     async def register_user(self, user_id: int) -> None:
         """Регистрация при /start: строка bot_users нужна API до первого create (FEAT-020)."""
@@ -157,8 +165,11 @@ class TorrentService:
         task = await self._owned(user_id, task_id)
         if task is None:
             return None
-        # ponytail: cancel без вызова provider — в контракте API.md §2 метода нет;
-        # upgrade path: FEAT-011 добавит cancel в TorrentProvider
+        if task.provider_id:
+            try:
+                await self._provider.delete(task.provider_id, delete_files=False)
+            except Exception:
+                logger.error("provider.delete failed task_id=%s", task.id, exc_info=True)
         await self._change(task, TorrentStatus.CANCELLED)
         logger.info("cancelled task_id=%s user_id=%s", task_id, user_id)
         return task
@@ -175,7 +186,6 @@ class TorrentService:
         # событие ДО удаления: torrent_events.torrent_id — FK с ON DELETE CASCADE
         await self._repo.add_event(task.id, "deleted")
         await self._repo.delete_task(task_id)
-        self._provider_ids.pop(task_id, None)
         logger.info("deleted task_id=%s user_id=%s", task_id, user_id)
         return True
 
@@ -188,12 +198,17 @@ class TorrentService:
         return task
 
     async def _ensure_provider(self, task: TorrentTask) -> None:
-        """Регистрирует magnet у provider один раз за жизнь процесса (task_id → provider_id)."""
-        provider_id = self._provider_ids.get(task.id)
-        if provider_id is None:
-            provider_id = await self._provider.add_magnet(task.magnet, SAVE_PATHS[task.media_type])
-            self._provider_ids[task.id] = provider_id
-        task.provider_id = provider_id
+        """Регистрирует magnet у provider и персистит provider_id (FEAT-011).
+
+        После рестарта задача с пустым provider_id получает magnet заново
+        (дедуп по info_hash на стороне провайдера).
+        """
+        if task.provider_id:
+            return
+        task.provider_id = await self._provider.add_magnet(
+            task.magnet, self._save_paths[task.media_type]
+        )
+        await self._repo.update_task(task)
 
     async def _change(self, task: TorrentTask, new_status: TorrentStatus) -> None:
         if new_status is not task.status:
@@ -206,30 +221,32 @@ class TorrentService:
         await self._repo.update_task(task)
 
     async def _sync(self, task: TorrentTask) -> None:
+        if task.status in _TERMINAL:
+            return
         try:
             await self._ensure_provider(task)
         except Exception:
             logger.error("provider.add_magnet failed task_id=%s", task.id, exc_info=True)
             await self._change(task, TorrentStatus.FAILED)
             return
-        if task.status in _TERMINAL:
-            return
         try:
-            status = await self._provider.get_status(task.provider_id)
+            info = await self._provider.get_info(task.provider_id)
         except Exception:
-            logger.error("provider.get_status failed task_id=%s", task.id, exc_info=True)
+            logger.error("provider.get_info failed task_id=%s", task.id, exc_info=True)
             await self._change(task, TorrentStatus.FAILED)
             return
-        if status is not task.status:
+        if info.status is not task.status:
             # lifecycle-событие только на смене статуса, НЕ на тике прогресса (design §Components)
             await self._repo.add_event(
-                task.id, "status_changed", json.dumps({"from": task.status, "to": status})
+                task.id,
+                "status_changed",
+                json.dumps({"from": task.status, "to": info.status}),
             )
-            task.status = status
-        if status is TorrentStatus.COMPLETED:
-            task.progress = 100.0
+            task.status = info.status
+        task.progress = info.progress
+        task.download_speed = info.download_speed
+        task.upload_speed = info.upload_speed
+        task.eta_seconds = info.eta_seconds
+        if info.status is TorrentStatus.COMPLETED and task.completed_at is None:
             task.completed_at = datetime.now(UTC)
-        elif status is TorrentStatus.DOWNLOADING:
-            # ponytail: фейковый прогресс +12.5% за рендер; upgrade path — данные из provider
-            task.progress = min(99.0, task.progress + _PROGRESS_STEP)
         await self._repo.update_task(task)

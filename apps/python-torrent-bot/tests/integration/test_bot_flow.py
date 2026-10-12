@@ -152,7 +152,7 @@ async def test_full_flow_start_to_downloads() -> None:
     assert tasks[0].status is TorrentStatus.QUEUED
     assert tasks[0].media_type is MediaType.MOVIE
     assert tasks[0].quality is Quality.FHD_1080
-    assert tasks[0].progress == 0.0
+    assert 0.0 <= tasks[0].progress < 100.0  # Fake симулирует прогресс при каждом list()
 
     # 6. /downloads (FEAT-007)
     await dp.feed_raw_update(bot, _message_update(next_id, "/downloads"))

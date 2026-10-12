@@ -97,3 +97,58 @@ def test_non_localhost_api_host_raises(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("API_HOST", "0.0.0.0")
     with pytest.raises(RuntimeError, match="API_HOST"):
         load_config()
+
+
+def _base_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("app.config.load_dotenv", lambda: None)
+    monkeypatch.setenv("BOT_TOKEN", "123:TEST")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pass@host:5432/db")
+    monkeypatch.delenv("QBITTORRENT_URL", raising=False)
+    monkeypatch.delenv("QBITTORRENT_USERNAME", raising=False)
+    monkeypatch.delenv("QBITTORRENT_PASSWORD", raising=False)
+    monkeypatch.delenv("SAVE_PATH_MOVIES", raising=False)
+    monkeypatch.delenv("SAVE_PATH_TV", raising=False)
+
+
+def test_test_mode_false_without_url_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    _base_env(monkeypatch)
+    monkeypatch.setenv("TEST_MODE", "false")
+    with pytest.raises(RuntimeError, match="QBITTORRENT_URL"):
+        load_config()
+
+
+def test_test_mode_false_with_url_is_valid(monkeypatch: pytest.MonkeyPatch) -> None:
+    _base_env(monkeypatch)
+    monkeypatch.setenv("TEST_MODE", "false")
+    monkeypatch.setenv("QBITTORRENT_URL", "http://192.168.1.50:8080")
+    config = load_config()
+    assert config.test_mode is False
+    assert config.qbittorrent_url == "http://192.168.1.50:8080"
+
+
+def test_repr_masks_password(monkeypatch: pytest.MonkeyPatch) -> None:
+    _base_env(monkeypatch)
+    monkeypatch.setenv("TEST_MODE", "true")
+    monkeypatch.setenv("QBITTORRENT_PASSWORD", "hunter2secret")
+    config = load_config()
+    text = repr(config)
+    assert "hunter2secret" not in text
+    assert "***" in text
+
+
+def test_save_paths_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
+    _base_env(monkeypatch)
+    monkeypatch.setenv("TEST_MODE", "true")
+    config = load_config()
+    assert config.save_path_movies == "Movies/"
+    assert config.save_path_tv == "TV/"
+
+
+def test_save_paths_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    _base_env(monkeypatch)
+    monkeypatch.setenv("TEST_MODE", "true")
+    monkeypatch.setenv("SAVE_PATH_MOVIES", "/mnt/media/movies")
+    monkeypatch.setenv("SAVE_PATH_TV", "/mnt/media/tv")
+    config = load_config()
+    assert config.save_path_movies == "/mnt/media/movies"
+    assert config.save_path_tv == "/mnt/media/tv"

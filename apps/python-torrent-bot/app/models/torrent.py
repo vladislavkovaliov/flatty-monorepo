@@ -17,6 +17,17 @@ class TorrentStatus(StrEnum):
 
 
 @dataclass
+class TorrentInfo:
+    """Снимок состояния торрента у провайдера (FEAT-011)."""
+
+    status: TorrentStatus
+    progress: float = 0.0  # 0–100
+    download_speed: int = 0  # B/s
+    upload_speed: int = 0  # B/s
+    eta_seconds: int | None = None
+
+
+@dataclass
 class TorrentTask:
     id: int
     user_id: int
@@ -33,7 +44,6 @@ class TorrentTask:
     eta_seconds: int | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     completed_at: datetime | None = None
-    # ponytail: provider_id сверх минимума ARCHITECTURE §4 — нужен для FEAT-011 (qBittorrent)
     provider_id: str = ""
 
 

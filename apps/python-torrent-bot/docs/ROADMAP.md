@@ -14,22 +14,22 @@ FEAT-010 и выше не реализовывать, пока пользова�
 
 ## Phase 0 — Telegram UI (MVP)
 
-- [ ] Start menu
-- [ ] Magnet parser
-- [ ] Movie / Series
-- [ ] Quality
-- [ ] Confirmation
-- [ ] Fake queue
-- [ ] Downloads list
-- [ ] Download controls
-- [ ] Tests
-- [ ] Documentation
+- [x] Start menu
+- [x] Magnet parser
+- [x] Movie / Series
+- [x] Quality
+- [x] Confirmation
+- [x] Fake queue
+- [x] Downloads list
+- [x] Download controls
+- [x] Tests
+- [x] Documentation
 
 ## Phase 1 — Persistent State
 
-- [ ] Database
-- [ ] Users
-- [ ] Torrents
+- [x] Database
+- [x] Users
+- [x] Torrents
 - [ ] Settings
 - [ ] Persistent FSM
 
@@ -41,16 +41,19 @@ FEAT-010 и выше не реализовывать, пока пользова�
 
 ## Phase 2 — qBittorrent
 
-- [ ] Provider
-- [ ] Add magnet
-- [ ] Status
-- [ ] Pause
-- [ ] Resume
-- [ ] Cancel
-- [ ] Delete
-- [ ] Progress
-- [ ] Speed
-- [ ] ETA
+- [x] Provider
+- [x] Add magnet
+- [x] Status
+- [x] Pause
+- [x] Resume
+- [x] Cancel
+- [x] Delete
+- [x] Progress
+- [x] Speed
+- [x] ETA
+
+Реализовано 2026-10-13 (FEAT-011): `QBittorrentProvider` на `qbittorrentapi`,
+`TEST_MODE=false` впервые валиден. Ручной E2E с живым qBittorrent — см. TESTING.md.
 
 ## Phase 3 — NAS
 

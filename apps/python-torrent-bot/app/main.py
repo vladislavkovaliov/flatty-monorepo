@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import logging.handlers
+import urllib.parse
 from pathlib import Path
 
 import uvicorn
@@ -10,13 +11,28 @@ from aiogram import Bot, Dispatcher
 
 from app.api.app import create_api_app
 from app.bot import create_dispatcher
-from app.config import load_config
+from app.config import Config, load_config
 from app.db.pool import apply_schema, create_pool, redact_database_url
 from app.providers.fake import FakeTorrentProvider
+from app.providers.qbittorrent import QBittorrentProvider
 from app.repositories.postgres import PostgresRepository
 from app.services.torrent_service import TorrentService
 
 logger = logging.getLogger(__name__)
+
+
+def _create_provider(config: Config) -> FakeTorrentProvider | QBittorrentProvider:
+    if config.test_mode:
+        return FakeTorrentProvider()
+    parsed = urllib.parse.urlsplit(config.qbittorrent_url)
+    host = parsed.hostname or "localhost"
+    port = parsed.port or 8080
+    return QBittorrentProvider(
+        host=host,
+        port=port,
+        username=config.qbittorrent_username,
+        password=config.qbittorrent_password,
+    )
 
 
 async def _run_polling(dp: Dispatcher, bot: Bot, server: uvicorn.Server) -> None:
@@ -61,7 +77,8 @@ async def main() -> None:
     try:
         await apply_schema(pool)
         repository = PostgresRepository(pool)
-        service = TorrentService(FakeTorrentProvider(), repository)
+        provider = _create_provider(config)
+        service = TorrentService(provider, repository, save_paths=config.save_paths)
         dp: Dispatcher = create_dispatcher(service, config.test_mode)
         bot = Bot(token=config.bot_token)
         api_app = create_api_app(service, repository, config.api_user_id)

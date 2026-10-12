@@ -58,8 +58,8 @@ class TorrentProvider(Protocol):
 
 ```text
 TorrentProvider
-   +--> FakeTorrentProvider   (app/providers/fake.py, MVP)
-   +--> QBittorrentProvider   (app/providers/qbittorrent.py, будущее)
+   +--> FakeTorrentProvider   (app/providers/fake.py, TEST_MODE=true)
+   +--> QBittorrentProvider   (app/providers/qbittorrent.py, TEST_MODE=false)
 ```
 
 ---

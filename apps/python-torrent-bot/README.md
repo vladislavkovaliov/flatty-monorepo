@@ -2,9 +2,10 @@
 
 Telegram-бот для торрент-загрузок: отправили magnet-ссылку — получили задачу в очереди,
 список загрузок с управлением (пауза / продолжить / отмена / удалить).
-Слоёная архитектура: handlers → services → repositories/providers. Сейчас реализованы
-Phase 0 (Telegram UI) и Phase 1 (PostgreSQL): загрузки имитирует `FakeTorrentProvider`,
-реальный протокол с qBittorrent — отдельная будущая фаза.
+Слоёная архитектура: handlers → services → repositories/providers. Реализованы
+Phase 0 (Telegram UI), Phase 1 (PostgreSQL) и Phase 2 (qBittorrent provider):
+`TEST_MODE=true` — загрузки имитирует `FakeTorrentProvider`; `TEST_MODE=false` —
+реальный `QBittorrentProvider` (нужен `QBITTORRENT_URL`).
 
 ## Требования
 
@@ -39,7 +40,7 @@ nx serve python-torrent-bot
 ### Автотесты
 
 ```bash
-nx test python-torrent-bot   # 49 тестов: unit + integration; DB-тесты skip'аются, если PostgreSQL недоступен
+nx test python-torrent-bot   # 76 тестов: unit + integration; DB-тесты skip'аются, если PostgreSQL недоступен
 nx lint python-torrent-bot   # ruff
 nx typecheck python-torrent-bot  # mypy
 ```
@@ -70,7 +71,7 @@ app/
 ├── handlers/        # Telegram handlers (commands, callbacks)
 ├── keyboards/       # inline-клавиатуры
 ├── services/        # бизнес-логика (magnet parser, torrent service)
-├── providers/       # FakeTorrentProvider (заглушка), базовый интерфейс
+├── providers/       # FakeTorrentProvider (симуляция), QBittorrentProvider (реальный), базовый интерфейс
 ├── repositories/    # доступ к БД (Postgres / InMemory)
 ├── models/          # domain-модели и enum
 └── db/              # пул psycopg, schema.sql

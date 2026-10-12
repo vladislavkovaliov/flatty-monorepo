@@ -155,3 +155,40 @@ pytest --cov=app --cov-report=term-missing
 - В логах отсутствуют любые упоминания qBittorrent, NAS, записи файлов (TEST_MODE).
 - Токен остался только в `.env` и нигде не залогирован.
 - Шаг 21 пройден; в логе старта виден redacted URL БД; без DATABASE_URL бот падает с понятной ошибкой.
+
+---
+
+## Ручной сценарий: реальный qBittorrent (Phase 2, FEAT-011)
+
+Не входит в CI. Нужны: запущенный qBittorrent Web UI и `TEST_MODE=false`.
+
+### Подготовка
+
+1. `.env`:
+
+   ```text
+   TEST_MODE=false
+   QBITTORRENT_URL=http://<ip-qbittorrent>:8080
+   QBITTORRENT_USERNAME=admin
+   QBITTORRENT_PASSWORD=<пароль>
+   ```
+
+2. Без `QBITTORRENT_URL` при `TEST_MODE=false` бот падает при старте (fail-fast).
+3. `nx serve python-torrent-bot`.
+
+### Шаги
+
+1. `/start` → отправьте magnet (любой реальный, с рабочими трекерами) → `🎬 Фильм` (или `📺 Сериал`) → качество → `⬇️ Добавить в очередь`.
+2. Откройте Web UI qBittorrent — торрент появился в списке, файлы пишутся в `SAVE_PATH_MOVIES`/`SAVE_PATH_TV`.
+3. `/downloads` — статус `⏳` с **реальными** процентами, скоростью и ETA (не `Speed: TEST`). Нет блока `🧪 TEST MODE`.
+4. `⏸ Пауза` → в qBittorrent торрент на паузе; `▶️ Продолжить` → качается снова.
+5. `❌ Отменить` → статус `🚫 Отменено`, торрент **исчезает** из qBittorrent (файлы не удаляются).
+6. `🗑 Удалить` → задача удалена из бота.
+7. **Рестарт:** `Ctrl+C` → снова `nx serve` → `/downloads` — задача на месте, `provider_id` сохранён, прогресс продолжается с того же значения (мagnet повторно НЕ добавляется).
+8. Недоступный qBittorrent (остановьте контейнер) → `/downloads` → активная задача становится `FAILED` с понятным сообщением, бот не падает.
+
+### Критерий успеха
+
+- Прогресс/скорость/ETA в боте совпадают с веб-UI qBittorrent.
+- Handlers в логах никогда не обращаются к qBittorrent напрямую (только service → provider).
+- Пароль qBittorrent нигде не залогирован.

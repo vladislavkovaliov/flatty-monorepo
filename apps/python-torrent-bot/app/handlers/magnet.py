@@ -11,7 +11,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
 
 from app.keyboards.main import main_menu_keyboard
 from app.keyboards.torrent import category_keyboard, confirm_keyboard, quality_keyboard
-from app.models.media import MEDIA_LABELS, QUALITY_LABELS, SAVE_PATHS, MediaType, Quality
+from app.models.media import MEDIA_LABELS, QUALITY_LABELS, MediaType, Quality
 from app.models.torrent import TorrentStatus, format_size
 from app.services.magnet_parser import MagnetInfo, MagnetParseError, parse_magnet
 from app.services.torrent_service import TorrentService
@@ -52,14 +52,18 @@ def _info_text(info: MagnetInfo) -> str:
 
 
 def _summary_text(
-    info: MagnetInfo, media_type: MediaType, quality: Quality, test_mode: bool
+    info: MagnetInfo,
+    media_type: MediaType,
+    quality: Quality,
+    test_mode: bool,
+    save_path: str,
 ) -> str:
     text = (
         "✅ Готово к добавлению\n\n"
         f"🎬 Название:\n{info.display_name or 'не определяло'}\n\n"
         f"📁 Категория:\n{MEDIA_LABELS[media_type]}\n\n"
         f"🎞 Качество:\n{QUALITY_LABELS[quality]}\n\n"
-        f"💾 Путь:\n{SAVE_PATHS[media_type]}\n"
+        f"💾 Путь:\n{save_path}\n"
     )
     if test_mode:
         text += "\n🧪 TEST MODE\n\nФайл реально скачиваться НЕ будет."
@@ -105,7 +109,12 @@ async def on_category(callback: CallbackQuery, state: FSMContext) -> None:
 
 
 @router.callback_query(TorrentWizard.choosing_quality, F.data.startswith("torrent:quality:"))
-async def on_quality(callback: CallbackQuery, state: FSMContext, test_mode: bool) -> None:
+async def on_quality(
+    callback: CallbackQuery,
+    state: FSMContext,
+    test_mode: bool,
+    torrent_service: TorrentService,
+) -> None:
     value = (callback.data or "").rsplit(":", 1)[-1]
     quality = _QUALITY_BY_CALLBACK.get(value)
     if quality is None:
@@ -117,7 +126,17 @@ async def on_quality(callback: CallbackQuery, state: FSMContext, test_mode: bool
     await state.update_data(quality=quality)
     await state.set_state(TorrentWizard.confirming)
     await callback.answer()
-    await _edit(callback, _summary_text(info, media_type, quality, test_mode), confirm_keyboard())
+    await _edit(
+        callback,
+        _summary_text(
+            info,
+            media_type,
+            quality,
+            test_mode,
+            torrent_service.save_path_for(media_type),
+        ),
+        confirm_keyboard(),
+    )
 
 
 @router.callback_query(TorrentWizard.confirming, F.data == "torrent:confirm:add")

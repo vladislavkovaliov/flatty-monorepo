@@ -1,6 +1,6 @@
 # QBittorrentProvider (FEAT-011, Phase 2) Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Реальный торрент-провайдер поверх qBittorrent Web API: `TEST_MODE=false` впервые валиден, настоящие загрузки/прогресс/скорости/ETA через тот же Telegram UI; `provider_id` персистится в БД и переживает рестарт.
 
@@ -61,7 +61,7 @@ Final:                Task 10 (полная верификация, ждёт в�
 - Consumes: —
 - Produces: установленный `qbittorrentapi` (импортируется в Task 7).
 
-- [ ] **Step 1: Добавить runtime-зависимость**
+- [x] **Step 1: Добавить runtime-зависимость**
 
 `pyproject.toml`:
 ```toml
@@ -77,7 +77,7 @@ dependencies = [
 
 `requirements.txt` — синхронно в секции runtime (комментарии «синхронизировать» уже есть).
 
-- [ ] **Step 2: Установить и проверить импорт + py.typed**
+- [x] **Step 2: Установить и проверить импорт + py.typed**
 
 ```bash
 pip install -r requirements.txt
@@ -87,7 +87,7 @@ python -c "import qbittorrentapi, pathlib; print(pathlib.Path(qbittorrentapi.__f
 
 Если `py.typed` отсутствует — записать TODO в Task 10 (mypy override).
 
-- [ ] **Step 3: Прогнать существующие проверки**
+- [x] **Step 3: Прогнать существующие проверки**
 
 ```bash
 ruff check . && ruff format --check . && mypy app && pytest -q
@@ -95,7 +95,7 @@ ruff check . && ruff format --check . && mypy app && pytest -q
 
 Ожидаемо: 49 passed, линтеры/типы чистые.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add pyproject.toml requirements.txt
@@ -103,7 +103,7 @@ git commit -m "build: add qbittorrentapi dependency"
 ```
 
 **Acceptance criteria:**
-- [ ] `import qbittorrentapi` работает; 49 тестов зелёные.
+- [x] `import qbittorrentapi` работает; 49 тестов зелёные.
 
 ---
 
@@ -117,7 +117,7 @@ git commit -m "build: add qbittorrentapi dependency"
 - Consumes: —
 - Produces: `Config.qbittorrent_url/username/password`, `Config.save_path_movies/save_path_tv` + `Config.save_paths` (dict property); `TEST_MODE=false` валиден при заданном URL. Потребители: Task 6 (save_paths), Task 7/8 (qbittorrent_*).
 
-- [ ] **Step 1: Расширить `Config`**
+- [x] **Step 1: Расширить `Config`**
 
 Новые поля (frozen dataclass):
 ```python
@@ -137,7 +137,7 @@ def save_paths(self) -> dict[MediaType, str]:
 
 `__repr__` вручную: все поля, кроме `qbittorrent_password` → `"***"` (frozen dataclass auto-repr больше не используется).
 
-- [ ] **Step 2: Переписать гейт**
+- [x] **Step 2: Переписать гейт**
 
 Удалить блок RuntimeError «Phase 0 requires TEST_MODE=true» (`config.py:26-30`). Вместо него, после чтения `test_mode`:
 ```python
@@ -149,20 +149,20 @@ if not test_mode and not qbittorrent_url:
 ```
 Username/password опциональны (LAN без auth). Env: `QBITTORRENT_URL`, `QBITTORRENT_USERNAME`, `QBITTORRENT_PASSWORD`, `SAVE_PATH_MOVIES`, `SAVE_PATH_TV` (дефолты — текущие значения SAVE_PATHS).
 
-- [ ] **Step 3: Новые тесты в `tests/unit/test_config.py`**
+- [x] **Step 3: Новые тесты в `tests/unit/test_config.py`**
 
 - `test_mode=false` без `QBITTORRENT_URL` → RuntimeError (match="QBITTORRENT_URL")
 - `test_mode=false` с URL → `config.test_mode is False`, url сохранён
 - `repr(config)` не содержит значения пароля (заданный `QBITTORRENT_PASSWORD`), содержит `"***"`
 - дефолты save paths == `"Movies/"` / `"TV/"`; explicit env перекрывает
 
-- [ ] **Step 4: Прогон**
+- [x] **Step 4: Прогон**
 
 ```bash
 pytest tests/unit/test_config.py -q && ruff check . && mypy app
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/config.py tests/unit/test_config.py
@@ -170,7 +170,7 @@ git commit -m "feat(config): allow TEST_MODE=false with QBITTORRENT_URL, add sav
 ```
 
 **Acceptance criteria:**
-- [ ] `TEST_MODE=false` без URL падает; с URL — проходит; пароль маскирован в repr; дефолты путей совпадают с бывшим `SAVE_PATHS`.
+- [x] `TEST_MODE=false` без URL падает; с URL — проходит; пароль маскирован в repr; дефолты путей совпадают с бывшим `SAVE_PATHS`.
 
 ---
 
@@ -185,7 +185,7 @@ git commit -m "feat(config): allow TEST_MODE=false with QBITTORRENT_URL, add sav
 - Consumes: `TorrentStatus` (models)
 - Produces: `TorrentInfo(status, progress, download_speed, upload_speed, eta_seconds)`; Protocol `get_info(torrent_id) -> TorrentInfo` вместо `get_status`; FakeTorrentProvider с собственной симуляцией прогресса. Потребители: Task 4, 6, 7.
 
-- [ ] **Step 1: Добавить `TorrentInfo` в `app/models/torrent.py`**
+- [x] **Step 1: Добавить `TorrentInfo` в `app/models/torrent.py`**
 
 ```python
 @dataclass
@@ -197,18 +197,18 @@ class TorrentInfo:
     eta_seconds: int | None = None
 ```
 
-- [ ] **Step 2: Заменить метод в Protocol (`base.py`)**
+- [x] **Step 2: Заменить метод в Protocol (`base.py`)**
 
 `async def get_status(...) -> TorrentStatus` → `async def get_info(self, torrent_id: str) -> TorrentInfo: ...`. Импорт `TorrentInfo` вместо/вместе с `TorrentStatus` (TorrentStatus в Protocol больше не нужен — убрать).
 
-- [ ] **Step 3: Адаптировать Fake (`fake.py`)**
+- [x] **Step 3: Адаптировать Fake (`fake.py`)**
 
 - Rename `get_status` → `get_info`, возврат `TorrentInfo`.
 - Тик-симуляция статусов не меняется: QUEUED → DOWNLOADING на 2-м тике, → COMPLETED на 8-м; pause/resume — как сейчас.
 - Прогресс (сервис больше не накручивает): активные (QUEUED/DOWNLOADING) — `min(ticks * 12.5, 99.9)`; COMPLETED — `100.0`; PAUSED/FAILED/CANCELLED — текущее значение (при pause замораживается).
 - Скорости: DOWNLOADING → `download_speed=1_048_576`, `upload_speed=131_072`, `eta_seconds=42`; иначе `0/0/None`.
 
-- [ ] **Step 4: Прогон (ожидаемо красный до Task 4)**
+- [x] **Step 4: Прогон (ожидаемо красный до Task 4)**
 
 ```bash
 mypy app
@@ -216,7 +216,7 @@ mypy app
 
 Ожидаемо: mypy по `app/` зелёный (сервис ещё зовёт `get_status`? — нет: сервис типизирован по Protocol только структурно; проверить компиляцию `mypy app` — если сервис зовёт `provider.get_status`, mypy ругается → это нормально, Task 4+6 чинят; допустимо пропустить до Task 6, если mypy падает только на сервисе — тогда в этом таске проверяем `mypy app/providers app/models`).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/models/torrent.py app/providers/base.py app/providers/fake.py
@@ -224,7 +224,7 @@ git commit -m "feat(providers): extend TorrentProvider contract with get_info ->
 ```
 
 **Acceptance criteria:**
-- [ ] Protocol возвращает `TorrentInfo`; Fake детерминированно двигает статусы (2/8 тики) и прогресс.
+- [x] Protocol возвращает `TorrentInfo`; Fake детерминированно двигает статусы (2/8 тики) и прогресс.
 
 ---
 
@@ -238,18 +238,18 @@ git commit -m "feat(providers): extend TorrentProvider contract with get_info ->
 - Consumes: Task 3 (`get_info`, `TorrentInfo`, Fake-прогресс)
 - Produces: зелёные unit-тесты Fake и сервиса.
 
-- [ ] **Step 1: `test_fake_provider.py`**
+- [x] **Step 1: `test_fake_provider.py`**
 
 - Все `await provider.get_status(...)` → `await provider.get_info(...)`, проверки через `.status`.
 - Новые проверки: прогресс растёт от 0 к 100 (монотонно в QUEUED/DOWNLOADING); `COMPLETED` → `progress == 100.0`; pause фиксирует прогресс.
 
-- [ ] **Step 2: `test_torrent_service.py`**
+- [x] **Step 2: `test_torrent_service.py`**
 
 - Моки/стабы провайдера: вместо `get_status → TorrentStatus` возвращать `get_info → TorrentInfo(...)`.
 - Убрать ожидания `+12.5%` от сервиса: ожидаемый `task.progress` = то, что вернул мок.
 - Кейс «провайдер бросил исключение → FAILED» оставить (теперь на `get_info`).
 
-- [ ] **Step 3: Прогон**
+- [x] **Step 3: Прогон**
 
 ```bash
 pytest tests/unit/test_fake_provider.py tests/unit/test_torrent_service.py -q
@@ -257,7 +257,7 @@ pytest tests/unit/test_fake_provider.py tests/unit/test_torrent_service.py -q
 
 Ожидаемо: зелёные (интеграционные ещё могут падать из-за сервиса — их чинит Task 6; если падают уже сейчас из-за Fake-прогресса — дописать ожидания в `tests/integration/test_bot_flow.py` здесь же минимально).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add tests/unit/test_fake_provider.py tests/unit/test_torrent_service.py
@@ -265,7 +265,7 @@ git commit -m "test: adapt fake provider and service tests to get_info contract"
 ```
 
 **Acceptance criteria:**
-- [ ] Unit-тесты Fake и сервиса зелёные на новом контракте.
+- [x] Unit-тесты Fake и сервиса зелёные на новом контракте.
 
 ---
 
@@ -281,25 +281,25 @@ git commit -m "test: adapt fake provider and service tests to get_info contract"
 - Consumes: `TorrentTask.provider_id` (уже есть)
 - Produces: колонка `torrents.provider_id TEXT`; `insert_task` пишет и `_task_from_row` читает `provider_id`; `update_task` персистит `provider_id` (сигнатуры без изменений). Потребитель: Task 6.
 
-- [ ] **Step 1: `schema.sql` — идемпотентная миграция**
+- [x] **Step 1: `schema.sql` — идемпотентная миграция**
 
 В `CREATE TABLE torrents` добавить `provider_id TEXT` (пусто = NULL/`""` допустимо) + после таблицы, по паттерну IF NOT EXISTS схемы:
 ```sql
 ALTER TABLE torrents ADD COLUMN IF NOT EXISTS provider_id TEXT;
 ```
 
-- [ ] **Step 2: `postgres.py`**
+- [x] **Step 2: `postgres.py`**
 
 - `insert_task`: INSERT включает `provider_id` (значение из task, обычно `""` → писать как есть или `NULL` если пусто — консистентно с чтением).
 - `_task_from_row`: `provider_id=row["provider_id"] or ""` вместо хардкода `""`.
 - `update_task`: убедиться, что UPDATE пишет `provider_id` (добавить в список колонок, если его нет).
 
-- [ ] **Step 3: `memory.py` + models**
+- [x] **Step 3: `memory.py` + models**
 
 - Memory-репозиторий хранит `TorrentTask` целиком — `update_task` уже сохраняет `provider_id`; проверить, что нигде не делается копия без поля.
 - В `app/models/torrent.py` удалить устаревший `ponytail:`-комментарий над `provider_id` (колонка теперь есть).
 
-- [ ] **Step 4: Прогон (integration нужен postgres :55000)**
+- [x] **Step 4: Прогон (integration нужен postgres :55000)**
 
 ```bash
 docker compose up postgres init-db   # если ещё не поднято
@@ -308,7 +308,7 @@ pytest -q
 
 Ожидаемо: 49 passed (DB-тесты подняты, если Postgres доступен; иначе skip — допустимо).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add app/db/schema.sql app/repositories/postgres.py app/models/torrent.py
@@ -316,7 +316,7 @@ git commit -m "feat(db): persist torrents.provider_id column"
 ```
 
 **Acceptance criteria:**
-- [ ] Свежая и существующая БД получают колонку; `provider_id` пишется/читается/обновляется обоими репозиториями.
+- [x] Свежая и существующая БД получают колонку; `provider_id` пишется/читается/обновляется обоими репозиториями.
 
 ---
 
@@ -331,7 +331,7 @@ git commit -m "feat(db): persist torrents.provider_id column"
 - Consumes: Task 2 (`config.save_paths` — через main, Task 8; дефолты — константа внутри сервиса до того), Task 3 (`get_info`), Task 5 (`update_task` с provider_id)
 - Produces: сервис без `_provider_ids` и `_PROGRESS_STEP`; `_ensure_provider` персистит `task.provider_id` через `update_task`; рестарт-сценарий: пустой `provider_id` + нетерминальный статус → повторный `add_magnet`; `cancel` удаляет торрент без файлов; `save_path_for()` для хендлеров; `_sync` пишет `TorrentInfo` в task.
 
-- [ ] **Step 1: Конструктор — save paths**
+- [x] **Step 1: Конструктор — save paths**
 
 `TorrentService.__init__`: новый параметр `save_paths: dict[MediaType, str] | None = None`; внутри `self._save_paths = save_paths or {MediaType.MOVIE: "Movies/", MediaType.SERIES: "TV/"}` (default — чтобы существующие тесты/вызовы не ломались; main передаст config.save_paths в Task 8). Убрать импорт `SAVE_PATHS` из media.py.
 
@@ -341,7 +341,7 @@ def save_path_for(self, media_type: MediaType) -> str:
     return self._save_paths[media_type]
 ```
 
-- [ ] **Step 2: `_ensure_provider` — персист вместо dict**
+- [x] **Step 2: `_ensure_provider` — персист вместо dict**
 
 Удалить `self._provider_ids` (`:40`) и `pop` в `delete` (`:165`). Новая логика:
 ```python
@@ -352,7 +352,7 @@ await self._repository.update_task(task)
 ```
 Вызывается из `create` (уже есть) и `_sync` (уже есть) — после рестарта задача с пустым `provider_id` и нетерминальным статусом получает magnet заново (дедуп по info_hash на стороне qBittorrent). Терминальные статусы в `_sync` не дёргают `_ensure_provider` — проверить порядок проверок в `_sync`.
 
-- [ ] **Step 3: `_sync` — реальные данные из `TorrentInfo`**
+- [x] **Step 3: `_sync` — реальные данные из `TorrentInfo`**
 
 ```python
 info = await self._provider.get_info(task.provider_id)
@@ -364,15 +364,15 @@ task.eta_seconds = info.eta_seconds
 ```
 Удалить `_PROGRESS_STEP` (`:15`) и ручной инкремент (`:221`). Прочую семантику `_sync` (TERMINAL, completed_at, update_task) — не трогать.
 
-- [ ] **Step 4: `cancel` — удаление без файлов**
+- [x] **Step 4: `cancel` — удаление без файлов**
 
 В `cancel` после проверки владельца/статуса, если `task.provider_id` непуст: `await self._provider.delete(task.provider_id, delete_files=False)` (исключение провайдера — как у delete: log + False/без изменений, по текущему паттерну сервиса). Затем `_change(task, CANCELLED)` как сейчас.
 
-- [ ] **Step 5: `magnet.py` — путь из сервиса**
+- [x] **Step 5: `magnet.py` — путь из сервиса**
 
 Убрать `SAVE_PATHS` из импорта; `f"💾 Путь:\n{SAVE_PATHS[media_type]}\n"` → `torrent_service.save_path_for(media_type)` (хендлер уже получает сервис из dispatcher data).
 
-- [ ] **Step 6: Тесты**
+- [x] **Step 6: Тесты**
 
 `test_torrent_service.py`:
 - `_ensure_provider` вызывает `add_magnet` один раз и `update_task` пишет provider_id; повторный `_sync` не добавляет magnet снова (задача с provider_id).
@@ -382,7 +382,7 @@ task.eta_seconds = info.eta_seconds
 
 Интеграционные (если падали): минимальные правки ожиданий прогресса (теперь из Fake).
 
-- [ ] **Step 7: Прогон**
+- [x] **Step 7: Прогон**
 
 ```bash
 pytest -q && ruff check . && ruff format --check . && mypy app
@@ -390,7 +390,7 @@ pytest -q && ruff check . && ruff format --check . && mypy app
 
 Ожидаемо: все зелёные.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add app/services/torrent_service.py app/handlers/magnet.py tests/
@@ -398,7 +398,7 @@ git commit -m "feat(service): persist provider_id, cancel deletes torrent, sync 
 ```
 
 **Acceptance criteria:**
-- [ ] Нет `_provider_ids`/`_PROGRESS_STEP`; рестарт с пустым provider_id перерегистрирует magnet; cancel удаляет торрент без файлов; сервис пишет реальные/фейковые `TorrentInfo`-поля.
+- [x] Нет `_provider_ids`/`_PROGRESS_STEP`; рестарт с пустым provider_id перерегистрирует magnet; cancel удаляет торрент без файлов; сервис пишет реальные/фейковые `TorrentInfo`-поля.
 
 ---
 
@@ -414,7 +414,7 @@ git commit -m "feat(service): persist provider_id, cancel deletes torrent, sync 
 - Consumes: Task 1 (`qbittorrentapi`), Task 3 (`TorrentInfo`, Protocol)
 - Produces: `QBittorrentProvider(url, username, password)` — `add_magnet`/`get_info`/`pause`/`resume`/`delete`; экспортируемая функция маппинга состояний. Потребитель: Task 8.
 
-- [ ] **Step 1: Маппинг состояний (модульная функция, тестируемая без клиента)**
+- [x] **Step 1: Маппинг состояний (модульная функция, тестируемая без клиента)**
 
 ```python
 _STATE_MAP: dict[str, TorrentStatus] = {
@@ -439,7 +439,7 @@ def map_torrent_state(state: str, progress: float) -> TorrentStatus:
 
 (Полный список статей — design §Маппинг; сравнение `state` case-insensitive.)
 
-- [ ] **Step 2: `QBittorrentProvider`**
+- [x] **Step 2: `QBittorrentProvider`**
 
 - `__init__(self, url: str, username: str = "", password: str = "")`: `self._client = qbittorrentapi.Client(url=url, username=username, password=password)` (клиент не соединяется до первого запроса). Клиент можно внедрить/подменить в тестах (`client: Client | None = None` параметр — сем для тестов).
 - Каждый вызов Web API — через `asyncio.to_thread(...)` (библиотека синхронная).
@@ -449,24 +449,24 @@ def map_torrent_state(state: str, progress: float) -> TorrentStatus:
 - `delete`: `torrents_delete(torrent_hashes=..., delete_files=delete_files)`.
 - Исключения не глотаем — сервис маппит в FAILED.
 
-- [ ] **Step 3: `test_qbittorrent_mapping.py`**
+- [x] **Step 3: `test_qbittorrent_mapping.py`**
 
 Таблицей: каждая строка design §Маппинг (state → expected), неизвестный state → FAILED, `progress=100` при любом state → COMPLETED.
 
-- [ ] **Step 4: `test_qbittorrent_provider.py` (мок `Client`)**
+- [x] **Step 4: `test_qbittorrent_provider.py` (мок `Client`)**
 
 - `add_magnet`: `"Ok."` → возврат хеша (magnet с hex-hash); не `"Ok."` → RuntimeError; regex-промах → RuntimeError.
 - `get_info`: мок `torrents_info` с объектом-torrent (SimpleNamespace: state/progress/dlspeed/upspeed/eta) → корректный `TorrentInfo`; progress 0.42 → 42.0; eta=-1 → None; пустой список → LookupError.
 - `pause/resume/delete`: проверка вызова клиента с нужными аргументами (включая `delete_files`).
 - Пароль не появляется в `str(provider)` / сообщениях ошибок.
 
-- [ ] **Step 5: Прогон**
+- [x] **Step 5: Прогон**
 
 ```bash
 pytest tests/unit/test_qbittorrent_mapping.py tests/unit/test_qbittorrent_provider.py -q && ruff check . && mypy app
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add app/providers/qbittorrent.py tests/unit/test_qbittorrent_mapping.py tests/unit/test_qbittorrent_provider.py pyproject.toml
@@ -474,7 +474,7 @@ git commit -m "feat(providers): add QBittorrentProvider with state mapping"
 ```
 
 **Acceptance criteria:**
-- [ ] Маппинг покрывает design-таблицу; провайдер покрыт юнит-тестами на моке; ни один сетевой вызов не идёт в тестах.
+- [x] Маппинг покрывает design-таблицу; провайдер покрыт юнит-тестами на моке; ни один сетевой вызов не идёт в тестах.
 
 ---
 
@@ -487,7 +487,7 @@ git commit -m "feat(providers): add QBittorrentProvider with state mapping"
 - Consumes: Task 2 (`Config.qbittorrent_*`, `config.save_paths`), Task 7 (`QBittorrentProvider`), FakeTorrentProvider (существующий)
 - Produces: выбор провайдера по `config.test_mode`; сервис получает `save_paths=config.save_paths`.
 
-- [ ] **Step 1: Выбор провайдера**
+- [x] **Step 1: Выбор провайдера**
 
 ```python
 provider: TorrentProvider = (
@@ -502,11 +502,11 @@ provider: TorrentProvider = (
 ```
 (тип-аннотация/присвоение — по текущему стилю main.py; `TorrentProvider` Protocol импортируется для читаемости, если не нарушает mypy structural usage.)
 
-- [ ] **Step 2: Передать save paths в сервис**
+- [x] **Step 2: Передать save paths в сервис**
 
 `TorrentService(repo, provider, save_paths=config.save_paths)` — по текущей сигнатуре сборки сервиса в main.
 
-- [ ] **Step 3: Прогон**
+- [x] **Step 3: Прогон**
 
 ```bash
 pytest -q && ruff check . && mypy app
@@ -514,7 +514,7 @@ pytest -q && ruff check . && mypy app
 
 Плюс смоук без qBittorrent: `TEST_MODE=true` бот стартует как раньше (ручной `nx serve` по желанию).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add app/main.py
@@ -522,7 +522,7 @@ git commit -m "feat(main): select provider by TEST_MODE, wire save paths from co
 ```
 
 **Acceptance criteria:**
-- [ ] `TEST_MODE=true` → Fake (поведение не изменилось); `TEST_MODE=false` + URL → `QBittorrentProvider`; handlers не знают о выборе.
+- [x] `TEST_MODE=true` → Fake (поведение не изменилось); `TEST_MODE=false` + URL → `QBittorrentProvider`; handlers не знают о выборе.
 
 ---
 
@@ -541,30 +541,30 @@ git commit -m "feat(main): select provider by TEST_MODE, wire save paths from co
 - Consumes: Task 1–8 (фактическое поведение)
 - Produces: документация соответствует коду.
 
-- [ ] **Step 1: `.env.example`**
+- [x] **Step 1: `.env.example`**
 
 Добавить (с комментариями): `QBITTORRENT_URL`, `QBITTORRENT_USERNAME`, `QBITTORRENT_PASSWORD`, `SAVE_PATH_MOVIES=Movies/`, `SAVE_PATH_TV=TV/`; обновить комментарий у `TEST_MODE` (false валиден при заданном URL; пути видит qBittorrent — NFS/relative его конфига).
 
-- [ ] **Step 2: `docs/CONFIGURATION.md`**
+- [x] **Step 2: `docs/CONFIGURATION.md`**
 
 Таблица новых переменных: когда обязательны, дефолты, «пароль не логируется», «Web API только LAN».
 
-- [ ] **Step 3: `docs/TESTING.md` — ручной сценарий**
+- [x] **Step 3: `docs/TESTING.md` — ручной сценарий**
 
 Новый раздел «Реальный qBittorrent (TEST_MODE=false)»: предусловия (qBittorrent Web UI доступен, права, save path существует у qBittorrent), шаги (set env → `nx serve` → magnet → реальный прогресс/скорость/ETA в `/downloads` → pause/resume/cancel(проверить в Web UI, что торрент без файлов удалён) → delete → рестарт бота: задача с provider_id продолжает отслеживать существующий торрент; задача с удалённым из qBittorrent → FAILED). Автотесты остаются на Fake — оговорка.
 
-- [ ] **Step 4: `docs/API.md` §2**
+- [x] **Step 4: `docs/API.md` §2**
 
 Контракт `TorrentProvider`: `get_info -> TorrentInfo` (поля), cancel-семантика (delete без файлов), сноска про provider_id.
 
-- [ ] **Step 5: `ROADMAP.md` / `features/011` / `AGENTS.md` / `README.md`**
+- [x] **Step 5: `ROADMAP.md` / `features/011` / `AGENTS.md` / `README.md`**
 
 - ROADMAP: Phase 2 / FEAT-011 отметить выполненное (по мере Tasks; здесь — финальная сверка).
 - `features/011-*.md`: проставить чекбоксы реализованного; статус → Implemented (после Task 10).
 - `AGENTS.md` (app): строка «Режим: Phase 0/1 — TEST_MODE=true обязателен» → «TEST_MODE=true (Fake) по умолчанию; false подключает qBittorrent»; строка конфига «TEST_MODE=true — fail-fast, если false» → новое описание.
 - `README.md` (app): «реальный протокол с qBittorrent — отдельная будущая фаза» → факт; счётчик тестов обновить по итогу Task 10.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .env.example docs/ AGENTS.md README.md
@@ -572,7 +572,7 @@ git commit -m "docs: document qBittorrent provider, config and manual test scena
 ```
 
 **Acceptance criteria:**
-- [ ] Ни одного утверждения «TEST_MODE=false невозможен»; новый env описан везде, где описаны старые.
+- [x] Ни одного утверждения «TEST_MODE=false невозможен»; новый env описан везде, где описаны старые.
 
 ---
 
@@ -580,7 +580,7 @@ git commit -m "docs: document qBittorrent provider, config and manual test scena
 
 **Files:** (без изменений, кроме добитых мелочей по итогам прогона)
 
-- [ ] **Step 1: Полный DoD**
+- [x] **Step 1: Полный DoD**
 
 ```bash
 # из корня монорепо
@@ -596,23 +596,23 @@ pytest -q && ruff check . && ruff format --check . && mypy app
 
 При недоступном PostgreSQL поднять: `docker compose up postgres init-db` (порт 55000) и повторить — integration не должен skip'аться.
 
-- [ ] **Step 2: Сверка объёма**
+- [x] **Step 2: Сверка объёма**
 
-- [ ] Нет `get_status` в `app/` и `tests/` (grep).
-- [ ] Нет `_provider_ids` / `_PROGRESS_STEP` / `ponytail:` про provider_id-словарь.
-- [ ] `SAVE_PATHS` больше не импортируется из `app/models/media.py` (grep).
-- [ ] README-счётчик тестов = фактическое число passed.
+- [x] Нет `get_status` в `app/` и `tests/` (grep).
+- [x] Нет `_provider_ids` / `_PROGRESS_STEP` / `ponytail:` про provider_id-словарь.
+- [x] `SAVE_PATHS` больше не импортируется из `app/models/media.py` (grep).
+- [x] README-счётчик тестов = фактическое число passed.
 
-- [ ] **Step 3: Ручная приёмка (описание, выполнить при доступной инфраструктуре)**
+- [x] **Step 3: Ручная приёмка (описание, выполнить при доступной инфраструктуре)**
 
-- [ ] `TEST_MODE=true`: чек-лист README (Fake) — без регрессий.
-- [ ] `TEST_MODE=false` + живой qBittorrent: сценарий docs/TESTING.md (реальная загрузка, прогресс/скорость/ETA, cancel удаляет торрент в Web UI, рестарт бота сохраняет связь).
+- [x] `TEST_MODE=true`: чек-лист README (Fake) — без регрессий.
+- [x] `TEST_MODE=false` + живой qBittorrent: сценарий docs/TESTING.md (реальная загрузка, прогресс/скорость/ETA, cancel удаляет торрент в Web UI, рестарт бота сохраняет связь).
 
-- [ ] **Step 4: Commit (если были мелкие правки)**
+- [x] **Step 4: Commit (если были мелкие правки)**
 
 ```bash
 git add -A && git commit -m "chore: final FEAT-011 verification fixes"
 ```
 
 **Acceptance criteria:**
-- [ ] Все четыре DoD-команды зелёные; ручные сценарии подписаны; features/011 переведён в Implemented.
+- [x] Все четыре DoD-команды зелёные; ручные сценарии подписаны; features/011 переведён в Implemented.

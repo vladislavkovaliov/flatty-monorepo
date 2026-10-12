@@ -15,11 +15,6 @@ class Quality(StrEnum):
     UNKNOWN = "unknown"
 
 
-SAVE_PATHS: dict[MediaType, str] = {
-    MediaType.MOVIE: "Movies/",
-    MediaType.SERIES: "TV/",
-}
-
 MEDIA_LABELS: dict[MediaType, str] = {
     MediaType.MOVIE: "Фильм",
     MediaType.SERIES: "Сериал",

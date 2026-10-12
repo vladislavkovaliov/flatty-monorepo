@@ -172,3 +172,92 @@ async def test_status_changes_record_lifecycle_events(
     await service.delete(1, task.id)
     kinds = [event for _tid, event, _payload in repo.events]
     assert kinds == ["created", "status_changed", "status_changed", "deleted"]
+
+
+async def test_provider_id_persisted_once(repo: InMemoryRepository) -> None:
+    class CountingFake(FakeTorrentProvider):
+        add_calls = 0
+
+        async def add_magnet(self, magnet: str, save_path: str) -> str:
+            CountingFake.add_calls += 1
+            return await super().add_magnet(magnet, save_path)
+
+    provider = CountingFake()
+    service = TorrentService(provider, repo)
+    task, _ = await service.create(
+        user_id=1, magnet=_magnet(), media_type=MediaType.MOVIE, quality=Quality.FHD_1080
+    )
+    assert CountingFake.add_calls == 1
+    assert task.provider_id.startswith("fake-")
+    for _ in range(5):
+        await service.list(1)
+    assert CountingFake.add_calls == 1  # повторно не регистрируем
+
+
+async def test_empty_provider_id_reregisters_after_restart(repo: InMemoryRepository) -> None:
+    seeded = TorrentTask(
+        id=0,
+        user_id=1,
+        magnet=f"magnet:?xt=urn:btih:{HASH_A}",
+        info_hash=HASH_A,
+        name="Restored",
+        media_type=MediaType.MOVIE,
+        quality=Quality.FHD_1080,
+    )
+    assert await repo.insert_task(seeded) is not None
+    stored = await repo.get_task(1, seeded.id)
+    assert stored is not None and stored.provider_id == ""
+    service = TorrentService(FakeTorrentProvider(), repo)
+    tasks = await service.list(1)
+    assert tasks[0].provider_id.startswith("fake-")
+
+
+async def test_cancel_deletes_torrent_without_files(repo: InMemoryRepository) -> None:
+    class DeleteRecording(FakeTorrentProvider):
+        def __init__(self) -> None:
+            super().__init__()
+            self.deleted: list[tuple[str, bool]] = []
+
+        async def delete(self, torrent_id: str, delete_files: bool = False) -> None:
+            self.deleted.append((torrent_id, delete_files))
+            await super().delete(torrent_id, delete_files)
+
+    provider = DeleteRecording()
+    service = TorrentService(provider, repo)
+    task, _ = await service.create(
+        user_id=1, magnet=_magnet(), media_type=MediaType.MOVIE, quality=Quality.FHD_1080
+    )
+    cancelled = await service.cancel(1, task.id)
+    assert cancelled is not None and cancelled.status is TorrentStatus.CANCELLED
+    assert provider.deleted == [(task.provider_id, False)]
+
+
+async def test_sync_copies_torrent_info_fields(repo: InMemoryRepository) -> None:
+    from app.models.torrent import TorrentInfo
+
+    class InfoFake(FakeTorrentProvider):
+        async def get_info(self, torrent_id: str) -> TorrentInfo:
+            return TorrentInfo(
+                status=TorrentStatus.DOWNLOADING,
+                progress=42.0,
+                download_speed=1234,
+                upload_speed=99,
+                eta_seconds=77,
+            )
+
+    service = TorrentService(InfoFake(), repo)
+    task, _ = await service.create(
+        user_id=1, magnet=_magnet(), media_type=MediaType.MOVIE, quality=Quality.FHD_1080
+    )
+    synced = (await service.list(1))[0]
+    assert synced.status is TorrentStatus.DOWNLOADING
+    assert synced.progress == 42.0
+    assert synced.download_speed == 1234
+    assert synced.upload_speed == 99
+    assert synced.eta_seconds == 77
+    assert task.provider_id == synced.provider_id
+
+
+async def test_save_path_for_defaults(service: TorrentService) -> None:
+    assert service.save_path_for(MediaType.MOVIE) == "Movies/"
+    assert service.save_path_for(MediaType.SERIES) == "TV/"

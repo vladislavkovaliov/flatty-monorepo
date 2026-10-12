@@ -5,8 +5,10 @@ from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
+from app.models.media import MediaType
 
-@dataclass(frozen=True)
+
+@dataclass(frozen=True, repr=False)
 class Config:
     bot_token: str
     test_mode: bool
@@ -15,6 +17,26 @@ class Config:
     api_host: str
     api_port: int
     api_user_id: int
+    qbittorrent_url: str = ""
+    qbittorrent_username: str = ""
+    qbittorrent_password: str = ""
+    save_path_movies: str = "Movies/"
+    save_path_tv: str = "TV/"
+
+    @property
+    def save_paths(self) -> dict[MediaType, str]:
+        return {MediaType.MOVIE: self.save_path_movies, MediaType.SERIES: self.save_path_tv}
+
+    def __repr__(self) -> str:
+        return (
+            f"Config(bot_token={self.bot_token!r}, test_mode={self.test_mode!r}, "
+            f"database_url={self.database_url!r}, log_level={self.log_level!r}, "
+            f"api_host={self.api_host!r}, api_port={self.api_port!r}, "
+            f"api_user_id={self.api_user_id!r}, qbittorrent_url={self.qbittorrent_url!r}, "
+            f"qbittorrent_username={self.qbittorrent_username!r}, "
+            'qbittorrent_password="***", '
+            f"save_path_movies={self.save_path_movies!r}, save_path_tv={self.save_path_tv!r})"
+        )
 
 
 def load_config() -> Config:
@@ -23,10 +45,11 @@ def load_config() -> Config:
     if not token:
         raise RuntimeError("BOT_TOKEN is not set. Copy .env.example to .env and fill BOT_TOKEN.")
     test_mode = os.getenv("TEST_MODE", "true").strip().lower() in {"1", "true", "yes"}
-    if not test_mode:
+    qbittorrent_url = (os.getenv("QBITTORRENT_URL") or "").strip()
+    if not test_mode and not qbittorrent_url:
         raise RuntimeError(
-            "Phase 0 requires TEST_MODE=true: real providers (qBittorrent/NAS) "
-            "are not implemented yet."
+            "QBITTORRENT_URL is required when TEST_MODE=false "
+            "(Web API base URL, e.g. http://192.168.1.50:8080)."
         )
     database_url = os.getenv("DATABASE_URL", "").strip()
     if not database_url:
@@ -70,4 +93,9 @@ def load_config() -> Config:
         api_host=api_host,
         api_port=api_port,
         api_user_id=api_user_id,
+        qbittorrent_url=qbittorrent_url,
+        qbittorrent_username=(os.getenv("QBITTORRENT_USERNAME") or "").strip(),
+        qbittorrent_password=os.getenv("QBITTORRENT_PASSWORD") or "",
+        save_path_movies=(os.getenv("SAVE_PATH_MOVIES") or "Movies/").strip(),
+        save_path_tv=(os.getenv("SAVE_PATH_TV") or "TV/").strip(),
     )

@@ -4,6 +4,7 @@ python-dotenv>=1.0
 psycopg[binary,pool]>=3.3,<4
 fastapi>=0.115,<1
 uvicorn>=0.54,<1
+qbittorrent-api>=2024.12,<2027
 
 # dev (DEVELOPMENT §5)
 pytest>=8

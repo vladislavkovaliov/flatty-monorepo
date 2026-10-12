@@ -13,7 +13,7 @@ from app.models.torrent import TorrentStatus, TorrentTask
 _TASK_COLUMNS = """
     t.id, t.magnet, t.info_hash, t.name, t.media_type, t.quality, t.status,
     t.progress, t.size_bytes, t.download_speed, t.upload_speed, t.eta_seconds,
-    t.created_at, t.completed_at, u.telegram_user_id
+    t.created_at, t.completed_at, t.provider_id, u.telegram_user_id
 """
 
 
@@ -34,8 +34,7 @@ def _task_from_row(row: Mapping[str, Any]) -> TorrentTask:
         eta_seconds=row["eta_seconds"],
         created_at=row["created_at"],
         completed_at=row["completed_at"],
-        # колонки нет по design (§Components) — session state заполняет TorrentService
-        provider_id="",
+        provider_id=row["provider_id"] or "",
     )
 
 
@@ -77,8 +76,8 @@ class PostgresRepository:
                     INSERT INTO torrents (
                         user_id, magnet, info_hash, name, media_type, quality,
                         status, progress, size_bytes, download_speed, upload_speed,
-                        eta_seconds, created_at, completed_at
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        eta_seconds, created_at, completed_at, provider_id
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (user_id, info_hash) DO NOTHING
                     RETURNING id
                     """,
@@ -97,6 +96,7 @@ class PostgresRepository:
                     task.eta_seconds,
                     task.created_at,
                     task.completed_at,
+                    task.provider_id or None,
                 ),
             )
             inserted = await cur.fetchone()
@@ -170,7 +170,7 @@ class PostgresRepository:
                     UPDATE torrents SET
                         magnet = %s, name = %s, status = %s, progress = %s,
                         size_bytes = %s, download_speed = %s, upload_speed = %s,
-                        eta_seconds = %s, completed_at = %s
+                        eta_seconds = %s, completed_at = %s, provider_id = %s
                     WHERE id = %s
                     """,
                 (
@@ -183,6 +183,7 @@ class PostgresRepository:
                     task.upload_speed,
                     task.eta_seconds,
                     task.completed_at,
+                    task.provider_id or None,
                     task.id,
                 ),
             )

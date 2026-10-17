@@ -4,6 +4,14 @@
 
 # Dependencies (rebuilt in container)
 node_modules
+**/node_modules
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+pgdata
+tmp
 
 # Build artifacts
 .next

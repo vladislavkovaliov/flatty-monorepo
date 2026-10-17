@@ -5,7 +5,7 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 ## Prerequisites
 
 - **Node.js** >= 20.19
-- **Docker** + Docker Compose (for infrastructure)
+- **Docker** + Docker Compose — or **podman** + podman-compose (for infrastructure)
 - **Go** (for backend and tools)
 - **Nx** (installed via `npm install`)
 
@@ -37,7 +37,7 @@ npm run dev
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Run all apps in parallel |
-| `npm run dev:frontend` | Run launcher + settings + resident + wrapper |
+| `npm run dev:frontend` | Run launcher + settings + resident + entrypoint + vue-torrent-bot |
 | `npm run dev:backend` | Run go-api + nest-graphql |
 | `npm run dev:resident` | Run launcher + resident |
 | `npm run dev:launcher` | Run launcher only |
@@ -45,6 +45,83 @@ npm run dev
 | `npm run test` | Test all apps |
 | `npm run lint` | Lint all apps |
 | `npm run graph` | Visualize Nx dependency graph |
+
+## Backends only (podman)
+
+Run just the APIs (**go-api**, **nest-graphql**) with their infrastructure via rootless podman.
+Frontends and nginx are not started.
+
+### One-time host setup
+
+Rootless podman on **btrfs** needs `fuse-overlayfs`, and short image names such as
+`postgres`/`rabbitmq` must be resolvable. This host's running kernel also has no `tun`
+module, so pasta/slirp4netns fail — every service uses `network_mode: host` and talks over
+`localhost`.
+
+```bash
+# 1. overlay storage driver on btrfs
+sudo pacman -S --noconfirm fuse-overlayfs
+# ~/.config/containers/storage.conf:
+#   [storage]
+#   driver = "overlay"
+#   [storage.options.overlay]
+#   mount_program = "/usr/bin/fuse-overlayfs"
+
+# 2. resolve short image names
+# ~/.config/containers/registries.conf:
+#   unqualified-search-registries = ["docker.io"]
+```
+
+### Start / stop
+
+```bash
+# First run only — builds the images (go test + npm ci). Build needs host networking.
+podman-compose -f docker-compose.backend.yml --podman-build-args="--network=host" build
+
+podman-compose -f docker-compose.backend.yml up -d
+podman-compose -f docker-compose.backend.yml logs -f go-api nest-graphql
+podman-compose -f docker-compose.backend.yml down
+```
+
+Endpoints (host networking → plain `localhost`):
+
+| Service | URL |
+|---------|-----|
+| go-api | http://localhost:8080/api/health |
+| nest-graphql | http://localhost:3000/api/config |
+| PostgreSQL | localhost:55000 |
+| Redpanda (Kafka) | localhost:9092 |
+| RabbitMQ | localhost:5672 (UI http://localhost:15672) |
+
+### Resource limits
+
+Each service is capped via `deploy.resources` (podman-compose maps it to
+`--cpus` / `--memory` / `--memory-reservation`):
+
+| Service | cpus | memory | reservation |
+|---------|------|--------|-------------|
+| postgres | 0.50 | 512M | 256M |
+| redpanda | 1.00 | 1G | 256M |
+| rabbitmq | 0.50 | 384M | 192M |
+| go-api | 0.50 | 256M | 128M |
+| nest-graphql | 1.00 | 512M | 256M |
+
+Live usage: `podman stats`. Redpanda (seastar) crashes with less than one CPU, hence
+`--smp 1` and `cpus: "1.00"`.
+
+### python-torrent-bot (on host)
+
+The bot's HTTP API is intentionally restricted to localhost, so run it on the host against the
+podman Postgres:
+
+```bash
+cp apps/python-torrent-bot/.env.example apps/python-torrent-bot/.env   # set BOT_TOKEN
+nx setup python-torrent-bot   # once: .venv + dependencies
+nx serve python-torrent-bot   # API on http://127.0.0.1:8090/docs
+```
+
+`.env`: `DATABASE_URL=postgresql://postgres:password@localhost:55000/torrent_bot?sslmode=disable`,
+`TEST_MODE=true`.
 
 ## Code Generation
 
@@ -77,12 +154,13 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 │          │   Script injection            │ Script injection         │
 │          ▼                               ▼                          │
 │  ┌──────────────────────────────────────────────────────────────┐   │
-│  │              Webpack UMD Micro-Frontends                     │   │
+│  │          Micro-Frontends (Webpack UMD + Vite IIFE)           │   │
 │  │  ┌───────────────────┐     ┌────────────────────────────┐    │   │
 │  │  │  react-settings   │     │  react-resident            │    │   │
 │  │  │  (port 8081)      │     │  (port 8083)               │    │   │
 │  │  │  User settings    │     │  Resident management       │    │   │
 │  │  └───────────────────┘     └────────────────────────────┘    │   │
+│  │          vue-torrent-bot (8084, Vite IIFE)                   │   │
 │  └──────────────────────────────────────────────────────────────┘   │
 │              ▲ Script injection                                     │
 │              │                                                      │
@@ -127,6 +205,7 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 | `apps/react-wrapper` | 5174 | Vite | Shell — full app with nav, integrates remotes as pages |
 | `apps/react-settings` | 8081 | Webpack | Remote — user settings page |
 | `apps/react-resident` | 8082 | Webpack | Remote — resident management CRUD |
+| `apps/vue-torrent-bot` | 8084 | Vite | Remote — Vue torrent-bot UI (IIFE) |
 | `apps/react-entrypoint` | 3000 (3001) | Next.js | Main shell — expenses, budgets, PDF upload & parsing |
 | `apps/go-api` | 8080 | Go + Gin | REST API (PostgreSQL, pgx) |
 | `apps/nest-graphql` | 3000 | NestJS + TypeORM | GraphQL API (PostgreSQL) |
@@ -137,9 +216,18 @@ Dev servers run on the host via Nx. Docker is used only for infrastructure (Post
 
 ## Micro-Frontends
 
-Remote MF apps (`react-settings`, `react-resident`) are built as **Webpack UMD** libraries,
-exposed on `window.ext-apps[name]`. Shell apps (`react-launcher`, `react-wrapper`) load them
-at runtime via dynamic `<script>` injection.
+Remotes are built as libraries and loaded by the shells at runtime via dynamic `<script>` injection:
+
+- **React remotes** (`react-settings`, `react-resident`) — Webpack **UMD**, exposed as `window.apps[name]`.
+- **Vue remote** (`vue-torrent-bot`) — Vite **IIFE**, exposes `window["ext-apps"]` implementing
+  `IAppComponent` (`initialize` / `destroy`) from `@flatty-budget/mfe-host`.
+
+Shells (`react-launcher`, `react-entrypoint`) fetch `GET /api/applications` at boot and load each row's
+`bundle_js` through its `proxy_base_path` rewrite.
+
+```bash
+nx serve vue-torrent-bot   # build + serve the bundle on :8084 (the host fetches /vue-torrent-bot.js)
+```
 
 ## PDF Parsing (Invoices)
 

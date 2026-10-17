@@ -87,6 +87,11 @@ export function MicrofrontendHost({
         return Promise.resolve();
       }
 
+      if (bundleName === APPLICATION_BUNDLE_NAME.VUE_TORRENT_BOT) {
+        // Keep behavior aligned with Angular wrapper: app bundle can work without separate styles.css.
+        return Promise.resolve();
+      }
+
       const commonChunks = [`${remoteOrigin}/${APPS_VENDORS_CHUNK_NAME}`];
 
       return Promise.all(
@@ -120,6 +125,15 @@ export function MicrofrontendHost({
       }
 
       if (bundleName === APPLICATION_BUNDLE_NAME.RESIDENT) {
+        const baseUrl = `${window.location.origin}${proxyBasePath}`;
+
+        return LoaderUtils.loadScript({
+          src: `${baseUrl}/${bundleName}.js`,
+          params: {},
+        });
+      }
+
+      if (bundleName === APPLICATION_BUNDLE_NAME.VUE_TORRENT_BOT) {
         const baseUrl = `${window.location.origin}${proxyBasePath}`;
 
         return LoaderUtils.loadScript({

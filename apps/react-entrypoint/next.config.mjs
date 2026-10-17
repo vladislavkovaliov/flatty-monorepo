@@ -4,6 +4,8 @@ const GO_API_ORIGIN = process.env.GO_API_ORIGIN || "http://localhost:8080";
 const NEST_ORIGIN = process.env.NEST_ORIGIN || "http://localhost:3000";
 const SETTINGS_ORIGIN = process.env.SETTINGS_ORIGIN || "http://localhost:8081";
 const RESIDENT_ORIGIN = process.env.RESIDENT_ORIGIN || "http://localhost:8082";
+const VUE_TORRENT_BOT_ORIGIN =
+  process.env.VUE_TORRENT_BOT_ORIGIN || "http://localhost:8084";
 
 // Fallback entries when the registry fetch fails at boot (go-api down, DB down, empty registry).
 const HARDCODED_APP_REWRITES = [
@@ -18,6 +20,10 @@ const HARDCODED_APP_REWRITES = [
   {
     source: "/external-app/:path*",
     destination: `${GO_API_ORIGIN}/:path*`,
+  },
+  {
+    source: "/external-vue-torrent-bot/:path*",
+    destination: `${VUE_TORRENT_BOT_ORIGIN}/:path*`,
   },
 ];
 

@@ -19,6 +19,7 @@ var migrations = []string{
 	"migrations/006_add_applications.sql",
 	"migrations/007_add_user_id_to_expenses.sql",
 	"migrations/004_add_user_settings.sql",
+	"migrations/008_add_vue_torrent_bot_application.sql",
 }
 
 func main() {

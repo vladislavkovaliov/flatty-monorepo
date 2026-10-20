@@ -226,7 +226,8 @@ Shells (`react-launcher`, `react-entrypoint`) fetch `GET /api/applications` at b
 `bundle_js` through its `proxy_base_path` rewrite.
 
 ```bash
-nx serve vue-torrent-bot   # build + serve the bundle on :8084 (the host fetches /vue-torrent-bot.js)
+nx serve vue-torrent-bot       # build + serve the bundle on :8084 (the host fetches /vue-torrent-bot.js)
+nx storybook vue-torrent-bot   # component workshop (Storybook) on :6006
 ```
 
 ## PDF Parsing (Invoices)

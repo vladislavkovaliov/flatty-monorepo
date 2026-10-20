@@ -25,6 +25,13 @@
         "command": "npm run type-check",
         "cwd": "apps/vue-torrent-bot"
       }
+    },
+    "storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run storybook",
+        "cwd": "apps/vue-torrent-bot"
+      }
     }
   },
   "tags": ["scope:frontend", "type:remote"]

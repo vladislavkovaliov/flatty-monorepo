@@ -7,9 +7,30 @@ const meta = {
   component: TorrentsTable,
   args: {
     items: [
-      { title: 'Matrix.1999.1080p.Bluray', mediaType: 'Movie', quality: '1080p', status: "in progress", progress: 30 },
-      { title: 'Dune.2021.2160p.WEB-DL', mediaType: 'Movie', quality: '2160p', status: "done", progress: 10 },
-      { title: 'Severance.S02.1080p.WEBRip', mediaType: 'Series', quality: '1080p', status: "done", progress: 90 },
+      {
+        id: 1,
+        name: 'Matrix.1999.1080p.Bluray',
+        media_type: 'movie',
+        quality: '1080p',
+        status: 'downloading',
+        progress: 30,
+      },
+      {
+        id: 2,
+        name: 'Dune.2021.2160p.WEB-DL',
+        media_type: 'movie',
+        quality: '2160p',
+        status: 'completed',
+        progress: 100,
+      },
+      {
+        id: 3,
+        name: 'Severance.S02.1080p.WEBRip',
+        media_type: 'series',
+        quality: '1080p',
+        status: 'paused',
+        progress: 90,
+      },
     ],
   },
 } satisfies Meta<typeof TorrentsTable>

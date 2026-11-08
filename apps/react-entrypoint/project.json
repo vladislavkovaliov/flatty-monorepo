@@ -9,7 +9,10 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "next dev",
-        "cwd": "apps/react-entrypoint"
+        "cwd": "apps/react-entrypoint",
+        "env": {
+          "PORT": "3001"
+        }
       }
     }
   }

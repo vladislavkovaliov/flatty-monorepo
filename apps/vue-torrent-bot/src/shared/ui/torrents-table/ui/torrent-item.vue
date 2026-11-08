@@ -1,28 +1,23 @@
 <script setup lang="ts">
-import { Box, Chip, Flex, Stack, Text, Badge } from '@mantine-vue/core'
+import { Flex, Stack, Text, Badge } from '@mantine-vue/core'
+import type { MediaType, Quality, TorrentStatus } from '@/entities/task/index.ts'
 
 interface Props {
-  title?: string
-  mediaType?: string
-  quality?: string
-  status?: string
-  progress?: number
+  name: string
+  media_type: MediaType
+  quality: Quality
+  status: TorrentStatus
 }
 
-withDefaults(defineProps<Props>(), {
-  title: 'Matrix.1999.1080p.Bluray',
-  mediaType: 'Movie',
-  quality: '1080p',
-  status: 'in progress',
-})
+defineProps<Props>()
 </script>
 
 <template>
   <Flex>
     <Stack gap="xs">
-      <Text>{{ title }}</Text>
+      <Text>{{ name }}</Text>
       <Flex gap="xs">
-        <Badge>{{ mediaType }}</Badge>
+        <Badge>{{ media_type }}</Badge>
         <Badge>{{ quality }}</Badge>
       </Flex>
     </Stack>

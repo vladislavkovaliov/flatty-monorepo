@@ -10,19 +10,16 @@ import {
 } from '@mantine-vue/core'
 
 import TorrentItem from './ui/torrent-item.vue'
+import type { TorrentTask } from '@/entities/task/index.ts'
 
-withDefaults(
-  defineProps<{
-    items?: {
-      title?: string
-      mediaType?: string
-      quality?: string
-      status?: string
-      progress?: number
-    }[]
-  }>(),
-  { items: () => [] },
-)
+type TorrentRow = Pick<
+  TorrentTask,
+  'id' | 'name' | 'status' | 'progress' | 'media_type' | 'quality'
+>
+
+withDefaults(defineProps<{ items?: TorrentRow[] }>(), {
+  items: () => [],
+})
 </script>
 
 <template>
@@ -35,9 +32,14 @@ withDefaults(
       </TableTr>
     </TableThead>
     <TableTbody>
-      <TableTr v-for="(item, index) in items" :key="index">
+      <TableTr v-for="item in items" :key="item.id">
         <TableTd>
-          <TorrentItem v-bind="item" />
+          <TorrentItem
+            :name="item.name"
+            :media_type="item.media_type"
+            :quality="item.quality"
+            :status="item.status"
+          />
         </TableTd>
         <TableTd>{{ item.status }}</TableTd>
         <TableTd>

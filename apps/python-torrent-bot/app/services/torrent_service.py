@@ -40,7 +40,7 @@ class TorrentService:
         self._provider_ids: dict[int, str] = {}
 
     async def register_user(self, user_id: int) -> None:
-        """Регистрация при /start: строка users нужна API до первого create (FEAT-020)."""
+        """Регистрация при /start: строка bot_users нужна API до первого create (FEAT-020)."""
         await self._repo.ensure_user(user_id)
 
     async def create(

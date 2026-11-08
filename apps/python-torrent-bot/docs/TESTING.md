@@ -61,7 +61,7 @@ tests/
   `pytest` остаётся зелёным в CI. Fail-fast проверка (`test_unreachable_database_fails_fast`)
   бегает всегда.
 - Тесты чистят только свои строки (тестовые telegram id 990000001..990000099,
-  каскадный DELETE через `users`). TRUNCATE всей БД не используется —
+  каскадный DELETE через `bot_users`). TRUNCATE всей БД не используется —
   не запускайте DB-тесты против production-БД с важными данными; лучше выделить
   отдельную БД (например torrent_bot).
 - Пароль из DATABASE_URL не попадает в вывод тестов (redaction в app/db/pool.py).

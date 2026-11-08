@@ -7,10 +7,13 @@ COPY packages/ packages/
 
 RUN npm ci
 
-RUN echo "PUBLIC_PROTOCOL=http" > apps/react-resident/.env && \
-    echo "PUBLIC_URL=localhost" >> apps/react-resident/.env && \
-    echo "PUBLIC_PORT=80" >> apps/react-resident/.env && \
-    echo "PUBLIC_PATH=api/swagger/doc.json" >> apps/react-resident/.env
+ARG PUBLIC_PROTOCOL=http
+ARG PUBLIC_URL=localhost
+ARG PUBLIC_PORT=80
+ARG PUBLIC_PATH=api/swagger/doc.json
+RUN printf 'PUBLIC_PROTOCOL=%s\nPUBLIC_URL=%s\nPUBLIC_PORT=%s\nPUBLIC_PATH=%s\n' \
+    "$PUBLIC_PROTOCOL" "$PUBLIC_URL" "$PUBLIC_PORT" "$PUBLIC_PATH" \
+    > apps/react-resident/.env
 
 RUN cd apps/react-resident && npx webpack --config webpack.apps.config.mjs --mode production
 

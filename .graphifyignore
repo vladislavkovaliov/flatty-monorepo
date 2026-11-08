@@ -1,0 +1,6 @@
+# graphify: index only application code (apps/ and packages/).
+# Everything else at the repository root is ignored; built-in skips still
+# handle node_modules, dist, .next, venv, etc. inside those folders.
+/*
+!/apps/
+!/packages/

@@ -16,7 +16,7 @@ As a user, I want my downloads and settings to survive a bot restart, so nothing
 
 ## Scope
 
-- Database + entities: `users`, `torrents`, `torrent_events`, `settings` (`media_items` — отложено в FEAT-013).
+- Database + entities: `bot_users`, `torrents`, `torrent_events`, `settings` (`media_items` — отложено в FEAT-013).
 - Persistent FSM storage — НЕ в Phase 1: FSM остаётся `MemoryStorage` (design §Approach).
 
 ## Out of Scope
@@ -70,7 +70,7 @@ Unit + integration с тестовой БД; не требовать внешн�
 
 ## Implementation Tasks
 
-- [x] Схема database (`app/db/schema.sql`: users, torrents, torrent_events, settings)
+- [x] Схема database (`app/db/schema.sql`: bot_users, torrents, torrent_events, settings)
 - [x] Repository layer (protocol `app/repositories/__init__.py` / `PostgresRepository` / `InMemoryRepository`)
 - [x] Connection pool + fail-fast + redaction (`app/db/pool.py`), `DATABASE_URL` в config
 - [x] DI/lifespan wiring (`app/main.py`)

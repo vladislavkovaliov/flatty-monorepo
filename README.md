@@ -5,32 +5,43 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 ## Prerequisites
 
 - **Node.js** >= 20.19
-- **Docker** + Docker Compose — or **podman** + podman-compose (for infrastructure)
+- **podman** + **podman-compose** (recommended for infrastructure)
 - **Go** (for backend and tools)
+- **air** — Go live-reload used by `nx serve go-api`:
+  `go install github.com/air-verse/air@latest` (installs into `~/go/bin`)
 - **Nx** (installed via `npm install`)
 
 ## Quick Start
 
 ```bash
-# 1. Start infrastructure (PostgreSQL, Redpanda, RabbitMQ, Jaeger)
-docker compose --env-file .env.dev up -d postgres redpanda rabbitmq jaeger
+# 1. Start infrastructure and initialize the database
+#    (PostgreSQL, Redpanda, RabbitMQ, Jaeger)
+podman-compose -f docker-compose.yml --env-file .env.dev \
+  up -d postgres init-db redpanda rabbitmq jaeger
 
-# 2. Create the database table (run once)
-psql postgres://postgres:password@localhost:55000/flatty -f db.sql
-
-# 3. Install dependencies
+# 2. Install dependencies
 npm install
 
-# 4. Run everything
+# 3. Run everything on the host
 npm run dev
 ```
 
-**Docker environments:**
+**Compose environments:**
 
 | Mode | Command |
 |------|---------|
-| Dev | `docker compose --env-file .env.dev up -d` |
-| Prod | `docker compose --env-file .env.prod up -d` |
+| Dev | `podman-compose -f docker-compose.yml --env-file .env.dev up -d` |
+| Prod | `podman-compose -f docker-compose.yml --env-file .env.prod up -d` |
+
+The full stack publishes nginx on `:80` and the remote micro-frontends on `:8081`,
+`:8082` and `:8084` (the browser loads their bundles directly). Rootless podman
+needs `net.ipv4.ip_unprivileged_port_start=80` to bind port 80:
+
+```bash
+echo 'net.ipv4.ip_unprivileged_port_start=80' | \
+  sudo tee /etc/sysctl.d/99-podman-unprivileged-ports.conf
+sudo sysctl --system
+```
 
 ## NPM Commands
 
@@ -39,6 +50,7 @@ npm run dev
 | `npm run dev` | Run all apps in parallel |
 | `npm run dev:frontend` | Run launcher + settings + resident + entrypoint + vue-torrent-bot |
 | `npm run dev:backend` | Run go-api + nest-graphql |
+| `npm run dev:backend:all` | Run go-api + nest-graphql + python-torrent-bot |
 | `npm run dev:resident` | Run launcher + resident |
 | `npm run dev:launcher` | Run launcher only |
 | `npm run build` | Build all apps |
@@ -53,30 +65,25 @@ Frontends and nginx are not started.
 
 ### One-time host setup
 
-Rootless podman on **btrfs** needs `fuse-overlayfs`, and short image names such as
-`postgres`/`rabbitmq` must be resolvable. This host's running kernel also has no `tun`
-module, so pasta/slirp4netns fail — every service uses `network_mode: host` and talks over
-`localhost`.
+Short image names such as `postgres`/`rabbitmq` must be resolvable:
 
 ```bash
-# 1. overlay storage driver on btrfs
-sudo pacman -S --noconfirm fuse-overlayfs
-# ~/.config/containers/storage.conf:
-#   [storage]
-#   driver = "overlay"
-#   [storage.options.overlay]
-#   mount_program = "/usr/bin/fuse-overlayfs"
-
-# 2. resolve short image names
-# ~/.config/containers/registries.conf:
-#   unqualified-search-registries = ["docker.io"]
+mkdir -p ~/.config/containers
+cat > ~/.config/containers/registries.conf <<'EOF'
+unqualified-search-registries = ["docker.io"]
+EOF
 ```
+
+`docker-compose.backend.yml` uses `network_mode: host` as a portable fallback, so it also
+works on hosts where pasta/slirp4netns are unavailable. On this host `/dev/net/tun` exists
+and pasta works, so the full `docker-compose.yml` (bridge networking, DNS by service name)
+is the recommended stack.
 
 ### Start / stop
 
 ```bash
-# First run only — builds the images (go test + npm ci). Build needs host networking.
-podman-compose -f docker-compose.backend.yml --podman-build-args="--network=host" build
+# First run only — builds the images (go test + npm ci)
+podman-compose -f docker-compose.backend.yml build
 
 podman-compose -f docker-compose.backend.yml up -d
 podman-compose -f docker-compose.backend.yml logs -f go-api nest-graphql
@@ -109,6 +116,12 @@ Each service is capped via `deploy.resources` (podman-compose maps it to
 Live usage: `podman stats`. Redpanda (seastar) crashes with less than one CPU, hence
 `--smp 1` and `cpus: "1.00"`.
 
+### nest-graphql (on host)
+
+`nx serve nest-graphql` runs `build` first: the dev script preloads
+`./dist/instrumentation.js` (OpenTelemetry) via `NODE_OPTIONS`, so a fresh checkout fails
+with `Cannot find module './dist/instrumentation.js'` until the project is built once.
+
 ### python-torrent-bot (on host)
 
 The bot's HTTP API is intentionally restricted to localhost, so run it on the host against the
@@ -120,8 +133,10 @@ nx setup python-torrent-bot   # once: .venv + dependencies
 nx serve python-torrent-bot   # API on http://127.0.0.1:8090/docs
 ```
 
-`.env`: `DATABASE_URL=postgresql://postgres:password@localhost:55000/torrent_bot?sslmode=disable`,
-`TEST_MODE=true`.
+`.env`: point `DATABASE_URL` at your PostgreSQL, for example
+`postgresql://postgres:postgres@192.168.1.35:5432/postgres?sslmode=disable`, and set
+`TEST_MODE=true`. `API_USER_ID` must be a plain integer (Telegram user id, e.g. `API_USER_ID=1`) —
+the bot fails fast on startup if it is not a positive integer.
 
 ## Code Generation
 
@@ -248,7 +263,7 @@ The parser runs as a local CLI (`./invoice-parser -file <path>`). See `apps/reac
 Distributed tracing via **OpenTelemetry**. `nest-graphql` and `go-api` export traces to Jaeger.
 
 ```bash
-docker compose up jaeger
+podman-compose -f docker-compose.yml --env-file .env.dev up -d jaeger
 ```
 
 - **Jaeger UI:** http://localhost:16686
@@ -262,7 +277,7 @@ Automated load testing with k6, Prometheus, and Grafana. Scripts live in `tools/
 ### Prerequisites
 
 - k6 >= 0.50 (install locally or use the Docker image)
-- A running backend (Docker compose **or** `npm run dev:backend` on host)
+- A running backend (podman-compose **or** `npm run dev:backend` on host)
 - A load-test user — seed once:
 
 ```bash
@@ -280,20 +295,24 @@ curl -X POST http://localhost/api/auth/sign-up/email \
 | `K6_PASSWORD` | *(required)* | Load-test user password |
 | `K6_RESIDENT_LOCATION_ID` | `1` | Resident location ID for queries |
 
-### Run — Docker Compose
+### Run — podman-compose
 
 Tests run inside the compose network (nginx → backends):
 
 ```bash
 # Smoke (5 VU, 1 min)
-docker compose --profile load-test run --rm k6 run /scripts/smoke.js
+podman-compose -f docker-compose.yml --env-file .env.dev \
+  --profile load-test run --rm k6 run /scripts/smoke.js
 
 # Load (ramp to 50 VU) — streams results to Prometheus
-docker compose --profile load-test run --rm k6 run --out experimental-prometheus-rw /scripts/load.js
+podman-compose -f docker-compose.yml --env-file .env.dev \
+  --profile load-test run --rm k6 run --out experimental-prometheus-rw /scripts/load.js
 
 # Stress / spike — on-demand
-docker compose --profile load-test run --rm k6 run /scripts/stress.js
-docker compose --profile load-test run --rm k6 run /scripts/spike.js
+podman-compose -f docker-compose.yml --env-file .env.dev \
+  --profile load-test run --rm k6 run /scripts/stress.js
+podman-compose -f docker-compose.yml --env-file .env.dev \
+  --profile load-test run --rm k6 run /scripts/spike.js
 ```
 
 ### Run — Local k6 (any backend URL)

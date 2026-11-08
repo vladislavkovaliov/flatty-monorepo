@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const GO_API_ORIGIN = process.env.GO_API_ORIGIN || "http://localhost:8080";
 const NEST_ORIGIN = process.env.NEST_ORIGIN || "http://localhost:3000";
 const SETTINGS_ORIGIN = process.env.SETTINGS_ORIGIN || "http://localhost:8081";
@@ -53,6 +58,9 @@ function fetchApplications() {
 
 const nextConfig = {
   output: "standalone",
+  // Keep the npm-workspace root inside the standalone image so that
+  // @flatty-budget/* symlinks are traced and copied.
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   reactCompiler: true,
   async rewrites() {
     const base = [

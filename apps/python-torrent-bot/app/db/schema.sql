@@ -1,7 +1,11 @@
 -- ponytail: идемпотентный schema.sql вместо Alembic (4 таблицы);
 -- ceiling: нет миграций схемы — upgrade path: Alembic, когда схема начнёт часто меняться.
 
-CREATE TABLE IF NOT EXISTS users (
+-- legacy-деплои: таблица называлась users — конфликтовала с "user" better-auth
+-- (go-api/nest-graphql) в общих PostgreSQL-инсталляциях; переименована в bot_users.
+ALTER TABLE IF EXISTS users RENAME TO bot_users;
+
+CREATE TABLE IF NOT EXISTS bot_users (
     id BIGSERIAL PRIMARY KEY,
     telegram_user_id BIGINT NOT NULL UNIQUE,
     username TEXT,
@@ -10,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS torrents (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES bot_users(id) ON DELETE CASCADE,
     magnet TEXT NOT NULL,
     info_hash TEXT NOT NULL,
     name TEXT NOT NULL,
@@ -40,7 +44,7 @@ CREATE INDEX IF NOT EXISTS idx_torrent_events_torrent_id ON torrent_events (torr
 
 -- таблица и repository есть; UI настроек нет (не в Phase 1)
 CREATE TABLE IF NOT EXISTS settings (
-    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES bot_users(id) ON DELETE CASCADE,
     key TEXT NOT NULL,
     value TEXT NOT NULL,
     PRIMARY KEY (user_id, key)

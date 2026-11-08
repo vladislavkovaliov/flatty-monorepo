@@ -24,7 +24,8 @@ Telegram-бот для торрент-загрузок: magnet-ссылка → 
 
 - `BOT_TOKEN` — от [@BotFather](https://t.me/BotFather)
 - `DATABASE_URL` — общий Postgres монорепо: `postgresql://postgres:password@localhost:55000/torrent_bot?sslmode=disable`
-  (БД `torrent_bot` создаётся автоматически через `docker compose up postgres init-db`)
+  (БД `torrent_bot` создаётся автоматически через
+  `podman-compose -f docker-compose.yml --env-file .env.dev up -d postgres init-db`)
 - `API_PORT=8090` — порт свободен; 8080 занят go-api
 - `TEST_MODE=true` — fail-fast, если false (реальные провайдеры не реализованы)
 

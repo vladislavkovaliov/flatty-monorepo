@@ -2,8 +2,9 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { GqlThrottlerGuard } from './common/gql-throttler.guard';
 import { ConfigController } from './config/config.controller';
 import { MetricsController } from './metrics/metrics.controller';
 import { ConfigService } from './config/config.service';
@@ -16,7 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AuthModule } from './auth/auth.module'
 import { InvitationModule } from './invitation/invitation.module'
 import { EmailModule } from './email/email.module'
-import type { Request } from 'express'
+import type { Request, Response } from 'express'
 import { join } from 'path';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
@@ -25,7 +26,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
   controllers: [ConfigController, MetricsController],
   providers: [
     ConfigService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: GqlThrottlerGuard },
   ],
   imports: [
     ThrottlerModule.forRoot([{
@@ -51,8 +52,9 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
       playground: false,
       introspection: true,
       csrfPrevention: true,
-      context: ({ req }: { req: Request }) => ({
+      context: ({ req, res }: { req: Request; res: Response }) => ({
         req,
+        res,
         userID: (req as any).userID,
       }),
       plugins: [ApolloServerPluginLandingPageLocalDefault()]

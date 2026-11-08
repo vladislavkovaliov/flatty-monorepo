@@ -116,6 +116,42 @@ class PostgresRepository:
             row = await cur.fetchone()
         return _task_from_row(row) if row is not None else None
 
+    async def list_completed_count_tasks(self, user_id: int) -> int:
+        async with self._pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "SELECT count(*) AS cnt FROM torrents t "
+                "JOIN bot_users u ON u.id = t.user_id "
+                "WHERE t.status = 'completed' AND u.telegram_user_id = %s",
+                (user_id,),
+            )
+            row = await cur.fetchone()
+
+        return row["cnt"] if row else 0
+
+    async def list_downloading_count_tasks(self, user_id: int) -> int:
+        async with self._pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "SELECT count(*) AS cnt FROM torrents t "
+                "JOIN bot_users u ON u.id = t.user_id "
+                "WHERE t.status = 'downloading' AND u.telegram_user_id = %s",
+                (user_id,),
+            )
+            row = await cur.fetchone()
+
+        return row["cnt"] if row else 0
+
+    async def list_queue_count_tasks(self, user_id: int) -> int:
+        async with self._pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "SELECT count(*) AS cnt FROM torrents t "
+                "JOIN bot_users u ON u.id = t.user_id "
+                "WHERE t.status = 'queued' AND u.telegram_user_id = %s",
+                (user_id,),
+            )
+            row = await cur.fetchone()
+
+        return row["cnt"] if row else 0
+
     async def list_tasks(self, user_id: int) -> list[TorrentTask]:
         async with self._pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(

@@ -49,6 +49,21 @@ def create_router(
         tasks = await _guard("list", service.list(api_user_id))
         return [_out(task) for task in tasks]
 
+    @router.get("/completed", response_model=int)
+    async def list_completed_tasks() -> int:
+        count = await _guard("list_completed_task", service.list_completed_tasks(api_user_id))
+        return count
+
+    @router.get("/downloading", response_model=int)
+    async def list_downloading_tasks() -> int:
+        count = await _guard("list_downloading_tasks", service.list_downloading_tasks(api_user_id))
+        return count
+
+    @router.get("/queued", response_model=int)
+    async def list_downloading_tasks() -> int:
+        count = await _guard("list_downloading_tasks", service.list_queue_count_tasks(api_user_id))
+        return count
+
     @router.get(
         "/{task_id}",
         response_model=TorrentTaskOut,

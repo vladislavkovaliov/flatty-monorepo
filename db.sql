@@ -548,6 +548,28 @@ BEFORE UPDATE ON expense_monthly_averages
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+-- populate expense stats from the seeded expenses
+-- (equivalent to migrations/002 + migrations/003 + migrations/005)
+
+INSERT INTO expense_monthly_totals (resident_location_id, month, year, total_spent)
+SELECT
+    resident_location_id,
+    month,
+    year,
+    SUM(amount) AS total_spent
+FROM expenses
+GROUP BY resident_location_id, month, year;
+
+INSERT INTO expense_monthly_averages (resident_location_id, month, year, average_amount, expense_count)
+SELECT
+    resident_location_id,
+    month,
+    year,
+    SUM(amount) / COUNT(*) AS average_amount,
+    COUNT(*) AS expense_count
+FROM expenses
+GROUP BY resident_location_id, month, year;
+
 -- invitation table (for admin invitation-by-magic-link flow)
 
 CREATE TYPE invitation_status AS ENUM ('pending', 'accepted', 'expired');

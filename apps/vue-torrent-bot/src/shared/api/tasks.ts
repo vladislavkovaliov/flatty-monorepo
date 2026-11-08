@@ -5,6 +5,18 @@ export function listTasks(): Promise<TorrentTask[]> {
   return apiFetch<TorrentTask[]>('/tasks')
 }
 
+export function listCompletedTasks(): Promise<Number> {
+  return apiFetch<Number>('/tasks/completed')
+}
+
+export function listDownloadingTasks(): Promise<Number> {
+  return apiFetch<Number>('/tasks/downloading')
+}
+
+export function listQueuedTasks(): Promise<Number> {
+  return apiFetch<Number>('/tasks/queued')
+}
+
 export function getTask(id: number): Promise<TorrentTask> {
   return apiFetch<TorrentTask>(`/tasks/${id}`)
 }

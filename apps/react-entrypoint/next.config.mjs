@@ -11,6 +11,8 @@ const SETTINGS_ORIGIN = process.env.SETTINGS_ORIGIN || "http://localhost:8081";
 const RESIDENT_ORIGIN = process.env.RESIDENT_ORIGIN || "http://localhost:8082";
 const VUE_TORRENT_BOT_ORIGIN =
   process.env.VUE_TORRENT_BOT_ORIGIN || "http://localhost:8084";
+const TORRENT_API_ORIGIN =
+  process.env.TORRENT_API_ORIGIN || "http://localhost:8090";
 
 // Fallback entries when the registry fetch fails at boot (go-api down, DB down, empty registry).
 const HARDCODED_APP_REWRITES = [
@@ -77,6 +79,14 @@ const nextConfig = {
         destination: "/api/uploads",
       },
       {
+        source: "/api/tasks",
+        destination: `${TORRENT_API_ORIGIN}/api/tasks`,
+      },
+      {
+        source: "/api/tasks/:path*",
+        destination: `${TORRENT_API_ORIGIN}/api/tasks/:path*`,
+      },
+      {
         source: "/api/:path*",
         destination: `${GO_API_ORIGIN}/api/:path*`,
       },
@@ -84,6 +94,7 @@ const nextConfig = {
         source: "/admin/:path*",
         destination: `${GO_API_ORIGIN}/admin/:path*`,
       },
+     
     ];
 
     const apps = await fetchApplications();

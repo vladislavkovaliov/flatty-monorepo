@@ -106,6 +106,19 @@ class TorrentService:
             await self._sync(task)
         return tasks
 
+    async def list_completed_tasks(self, user_id: int) -> int:
+        count = await self._repo.list_completed_count_tasks(user_id)
+        return count
+
+    async def list_downloading_tasks(self, user_id: int) -> int:
+        count = await self._repo.list_downloading_count_tasks(user_id)
+        return count
+
+    async def list_queue_count_tasks(self, user_id: int) -> int:
+        count = await self._repo.list_queue_count_tasks(user_id)
+        return count
+
+
     async def get(self, user_id: int, task_id: int) -> TorrentTask | None:
         return await self._owned(user_id, task_id)
 

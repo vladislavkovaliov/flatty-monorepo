@@ -4,9 +4,9 @@ import {
   type ApplicationConfig,
   useApplications,
 } from "@flatty-budget/mfe-host";
-import { ErrorBoundary } from "@/components/error-boundary/error-boundary";
 import { Loader } from "@mantine/core";
 import dynamic from "next/dynamic";
+import { ErrorBoundary } from "@/components/error-boundary/error-boundary";
 
 const MicrofrontendHost = dynamic(
   () => import("@/core/micro-frontend-host").then((m) => m.MicrofrontendHost),

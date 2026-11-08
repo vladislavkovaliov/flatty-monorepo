@@ -94,7 +94,6 @@ const nextConfig = {
         source: "/admin/:path*",
         destination: `${GO_API_ORIGIN}/admin/:path*`,
       },
-     
     ];
 
     const apps = await fetchApplications();

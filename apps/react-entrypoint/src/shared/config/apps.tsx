@@ -2,6 +2,7 @@ import {
   IconApi,
   IconBrandGraphql,
   IconBrandMinecraft,
+  IconBrandVue,
   IconCategory2,
   IconCoin,
   IconHome,
@@ -10,7 +11,6 @@ import {
   IconScanTraces,
   IconSettings2,
   IconUsers,
-  IconBrandVue,
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
@@ -101,10 +101,10 @@ export const APPS: AppDefinition[] = [
     icon: <IconBrandMinecraft size={24} stroke={1.5} />,
   },
   {
-    id: 'vue-torrent-bot',
-    label: 'Vue Torrent Bot',
-    description: 'Torrent bot UI',
-    path: '/vue-torrent-bot',
+    id: "vue-torrent-bot",
+    label: "Vue Torrent Bot",
+    description: "Torrent bot UI",
+    path: "/vue-torrent-bot",
     icon: <IconBrandVue />,
   },
 ];

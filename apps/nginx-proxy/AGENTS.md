@@ -18,4 +18,4 @@ Nginx reverse proxy for Docker deployment.
 
 | Command | Description |
 |---------|-------------|
-| `docker build -t nginx-proxy .` | Build image |
+| `podman build -t nginx-proxy .` | Build image |

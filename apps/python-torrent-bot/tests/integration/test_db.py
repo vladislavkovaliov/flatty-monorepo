@@ -19,7 +19,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 # test_unreachable_database_fails_fast. Skip живёт в fixture pool:
 # тесты, зависящие от pool/repo, skip'аются; fail-fast тест бегает всегда.
 
-# тестовые telegram id (см. header файла): чистятся каскадом через users
+# тестовые telegram id (см. header файла): чистятся каскадом через bot_users
 _TEST_USER_LO = 990000001
 _TEST_USER_HI = 990000099
 
@@ -55,13 +55,13 @@ async def pool() -> AsyncGenerator[AsyncConnectionPool, None]:
 async def repo(pool: AsyncConnectionPool) -> AsyncGenerator[PostgresRepository, None]:
     async with pool.connection() as conn:
         await conn.execute(
-            "DELETE FROM users WHERE telegram_user_id BETWEEN %s AND %s",
+            "DELETE FROM bot_users WHERE telegram_user_id BETWEEN %s AND %s",
             (_TEST_USER_LO, _TEST_USER_HI),
         )  # каскадом уберёт torrents/events/settings этих пользователей
     yield PostgresRepository(pool)
     async with pool.connection() as conn:
         await conn.execute(
-            "DELETE FROM users WHERE telegram_user_id BETWEEN %s AND %s",
+            "DELETE FROM bot_users WHERE telegram_user_id BETWEEN %s AND %s",
             (_TEST_USER_LO, _TEST_USER_HI),
         )
 
@@ -78,7 +78,7 @@ async def test_schema_applied_idempotent(pool: AsyncConnectionPool) -> None:
         cur = await conn.execute("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
         rows = await cur.fetchall()
     names = {row[0] for row in rows}
-    assert {"users", "torrents", "torrent_events", "settings"} <= names
+    assert {"bot_users", "torrents", "torrent_events", "settings"} <= names
     assert "media_items" not in names
 
 

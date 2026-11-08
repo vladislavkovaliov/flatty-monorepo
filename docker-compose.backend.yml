@@ -1,7 +1,7 @@
 # Backend-only stack (go-api + nest-graphql) with infrastructure.
 #
-# NOTE: rootless podman on this host cannot use pasta/slirp4netns (no /dev/net/tun),
-# so every service uses `network_mode: host` and talks over localhost.
+# Uses host networking as a portable fallback (works even without pasta/tun).
+# On hosts where pasta works, prefer docker-compose.yml (bridge network + service DNS).
 # Start:  podman-compose -f docker-compose.backend.yml --env-file .env.dev up -d
 services:
   postgres:
@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-flatty}
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -p 55000"]
       interval: 5s
@@ -41,9 +41,31 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-flatty}
     volumes:
-      - ./db.sql:/db.sql
-      - ./scripts/init-db.sh:/init-db.sh
+      - ./db.sql:/db.sql:ro
+      - ./scripts/init-db.sh:/init-db.sh:ro
+      - ./apps/go-api/migrations:/migrations:ro
     command: sh /init-db.sh
+    restart: "no"
+
+  # Runs after nest-graphql has created the better-auth schema (the "user" table).
+  init-db-auth:
+    image: postgres:16
+    network_mode: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nest-graphql:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: localhost
+      PGPORT: "55000"
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-flatty}
+    volumes:
+      - ./scripts/init-db-auth.sh:/init-db-auth.sh:ro
+      - ./apps/go-api/migrations:/migrations:ro
+    command: sh /init-db-auth.sh
     restart: "no"
 
   redpanda:
@@ -111,6 +133,12 @@ services:
       OTEL_SDK_DISABLED: "true"
     depends_on:
       - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/config || exit 1"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
     restart: unless-stopped
     deploy:
       resources:
@@ -119,3 +147,6 @@ services:
           memory: 512M
         reservations:
           memory: 256M
+
+volumes:
+  pgdata:

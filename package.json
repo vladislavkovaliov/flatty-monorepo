@@ -14,6 +14,7 @@
     "dev:launcher": "nx run-many --target=serve --projects=react-launcher --parallel=1",
     "dev:entrypoint": "nx run-many --target=serve --projects=react-entrypoint --parallel=1",
     "dev:backend": "nx run-many --target=serve --projects=go-api,nest-graphql --parallel=2",
+    "dev:backend:all": "nx run-many --target=serve --projects=go-api,nest-graphql,python-torrent-bot --parallel=3",
     "build": "nx run-many --target=build --all",
     "test": "nx run-many --target=test --all",
     "lint": "nx run-many --target=lint --all",

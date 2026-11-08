@@ -9,6 +9,19 @@ RUN test -f packages/sdk/src/types/api.d.ts
 
 RUN npm ci
 
+# Rewrites are evaluated during `next build`, so the destinations must be
+# supplied as build args (runtime env cannot change them afterwards).
+ARG GO_API_ORIGIN=http://localhost:8080
+ARG NEST_ORIGIN=http://localhost:3000
+ARG SETTINGS_ORIGIN=http://localhost:8081
+ARG RESIDENT_ORIGIN=http://localhost:8082
+ARG VUE_TORRENT_BOT_ORIGIN=http://localhost:8084
+ENV GO_API_ORIGIN=$GO_API_ORIGIN \
+    NEST_ORIGIN=$NEST_ORIGIN \
+    SETTINGS_ORIGIN=$SETTINGS_ORIGIN \
+    RESIDENT_ORIGIN=$RESIDENT_ORIGIN \
+    VUE_TORRENT_BOT_ORIGIN=$VUE_TORRENT_BOT_ORIGIN
+
 RUN cd apps/react-entrypoint && npx next build
 
 FROM node:24-alpine AS runner

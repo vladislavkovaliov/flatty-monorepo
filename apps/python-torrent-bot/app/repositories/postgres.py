@@ -47,9 +47,9 @@ class PostgresRepository:
     async def _ensure_user(cur: AsyncCursor[dict[str, Any]], telegram_user_id: int) -> int:
         await cur.execute(
             """
-            INSERT INTO users (telegram_user_id) VALUES (%s)
+            INSERT INTO bot_users (telegram_user_id) VALUES (%s)
             ON CONFLICT (telegram_user_id)
-            DO UPDATE SET username = COALESCE(users.username, EXCLUDED.username)
+            DO UPDATE SET username = COALESCE(bot_users.username, EXCLUDED.username)
             RETURNING id
             """,
             (telegram_user_id,),
@@ -62,7 +62,7 @@ class PostgresRepository:
         async with self._pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 f"SELECT {_TASK_COLUMNS} FROM torrents t "
-                "JOIN users u ON u.id = t.user_id "
+                "JOIN bot_users u ON u.id = t.user_id "
                 "WHERE u.telegram_user_id = %s AND t.info_hash = %s",
                 (user_id, info_hash),
             )
@@ -109,7 +109,7 @@ class PostgresRepository:
         async with self._pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 f"SELECT {_TASK_COLUMNS} FROM torrents t "
-                "JOIN users u ON u.id = t.user_id "
+                "JOIN bot_users u ON u.id = t.user_id "
                 "WHERE u.telegram_user_id = %s AND t.id = %s",
                 (user_id, task_id),
             )
@@ -120,7 +120,7 @@ class PostgresRepository:
         async with self._pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
             await cur.execute(
                 f"SELECT {_TASK_COLUMNS} FROM torrents t "
-                "JOIN users u ON u.id = t.user_id "
+                "JOIN bot_users u ON u.id = t.user_id "
                 "WHERE u.telegram_user_id = %s ORDER BY t.id",
                 (user_id,),
             )
@@ -166,7 +166,7 @@ class PostgresRepository:
         async with self._pool.connection() as conn, conn.cursor() as cur:
             await cur.execute(
                 "SELECT s.value FROM settings s "
-                "JOIN users u ON u.id = s.user_id "
+                "JOIN bot_users u ON u.id = s.user_id "
                 "WHERE u.telegram_user_id = %s AND s.key = %s",
                 (user_id, key),
             )
@@ -189,6 +189,6 @@ class PostgresRepository:
     async def user_exists(self, telegram_user_id: int) -> bool:
         async with self._pool.connection() as conn, conn.cursor() as cur:
             await cur.execute(
-                "SELECT 1 FROM users WHERE telegram_user_id = %s", (telegram_user_id,)
+                "SELECT 1 FROM bot_users WHERE telegram_user_id = %s", (telegram_user_id,)
             )
             return await cur.fetchone() is not None

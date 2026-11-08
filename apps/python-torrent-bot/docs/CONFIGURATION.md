@@ -50,7 +50,7 @@ fail-fast при попытке слушать наружу. `API_USER_ID` — t
 работает API**: create ставит его владельцем задачи, list/get/pause/resume/cancel/delete проверяют
 ownership через него (поведение = Telegram). Несовпадение с вашим реальным telegram id = пустой
 список задач. Перед первым `POST /api/tasks` пользователь должен нажать `/start` в боте
-(регистрация в `users`).
+(регистрация в `bot_users`).
 
 ---
 

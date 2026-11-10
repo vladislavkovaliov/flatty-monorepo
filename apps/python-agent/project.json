@@ -1,0 +1,42 @@
+{
+  "name": "python-agent",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/python-agent/app",
+  "targets": {
+    "setup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+        "cwd": "apps/python-agent"
+      }
+    },
+    "mcp": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": ".venv/bin/python -m app.mcp_server",
+        "cwd": "apps/python-expense-agent"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": ".venv/bin/python -m app.main",
+        "cwd": "apps/python-expense-agent"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": { "command": ".venv/bin/pytest", "cwd": "apps/python-agent" }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": { "command": ".venv/bin/ruff check .", "cwd": "apps/python-agent" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": ".venv/bin/mypy app", "cwd": "apps/python-agent" }
+    }
+  },
+  "tags": ["scope:backend", "type:agent"]
+}

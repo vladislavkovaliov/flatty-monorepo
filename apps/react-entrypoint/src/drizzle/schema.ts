@@ -292,6 +292,9 @@ export const userRoles = pgTable(
 export const expenseMonthlyTotals = pgTable(
   "expense_monthly_totals",
   {
+    residentLocationId: bigint("resident_location_id", {
+      mode: "number",
+    }).notNull(),
     month: integer().notNull(),
     year: integer().notNull(),
     totalSpent: numeric("total_spent", { precision: 12, scale: 2 })
@@ -300,13 +303,15 @@ export const expenseMonthlyTotals = pgTable(
     updatedAt: timestamp("updated_at", { mode: "string" }).default(
       sql`CURRENT_TIMESTAMP`,
     ),
-    createdAt: timestamp("created_at", { mode: "string" }).default(
-      sql`CURRENT_TIMESTAMP`,
-    ),
   },
   (table) => [
+    foreignKey({
+      columns: [table.residentLocationId],
+      foreignColumns: [residentLocations.id],
+      name: "expense_monthly_totals_resident_location_id_fkey",
+    }).onDelete("cascade"),
     primaryKey({
-      columns: [table.year, table.month],
+      columns: [table.residentLocationId, table.month, table.year],
       name: "expense_monthly_totals_pkey",
     }),
     check(
@@ -320,6 +325,9 @@ export const expenseMonthlyTotals = pgTable(
 export const expenseMonthlyAverages = pgTable(
   "expense_monthly_averages",
   {
+    residentLocationId: bigint("resident_location_id", {
+      mode: "number",
+    }).notNull(),
     month: integer().notNull(),
     year: integer().notNull(),
     averageAmount: numeric("average_amount", { precision: 12, scale: 2 })
@@ -329,13 +337,15 @@ export const expenseMonthlyAverages = pgTable(
     updatedAt: timestamp("updated_at", { mode: "string" }).default(
       sql`CURRENT_TIMESTAMP`,
     ),
-    createdAt: timestamp("created_at", { mode: "string" }).default(
-      sql`CURRENT_TIMESTAMP`,
-    ),
   },
   (table) => [
+    foreignKey({
+      columns: [table.residentLocationId],
+      foreignColumns: [residentLocations.id],
+      name: "expense_monthly_averages_resident_location_id_fkey",
+    }).onDelete("cascade"),
     primaryKey({
-      columns: [table.year, table.month],
+      columns: [table.residentLocationId, table.month, table.year],
       name: "expense_monthly_averages_pkey",
     }),
     check(

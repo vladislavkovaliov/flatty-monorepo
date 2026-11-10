@@ -1,0 +1,24 @@
+[project]
+name = "python-agent"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.12"
+dependencies = [
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# markdown только документация — не форматировать code blocks в доках/плане
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["app"]
+# namespace packages без __init__.py: явные базы, чтобы не было дублей имён модулей
+mypy_path = "."
+explicit_package_bases = true

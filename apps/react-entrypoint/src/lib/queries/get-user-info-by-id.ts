@@ -7,20 +7,20 @@ export async function getUserInfoById(userId: string) {
     db
       .select()
       .from(schema.user)
-      .where(eq(schema.user.id, userId))
-      .rightJoin(
+      .leftJoin(
         schema.residentLocations,
-        eq(schema.residentLocations.userId, userId),
-      ),
+        eq(schema.residentLocations.userId, schema.user.id),
+      )
+      .where(eq(schema.user.id, userId)),
     db
       .select()
       .from(schema.expenseMonthlyTotals)
-      .orderBy(desc(schema.expenseMonthlyTotals.createdAt))
+      .orderBy(desc(schema.expenseMonthlyTotals.updatedAt))
       .limit(1),
     db
       .select()
       .from(schema.expenseMonthlyAverages)
-      .orderBy(desc(schema.expenseMonthlyAverages.createdAt))
+      .orderBy(desc(schema.expenseMonthlyAverages.updatedAt))
       .limit(1),
   ]);
 

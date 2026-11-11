@@ -1,6 +1,5 @@
 import asyncio
 import json
-
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -12,13 +11,13 @@ from app.agent.ollama_client import build_ollama_client
 from app.agent.tools import mcp_tools_to_ollama
 from app.config import load_config
 
-
 MAX_STEP = 6
 
 SYSTEM_PROMT = (
     "Ты помощник по личным расходам. Для любых цифр и фактов "
     "обязательно вызывай инструменты и никогда не выдумывай суммы. "
-    "Если данных нет — так и скажи. Отвечай кратко и по-русски."
+    "Если данных нет — так и скажи. Отвечай кратко и по-русски. "
+    "Если просят список или таблицу, выводи только Markdown-таблицу."
 )
 
 
@@ -141,7 +140,7 @@ async def main() -> None:
         result = await run_agent(
             ollama=ollama,
             mcp=mcp,
-            question="Сколько всего я потратил в июне 2030 года?",
+            question="Сколько всего я потратил в июне 2026 года?",
             model=cfg.ollama,
             resident_location_id=1,
         )

@@ -3,7 +3,7 @@ from mcp.server import MCPServer
 from app.config import load_config
 from app.db import expenses as repo
 from app.db.connection import Pool, create_pool
-from app.db.types import MonthlyTotalRow, CategoryRow, MonthlyAverageRow, YearMonthRow, ExpenseRow
+from app.db.types import CategoryRow, ExpenseRow, MonthlyAverageRow, MonthlyTotalRow, YearMonthRow
 
 
 def build_mcp_server(pool: Pool) -> MCPServer:
@@ -63,7 +63,16 @@ def build_mcp_server(pool: Pool) -> MCPServer:
             category_id=category_id
         )
 
-    @mcp.resource(uri="resource://categories", name="categories", description="Expense categories reference (id, name, description).")
+    @mcp.tool()
+    def list_categories() -> list[CategoryRow]:
+        """Return the list of expense categories (id, name, description)."""
+        return repo.list_categories(pool)
+
+    @mcp.resource(
+        uri="resource://categories",
+        name="categories",
+        description="Expense categories reference (id, name, description).",
+    )
     def categories() -> list[CategoryRow]:
         return repo.list_categories(pool)
 

@@ -422,7 +422,7 @@ def get_monthly_totals(
   понятная ошибка, но не 500-стектрейс в модель);
 - не содержат бизнес-логики сверх «сходи в БД и верни данные».
 
-- [ ] Ручной вызов каждого инструмента из Python возвращает ожидаемое.
+- [x] Ручной вызов каждого инструмента из Python возвращает ожидаемое.
 
 ## Шаг 4. MCP-сервер (`app/mcp_server.py`)
 
@@ -462,8 +462,8 @@ if __name__ == "__main__":
 npx @modelcontextprotocol/inspector .venv/bin/python -m app.mcp_server
 ```
 
-- [ ] Inspector видит все инструменты.
-- [ ] Через Inspector инструмент возвращает корректные данные.
+- [x] Inspector видит все инструменты.
+- [x] Через Inspector инструмент возвращает корректные данные.
 
 ## Шаг 5. Подключение к opencode
 
@@ -475,7 +475,7 @@ npx @modelcontextprotocol/inspector .venv/bin/python -m app.mcp_server
     "expense-agent": {
       "type": "local",
       "enabled": true,
-      "command": "apps/python-expense-agent/.venv/bin/python",
+      "command": "apps/python-agent/.venv/bin/python",
       "args": ["-m", "app.mcp_server"],
       "environment": {
         "DATABASE_URL": "postgres://postgres:password@localhost:55000/flatty?sslmode=disable"
@@ -492,17 +492,17 @@ npx @modelcontextprotocol/inspector .venv/bin/python -m app.mcp_server
 вроде: «Сколько потрачено в январе 2023 по объекту 1?» — агент должен вызвать
 `get_monthly_totals` и ответить числом.
 
-- [ ] opencode видит инструменты.
-- [ ] Ответ на вопрос содержит правильное число.
+- [x] opencode видит инструменты.
+- [x] Ответ на вопрос содержит правильное число.
 
 ## Критерии готовности
 
-- [ ] `nx lint python-expense-agent` — чисто.
-- [ ] `nx typecheck python-expense-agent` — чисто (`mypy strict`).
-- [ ] `nx setup` и запуск MCP работают с нуля по инструкции.
+- [x] `nx lint python-agent` — чисто.
+- [x] `nx typecheck python-agent` — чисто (`mypy strict`).
+- [x] `nx setup` и запуск MCP работают с нуля по инструкции.
 - [ ] Все 5 инструментов доступны в Inspector.
-- [ ] opencode через MCP отвечает на 2–3 разных вопроса о расходах.
-- [ ] В `.env.example` нет реальных секретов, `.env` в `.gitignore`.
+- [x] opencode через MCP отвечает на 2–3 разных вопроса о расходах.
+- [x] В `.env.example` нет реальных секретов, `.env` в `.gitignore`.
 
 ## Подсказки и грабли
 

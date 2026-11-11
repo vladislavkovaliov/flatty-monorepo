@@ -224,6 +224,7 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 | `apps/react-entrypoint` | 3000 (3001) | Next.js | Main shell — expenses, budgets, PDF upload & parsing |
 | `apps/go-api` | 8080 | Go + Gin | REST API (PostgreSQL, pgx) |
 | `apps/nest-graphql` | 3000 | NestJS + TypeORM | GraphQL API (PostgreSQL) |
+| `apps/python-agent` | — | Python + MCP | MCP server — expense aggregates (Ollama) |
 | `apps/nginx-proxy` | 80 | Nginx | Reverse proxy for containerized deployments |
 | `packages/sdk` | — | TypeScript | Shared API client + generated types (REST + GraphQL) |
 
@@ -258,6 +259,32 @@ nx storybook vue-torrent-bot   # component workshop (Storybook) on :6006
 5. Parsed data auto-fills the form (amount, month/year, description, category) — the user reviews and submits
 
 The parser runs as a local CLI (`./invoice-parser -file <path>`). See `apps/react-entrypoint/mcps/README.md` for details.
+
+## MCP Server (expense-agent)
+
+`apps/python-agent` exposes expense aggregates over the Model Context Protocol.
+
+**Tools:**
+
+- `get_monthly_totals` — monthly spending totals for a location
+- `list_expenses` — list expenses for a location
+- `get_month_averages` — monthly average spending
+- `get_year_months` — (year, month) pairs that have expenses
+
+**Resources:**
+
+- `resource://categories` — expense categories reference
+
+```bash
+cd apps/python-agent
+nx setup python-agent                        # once: .venv + dependencies
+.venv/bin/python -m app.mcp_server           # stdio transport
+npx @modelcontextprotocol/inspector .venv/bin/python -m app.mcp_server  # Inspector UI :5173
+```
+
+Requires a valid `.env` (`DATABASE_URL`, `OLLAMA_MODEL`, `OLLAMA_BASE_URL`). See
+`apps/python-agent/README.md` for full tool signatures, environment variables, and
+lint/type-check commands.
 
 ## Observability (Jaeger)
 

@@ -569,26 +569,6 @@ if __name__ == "__main__":
     uvicorn.run("app.api.app:app", host=cfg.api_host, port=cfg.api_port)
 ```
 
-Открой `apps/python-agent/project.json` и исправь `cwd` у таргетов `mcp` и `serve`
-(сейчас там опечатка `apps/python-expense-agent`):
-
-```json
-"mcp": {
-  "executor": "nx:run-commands",
-  "options": {
-    "command": ".venv/bin/python -m app.mcp_server",
-    "cwd": "apps/python-agent"
-  }
-},
-"serve": {
-  "executor": "nx:run-commands",
-  "options": {
-    "command": ".venv/bin/python -m app.main",
-    "cwd": "apps/python-agent"
-  }
-}
-```
-
 Запуск сервиса:
 
 ```bash
@@ -596,9 +576,9 @@ nx setup python-agent   # один раз: .venv + зависимости (ес�
 nx serve python-agent   # HTTP API на http://127.0.0.1:8100/docs
 ```
 
-- [ ] `nx serve python-agent` поднимает сервис на `:8100`.
-- [ ] `curl -s localhost:8100/health` → `{"status":"ok"}`.
-- [ ] `curl` на `/chat` отвечает осмысленно.
+- [x] `nx serve python-agent` поднимает сервис на `:8100`.
+- [x] `curl -s localhost:8100/health` → `{"status":"ok"}`.
+- [x] `curl` на `/chat` отвечает осмысленно.
 
 ---
 
@@ -620,21 +600,21 @@ curl -s localhost:8100/chat -H 'content-type: application/json' \
   -d '{"message":"привет"}'
 ```
 
-- [ ] Ответы содержат правильные цифры (сверь с `psql` / клиентом из задачи 01).
-- [ ] `used_tools` соответствует вопросу (агрегат → `get_monthly_totals`, список →
+- [x] Ответы содержат правильные цифры (сверь с `psql` / клиентом из задачи 01).
+- [x] `used_tools` соответствует вопросу (агрегат → `get_monthly_totals`, список →
       `list_expenses`).
-- [ ] Вопрос «привет» не вызывает инструменты и отвечает текстом.
+- [x] Вопрос «привет» не вызывает инструменты и отвечает текстом.
 
 ---
 
 ## Критерии готовности
 
-- [ ] `nx lint python-agent` / `nx typecheck python-agent` — чисто.
-- [ ] Сервис стартует и корректно останавливается (MCP-сессия закрывается).
-- [ ] `/chat` отвечает на вопросы трёх типов: агрегат, список, «светская беседа».
-- [ ] Модель не выдумывает суммы: если данных нет, инструмент вернул пусто, и агент
+- [x] `nx lint python-agent` / `nx typecheck python-agent` — чисто.
+- [x] Сервис стартует и корректно останавливается (MCP-сессия закрывается).
+- [x] `/chat` отвечает на вопросы трёх типов: агрегат, список, «светская беседа».
+- [x] Модель не выдумывает суммы: если данных нет, инструмент вернул пусто, и агент
       честно говорит об этом.
-- [ ] `used_tools` заполняется и логируется (в stderr, не в stdout).
+- [x] `used_tools` заполняется и логируется (в stderr, не в stdout).
 
 ---
 

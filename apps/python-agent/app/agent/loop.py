@@ -14,10 +14,10 @@ from app.config import load_config
 MAX_STEP = 6
 
 SYSTEM_PROMT = (
-    "Ты помощник по личным расходам. Для любых цифр и фактов "
-    "обязательно вызывай инструменты и никогда не выдумывай суммы. "
-    "Если данных нет — так и скажи. Отвечай кратко и по-русски. "
-    "Если просят список или таблицу, выводи только Markdown-таблицу."
+    "You are a personal expenses assistant. For any numbers or facts, "
+    "always call tools and never make up amounts. "
+    "If there is no data, say so. Answer briefly and in Russian. "
+    "If a list or table is requested, output only a Markdown table."
 )
 
 

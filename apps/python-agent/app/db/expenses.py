@@ -25,12 +25,12 @@ def get_monthly_totals(
     year: int | None = None,
     month: int | None = None,
 ) -> list[MonthlyTotalRow]:
-    """Вернуть суммы трат по месяцам для объекта.
+    """Return monthly spending totals for a location.
 
     Args:
-      resident_location_id: id объекта (квартиры).
-      year: год, если нужно отфильтровать.
-      month: месяц 1-12, если нужно отфильтровать.
+      resident_location_id: location (apartment) id.
+      year: year to filter by, if any.
+      month: month 1-12 to filter by, if any.
     """
     sql = """
         select month, year, total_spent
@@ -58,10 +58,10 @@ def get_monthly_totals(
 def list_categories(
     pool: Pool,
 ) -> list[CategoryRow]:
-    """Вернуть список категорий расходов.
+    """Return the list of expense categories.
 
     Returns:
-      Список категорий с полями id, name, description.
+      List of categories with id, name, description fields.
     """
     sql = """
         SELECT id, name, description FROM categories ORDER BY name
@@ -89,19 +89,19 @@ def list_expenses(
     limit: int = 50,
     offset: int = 0,
 ) -> list[ExpenseRow]:
-    """Вернуть список трат объекта с фильтрами и пагинацией.
+    """Return a location's expenses with filters and pagination.
 
     Args:
-      resident_location_id: id объекта (квартиры).
-      year: год, если нужно отфильтровать.
-      month: месяц 1-12, если нужно отфильтровать.
-      category_id: id категории, если нужно отфильтровать.
-      limit: максимум записей (1-100, по умолчанию 50).
-      offset: смещение для пагинации (по умолчанию 0).
+      resident_location_id: location (apartment) id.
+      year: year to filter by, if any.
+      month: month 1-12 to filter by, if any.
+      category_id: category id to filter by, if any.
+      limit: max records (1-100, default 50).
+      offset: pagination offset (default 0).
 
     Returns:
-      Список трат с полями id, category_id, category_name, amount,
-      description, month, year.
+      List of expenses with id, category_id, category_name, amount,
+      description, month, year fields.
     """
     where = ["e.resident_location_id = %s"]
     params: list[object] = [resident_location_id]
@@ -118,7 +118,7 @@ def list_expenses(
         where.append("e.category_id = %s")
         params.append(category_id)
 
-    limit = max(1, min(limit, 100))   # защита от limit=100000 из LLM
+    limit = max(1, min(limit, 100))   # guard against limit=100000 from the LLM
     offset = max(0, offset)
 
     sql = f"""
@@ -154,13 +154,13 @@ def get_month_averages(
     pool: Pool,
     resident_location_id: int
 ) -> list[MonthlyAverageRow]:
-    """Вернуть средние суммы трат по месяцам объекта.
+    """Return a location's monthly average spending.
 
     Args:
-      resident_location_id: id объекта (квартиры).
+      resident_location_id: location (apartment) id.
 
     Returns:
-      Список записей с полями month, year, average_amount, expense_count.
+      List of records with month, year, average_amount, expense_count fields.
     """
     sql = """
         SELECT month, year, average_amount, expense_count
@@ -190,13 +190,13 @@ def get_year_months(
     pool: Pool,
     resident_location_id: int
 ) -> list[YearMonthRow]:
-    """Вернуть список (год, месяц), за которые у объекта есть траты.
+    """Return the (year, month) pairs for which a location has expenses.
 
     Args:
-      resident_location_id: id объекта (квартиры).
+      resident_location_id: location (apartment) id.
 
     Returns:
-      Список записей с полями year, month.
+      List of records with year, month fields.
     """
     sql = """
         SELECT DISTINCT year, month

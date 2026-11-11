@@ -15,14 +15,14 @@
       "executor": "nx:run-commands",
       "options": {
         "command": ".venv/bin/python -m app.mcp_server",
-        "cwd": "apps/python-expense-agent"
+        "cwd": "apps/python-agent"
       }
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
         "command": ".venv/bin/python -m app.main",
-        "cwd": "apps/python-expense-agent"
+        "cwd": "apps/python-agent"
       }
     },
     "test": {

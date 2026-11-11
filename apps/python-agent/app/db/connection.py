@@ -1,7 +1,7 @@
 from psycopg import Connection
 from psycopg_pool import ConnectionPool
 
-# Тип пула соединений, возвращаемый create_pool.
+# Connection pool type returned by create_pool.
 Pool = ConnectionPool[Connection]
 
 

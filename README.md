@@ -270,6 +270,7 @@ The parser runs as a local CLI (`./invoice-parser -file <path>`). See `apps/reac
 - `list_expenses` — list expenses for a location
 - `get_month_averages` — monthly average spending
 - `get_year_months` — (year, month) pairs that have expenses
+- `list_categories` — expense categories reference
 
 **Resources:**
 

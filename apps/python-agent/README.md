@@ -20,9 +20,10 @@ All `app/db/expenses.py` functions take `pool: Pool` as their first argument.
 Tools are computed/filtered queries, registered with the `@mcp.tool()` decorator:
 
 - `get_monthly_totals(resident_location_id, year=None, month=None)`
-- `list_expenses(resident_location_id)`
+- `list_expenses(resident_location_id, category_id=None, month=None, year=None, limit=5, offset=0)`
 - `get_month_averages(resident_location_id)`
 - `get_year_months(resident_location_id)`
+- `list_categories()` — expense categories (`id`, `name`, `description`)
 
 ## Resources
 

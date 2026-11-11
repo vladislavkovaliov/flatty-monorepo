@@ -13,7 +13,11 @@ def build_mcp_server(pool: Pool) -> MCPServer:
     def get_year_months(
         resident_location_id: int
     ) -> list[YearMonthRow]:
-        """Return the (year, month) pairs that have expenses."""
+        """Return only the (year, month) pairs that have expenses, with no amounts.
+
+        Use this to discover which months have data. For actual spending
+        amounts, call get_monthly_totals instead.
+        """
         return repo.get_year_months(
             pool=pool,
             resident_location_id=resident_location_id
@@ -35,7 +39,11 @@ def build_mcp_server(pool: Pool) -> MCPServer:
         year: int | None = None,
         month: int | None = None
     ) -> list[MonthlyTotalRow]:
-        """Return monthly spending totals for a location."""
+        """Return monthly spending totals (sums in BYN) for a location.
+
+        Returns rows with year, month, and total_spent. Use this tool whenever
+        the user asks how much was spent per month or per year.
+        """
         return repo.get_monthly_totals(
             pool=pool,
             resident_location_id=resident_location_id,

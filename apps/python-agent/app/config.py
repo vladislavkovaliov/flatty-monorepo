@@ -23,13 +23,15 @@ def load_config() -> Config:
     
     if not ollama:
         """ TODO: update .env and env.example by OLLAMA_MODEL """
-        raise RuntimeError("ollama str is not set. Copy .env.example to .env and fill OLLAMA_MODEL.")
+        raise RuntimeError("ollama str is not set. Copy .env.example to .env "
+        "and fill OLLAMA_MODEL.")
     
     ollama_base_url = os.getenv("OLLAMA_BASE_URL", "").strip()
 
     if not ollama_base_url:
         """ TODO: update .env and env.example by OLLAMA_BASE_URL """
-        raise RuntimeError("ollama_base_url str is not set. Copy .env.example to .env and fill OLLAMA_BASE_URL.")
+        raise RuntimeError("ollama_base_url str is not set. Copy .env.example to .env "
+        "and fill OLLAMA_BASE_URL.")
     
 
     database_url = os.getenv("DATABASE_URL", "").strip()

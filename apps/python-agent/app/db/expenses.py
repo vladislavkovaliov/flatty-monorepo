@@ -1,6 +1,15 @@
 from decimal import Decimal
+
 from psycopg.rows import dict_row
-from app.db.types import MonthlyTotalRow, YearMonthRow
+
+from app.db.connection import Pool
+from app.db.types import (
+    CategoryRow,
+    ExpenseRow,
+    MonthlyAverageRow,
+    MonthlyTotalRow,
+    YearMonthRow,
+)
 
 
 def _money(value: Decimal | float | int | None) -> float:
@@ -11,7 +20,7 @@ def _money(value: Decimal | float | int | None) -> float:
         return 0.0
 
 def get_monthly_totals(
-    pool,
+    pool: Pool,
     resident_location_id: int,
     year: int | None = None,
     month: int | None = None,
@@ -32,11 +41,10 @@ def get_monthly_totals(
         order BY year DESC, month DESC
     """
 
-    with pool.connection() as conn:
-        with conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(sql, (resident_location_id, year, year, month, month))
-            
-            rows = cur.fetchall()
+    with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(sql, (resident_location_id, year, year, month, month))
+        
+        rows = cur.fetchall()
 
     return [
         {
@@ -47,8 +55,33 @@ def get_monthly_totals(
         for r in rows
     ]
 
+def list_categories(
+    pool: Pool,
+) -> list[CategoryRow]:
+    """Вернуть список категорий расходов.
+
+    Returns:
+      Список категорий с полями id, name, description.
+    """
+    sql = """
+        SELECT id, name, description FROM categories ORDER BY name
+    """
+
+    with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(sql)
+        rows = cur.fetchall()
+
+    return [
+        {
+            "id": int(r["id"]),
+            "name": str(r["name"]),
+            "description": str(r["description"]),
+        }
+        for r in rows
+    ]
+
 def list_expenses(
-    pool,
+    pool: Pool,
     resident_location_id: int,
     year: int | None = None,
     month: int | None = None,
@@ -56,6 +89,20 @@ def list_expenses(
     limit: int = 50,
     offset: int = 0,
 ) -> list[ExpenseRow]:
+    """Вернуть список трат объекта с фильтрами и пагинацией.
+
+    Args:
+      resident_location_id: id объекта (квартиры).
+      year: год, если нужно отфильтровать.
+      month: месяц 1-12, если нужно отфильтровать.
+      category_id: id категории, если нужно отфильтровать.
+      limit: максимум записей (1-100, по умолчанию 50).
+      offset: смещение для пагинации (по умолчанию 0).
+
+    Returns:
+      Список трат с полями id, category_id, category_name, amount,
+      description, month, year.
+    """
     where = ["e.resident_location_id = %s"]
     params: list[object] = [resident_location_id]
 
@@ -86,10 +133,9 @@ def list_expenses(
     
     params.extend([limit, offset])
 
-    with pool.connection() as conn:
-        with conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(sql, params)
-            rows = cur.fetchall()
+    with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(sql, params)
+        rows = cur.fetchall()
 
     return [
         {
@@ -104,10 +150,18 @@ def list_expenses(
         for r in rows
     ]
 
-def get_month_avarages(
-    pool,
+def get_month_averages(
+    pool: Pool,
     resident_location_id: int
-) -> List[MonthlyAverageRow]:
+) -> list[MonthlyAverageRow]:
+    """Вернуть средние суммы трат по месяцам объекта.
+
+    Args:
+      resident_location_id: id объекта (квартиры).
+
+    Returns:
+      Список записей с полями month, year, average_amount, expense_count.
+    """
     sql = """
         SELECT month, year, average_amount, expense_count
         FROM expense_monthly_averages
@@ -115,13 +169,12 @@ def get_month_avarages(
         ORDER BY year DESC, month DESC
     """
 
-    with pool.connection() as conn:
-        with conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(sql, (
-                    resident_location_id,
-                ),
-            )
-            rows = cur.fetchall()
+    with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(sql, (
+                resident_location_id,
+            ),
+        )
+        rows = cur.fetchall()
 
     return [
         {
@@ -134,9 +187,17 @@ def get_month_avarages(
     ]
 
 def get_year_months(
-    pool,
+    pool: Pool,
     resident_location_id: int
 ) -> list[YearMonthRow]:
+    """Вернуть список (год, месяц), за которые у объекта есть траты.
+
+    Args:
+      resident_location_id: id объекта (квартиры).
+
+    Returns:
+      Список записей с полями year, month.
+    """
     sql = """
         SELECT DISTINCT year, month
         FROM expenses
@@ -144,13 +205,12 @@ def get_year_months(
         ORDER BY year DESC, month DESC
     """
 
-    with pool.connection() as conn:
-        with conn.cursor(row_factory=dict_row) as cur:
-            cur.execute(
-                sql,
-                (resident_location_id,),
-            )
-            rows = cur.fetchall()
+    with pool.connection() as conn, conn.cursor(row_factory=dict_row) as cur:
+        cur.execute(
+            sql,
+            (resident_location_id,),
+        )
+        rows = cur.fetchall()
 
     return [
         {
@@ -159,5 +219,3 @@ def get_year_months(
         }
         for r in rows
     ]
-
-def 

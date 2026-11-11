@@ -11,7 +11,7 @@ class ExpenseRow(TypedDict):
     id: int
     category_id: int
     category_name: str
-    amount: float          # Decimal -> float на границе
+    amount: float          # Decimal -> float at the boundary
     description: str | None
     month: int
     year: int

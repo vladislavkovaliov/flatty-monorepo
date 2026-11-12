@@ -22,6 +22,6 @@ const remote: IAppComponent = {
   },
 };
 
-(window as any)['ext-apps'] = remote;
+Object.assign(window, { 'ext-apps': remote });
 
 export default remote;

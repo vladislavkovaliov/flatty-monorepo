@@ -151,11 +151,11 @@ func TestCachedRepository_List_DefensiveCopy(t *testing.T) {
 
 	first, err := repo.List(ctx, 20, 0, "user-1")
 	assert.NoError(t, err)
-	first = append(first, newTestLocation(99, "user-1", now))
+	first[0] = newTestLocation(99, "user-1", now)
 
 	second, err := repo.List(ctx, 20, 0, "user-1")
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(second), "mutating a returned slice must not corrupt the cached entry")
+	assert.NotEqual(t, first[0], second[0], "mutating a returned slice must not corrupt the cached entry")
 }
 
 func TestCachedRepository_List_DBErrorNotCached(t *testing.T) {

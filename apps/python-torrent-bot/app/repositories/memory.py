@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 
-from app.models.torrent import TorrentTask
+from app.models.torrent import TorrentStatus, TorrentTask
 
 
 class InMemoryRepository:
@@ -37,6 +37,20 @@ class InMemoryRepository:
 
     async def list_tasks(self, user_id: int) -> list[TorrentTask]:
         return [t for t in self._tasks.values() if t.user_id == user_id]
+
+    def _count(self, user_id: int, status: TorrentStatus) -> int:
+        return sum(
+            1 for t in self._tasks.values() if t.user_id == user_id and t.status is status
+        )
+
+    async def list_completed_count_tasks(self, user_id: int) -> int:
+        return self._count(user_id, TorrentStatus.COMPLETED)
+
+    async def list_downloading_count_tasks(self, user_id: int) -> int:
+        return self._count(user_id, TorrentStatus.DOWNLOADING)
+
+    async def list_queue_count_tasks(self, user_id: int) -> int:
+        return self._count(user_id, TorrentStatus.QUEUED)
 
     async def update_task(self, task: TorrentTask) -> None:
         # объекты хранятся по ссылке — мутации уже видны; совпадает с контрактом «персист»

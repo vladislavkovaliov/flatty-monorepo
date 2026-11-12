@@ -151,11 +151,11 @@ func TestCachedRepository_ListByEnv_DefensiveCopy(t *testing.T) {
 
 	first, err := repo.ListByEnv(ctx, "prod")
 	assert.NoError(t, err)
-	first = append(first, newTestApp(99, "Injected", "prod", now))
+	first[0] = newTestApp(99, "Injected", "prod", now)
 
 	second, err := repo.ListByEnv(ctx, "prod")
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(second), "mutating a returned slice must not corrupt the cached entry")
+	assert.NotEqual(t, first[0], second[0], "mutating a returned slice must not corrupt the cached entry")
 }
 
 func TestCachedRepository_ListByEnv_DBErrorNotCached(t *testing.T) {

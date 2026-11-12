@@ -224,11 +224,11 @@ func TestCachedRepository_List_DefensiveCopy(t *testing.T) {
 
 	first, err := repo.List(ctx, 10, "user-1", 20, 0)
 	assert.NoError(t, err)
-	first = append(first, newTestExpenseWithCategory(99, 10, 100, 1, "Injected", 6, 2024, now, "user-1"))
+	first[0] = newTestExpenseWithCategory(99, 10, 100, 1, "Injected", 6, 2024, now, "user-1")
 
 	second, err := repo.List(ctx, 10, "user-1", 20, 0)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(second), "mutating a returned slice must not corrupt the cached entry")
+	assert.NotEqual(t, first[0], second[0], "mutating a returned slice must not corrupt the cached entry")
 }
 
 func TestCachedRepository_List_DBErrorNotCached(t *testing.T) {

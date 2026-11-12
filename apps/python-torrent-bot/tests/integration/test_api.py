@@ -155,3 +155,14 @@ async def test_openapi_and_docs(client: TestClient) -> None:
     assert schema.status_code == 200
     assert "/api/tasks" in schema.json()["paths"]
     assert client.get("/docs").status_code == 200
+
+
+async def test_count_endpoints_split_by_status(client: TestClient) -> None:
+    client.post(
+        "/api/tasks",
+        json={"magnet": _MAGNET, "media_type": "movie", "quality": "1080p"},
+    )
+    assert client.get("/api/tasks/queued").json() == 1
+    assert client.get("/api/tasks/downloading").json() == 0
+    assert client.get("/api/tasks/completed").json() == 0
+

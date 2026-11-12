@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { formatSize } from '@/entities/task'
 import { useTaskList } from '../model/useTaskList'
 import { useDownloadingTasks } from '../model/useDownloadingTasks'
 import HeroCard from '@/shared/ui/hero-card/hero-card.vue'
 import TorrentsTable from '@/shared/ui/torrents-table/torrents-table.vue'
-import { Flex, Stack, Button, Text, Chip, Box } from '@mantine-vue/core'
+import { Text } from '@mantine-vue/core'
 
 defineEmits<{ open: [id: number] }>()
 
 const { data, isPending, isError, error } = useTaskList()
-const { data: downloadingCount, isPending: isDownloadingCountPending, isError: isDownloadingError } = useDownloadingTasks()
+const { data: downloadingCount, isPending: isDownloadingCountPending } = useDownloadingTasks()
 
 </script>
 

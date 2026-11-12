@@ -29,14 +29,14 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "go test ./...",
+        "command": "go test -race ./...",
         "cwd": "apps/go-api"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "staticcheck ./...",
+        "command": "PATH=\"$HOME/go/bin:$PATH\" staticcheck ./...",
         "cwd": "apps/go-api"
       }
     }

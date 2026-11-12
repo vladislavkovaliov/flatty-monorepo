@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -19,7 +20,9 @@ SYSTEM_PROMT = (
     "If there is no data, say so. Answer briefly and in Russian. "
     "If a list or table is requested, output only a Markdown table. "
     "For questions about spending amounts per month or year, call "
-    "get_monthly_totals; get_year_months returns no amounts."
+    "get_monthly_totals; get_year_months returns no amounts. "
+    "Conversation history is context only: never reuse or extrapolate "
+    "amounts from it, always call tools for the current question."
 )
 
 
@@ -63,6 +66,7 @@ async def run_agent(
         question: str,
         model: str,
         resident_location_id: int,
+        history: list[dict] | None = None
 ) -> AgentResult:
     tools_result = await mcp.list_tools()
 
@@ -74,10 +78,17 @@ async def run_agent(
 
     messages: list[dict] = [
         { "role": "system", "content": system_promt },
-        { "role": "user", "content": question },
     ]
 
+    messages.extend(history or [])
+    messages.append({
+        "role": "user",
+        "content": question,
+    })
+
     used: list[str] = []
+
+    retried = False
 
     for _ in range(MAX_STEP):
         response = await ollama.chat(
@@ -92,8 +103,24 @@ async def run_agent(
         calls = msg.tool_calls or []
 
         if not calls:
+            answer = msg.content or ""
+
+            # A model can copy numbers from history instead of calling a tool
+            if not used and not retried and re.search(r"\d", answer):
+                retried = True
+                messages.append({ "role": "assistant", "content": answer })
+                messages.append({
+                    "role": "user",
+                    "content": (
+                        "You answered with numbers without calling any tool. "
+                        "Call get_monthly_totals for the asked period and "
+                        "answer only from its result."
+                    ),
+                })
+                continue
+
             return AgentResult(
-                answer=msg.content or "",
+                answer=answer,
                 used_tools=used,
             )
 

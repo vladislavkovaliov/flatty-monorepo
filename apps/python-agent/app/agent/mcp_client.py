@@ -1,6 +1,5 @@
-import sys
 import asyncio
-
+import sys
 from pathlib import Path
 
 from mcp import Client, StdioServerParameters
@@ -29,7 +28,7 @@ async def main() -> None:
         print(result.is_error)
         if result.content:
             for block in result.content:
-                print(block.text)
+                print(getattr(block, "text", block))
         else:
             print(result.structured_content)
 

@@ -1,6 +1,6 @@
 import asyncio
 import json
-import re
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -29,13 +29,15 @@ SYSTEM_PROMT = (
 @dataclass
 class AgentResult:
     answer: str
-    used_tools: list[str] = field(default=list)
+    used_tools: list[str] = field(default_factory=list)
 
 
 class McpClient(Protocol):
     async def list_tools(self) -> Any: ...
 
-    async def call_tool(self, name: str, arguments: dict | None = None) -> Any: ...
+    async def call_tool(
+        self, name: str, arguments: dict[str, Any] | None = None
+    ) -> Any: ...
 
 
 def tool_result_to_text(result: Any) -> str:
@@ -60,6 +62,126 @@ def tool_result_to_text(result: Any) -> str:
     return "\n".join(parts)
 
 
+async def run_agent_stream(
+    ollama: AsyncClient,
+    mcp: McpClient,
+    question: str,
+    model: str,
+    resident_location_id: int,
+    history: list[dict[str, Any]] | None = None,
+) -> AsyncGenerator[dict[str, Any], None]:
+    tools_result = await mcp.list_tools()
+    
+    tools = mcp_tools_to_ollama(tools_result.tools)
+
+    system_promt = (
+        SYSTEM_PROMT + f"\nThe object (resident_location_id): {resident_location_id}"
+    )
+
+    messages: list[dict[str, Any]] = [
+        { "role": "system", "content": system_promt },
+    ]
+
+    messages.extend(history or [])
+    messages.append({
+        "role": "user",
+        "content": question,
+    })
+
+    used: list[str] = []
+
+    for _ in range(MAX_STEP):
+        tool_calls: list[Any] = []
+        text = ""
+
+        stream = await ollama.chat(
+            model=model,
+            messages=messages,
+            tools=tools,
+            options={ "temperature": 0.0 },
+            stream=True,
+        )
+
+        async for chunk in stream:
+            msg = chunk.message
+
+            if msg.tool_calls:
+                tool_calls.extend(msg.tool_calls)
+
+                continue
+
+            if msg.content:
+                text = text + msg.content
+
+                if not tool_calls:
+                    yield {
+                        "event": "token",
+                        "data": {
+                            "text": msg.content
+                        }
+                    }
+
+        if not tool_calls:
+            yield {
+                "event": "done",
+                "data": {
+                    "answer": text,
+                    "used_tools": used,
+                }
+            }
+
+            return
+
+        messages.append(
+            {
+                "role": "assistant",
+                "content": text,
+                "tool_calls": tool_calls,
+            }
+        )
+
+        for call in tool_calls:
+            name = call.function.name
+
+            used.append(name)
+
+            yield {
+                "event": "tool_start",
+                "data": {
+                    "name": name,
+                },
+            }
+
+            try:
+                arguments = dict(call.function.arguments or {})
+
+                content = tool_result_to_text(
+                    await mcp.call_tool(
+                        name,
+                        arguments=arguments,
+                    )
+                )
+            except Exception as exc:
+                content = f"Error calling tool {name}: {exc}"
+
+            messages.append({
+                "role": "tool",
+                "tool_name": name,
+                "content": content, 
+            })
+
+        yield {
+            "event": "done",
+            "data": {
+                "answer": "Not ready to get answer for MAX_STEP",
+                "used_tools": used,
+            }
+        }
+
+
+
+
+
 async def run_agent(
         ollama: AsyncClient,
         mcp: McpClient,
@@ -76,7 +198,7 @@ async def run_agent(
         SYSTEM_PROMT + f"\nThe object (resident_location_id): {resident_location_id}"
     )
 
-    messages: list[dict] = [
+    messages: list[dict[str, Any]] = [
         { "role": "system", "content": system_promt },
     ]
 

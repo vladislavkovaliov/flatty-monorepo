@@ -6,6 +6,7 @@ import { ThemeProvider } from './app/providers/theme-provider';
 import { ResidentPage } from './pages/resident';
 
 export function App() {
+  console.log(42)
   return (
     <QueryProvider>
       <ThemeProvider>

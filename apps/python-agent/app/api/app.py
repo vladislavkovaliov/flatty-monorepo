@@ -20,11 +20,6 @@ class HistoryMessage(BaseModel):
     content: str
 
 
-class HistoryMessage(BaseModel):
-    role: Literal["user", "assistant"]
-    content: str
-
-
 class ChatRequest(BaseModel):
     message: str
     resident_location_id: int = 1

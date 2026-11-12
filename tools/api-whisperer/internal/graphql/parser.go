@@ -162,10 +162,10 @@ type introFullType struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Fields      []struct {
-		Name        string   `json:"name"`
-		Description string   `json:"description"`
+		Name        string    `json:"name"`
+		Description string    `json:"description"`
 		Args        []argJSON `json:"args"`
-		Type        typeJSON `json:"type"`
+		Type        typeJSON  `json:"type"`
 	} `json:"fields"`
 	EnumValues []struct {
 		Name string `json:"name"`
@@ -178,7 +178,7 @@ type introFullType struct {
 }
 
 type argJSON struct {
-	Name string  `json:"name"`
+	Name string   `json:"name"`
 	Type typeJSON `json:"type"`
 }
 

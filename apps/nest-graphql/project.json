@@ -19,20 +19,6 @@
         "command": "npm run dev",
         "cwd": "apps/nest-graphql"
       }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npm test",
-        "cwd": "apps/nest-graphql"
-      }
-    },
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "npm run lint",
-        "cwd": "apps/nest-graphql"
-      }
     }
   },
   "tags": ["scope:backend", "type:api"]

@@ -60,8 +60,8 @@ def create_router(
         return count
 
     @router.get("/queued", response_model=int)
-    async def list_downloading_tasks() -> int:
-        count = await _guard("list_downloading_tasks", service.list_queue_count_tasks(api_user_id))
+    async def list_queue_count_tasks() -> int:
+        count = await _guard("list_queue_count_tasks", service.list_queue_count_tasks(api_user_id))
         return count
 
     @router.get(

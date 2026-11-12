@@ -36,6 +36,71 @@ jobs:
       - name: Lint ${{ matrix.name }}
         run: npm run lint -w '${{ matrix.workspace }}'
 
+  affected:
+    name: Affected lint & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Resolve Nx base
+        if: github.event_name == 'pull_request'
+        run: echo "NX_BASE=${{ github.event.pull_request.base.sha }}" >> "$GITHUB_ENV"
+
+      - name: Lint & test affected projects
+        if: github.event_name == 'pull_request'
+        run: npx nx affected -t lint test --exclude=go-api,review,sql,python-agent,python-torrent-bot
+
+      - name: Lint & test all projects
+        if: github.event_name == 'push'
+        run: npx nx run-many -t lint test --all --exclude=go-api,review,sql,python-agent,python-torrent-bot
+
+  backend:
+    name: Backend lint, typecheck, test & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/go-api/go.mod
+          cache: true
+          cache-dependency-path: apps/go-api/go.sum
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            apps/python-agent/requirements.txt
+            apps/python-torrent-bot/requirements.txt
+
+      - run: npm ci
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+
+      - name: Create python virtualenvs
+        run: |
+          npx nx setup python-agent
+          npx nx setup python-torrent-bot
+
+      - name: Lint, typecheck, test & build
+        run: npx nx run-many -t lint typecheck test build --projects=go-api,nest-graphql,python-agent,python-torrent-bot
+
   test:
     name: Test SDK
     runs-on: ubuntu-latest

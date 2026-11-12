@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -188,7 +189,7 @@ async def run_agent(
         question: str,
         model: str,
         resident_location_id: int,
-        history: list[dict] | None = None
+        history: list[dict[str, Any]] | None = None
 ) -> AgentResult:
     tools_result = await mcp.list_tools()
 

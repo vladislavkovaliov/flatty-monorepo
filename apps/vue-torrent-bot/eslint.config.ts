@@ -18,6 +18,14 @@ export default defineConfigWithVueTs(
   globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
 
   ...pluginVue.configs['flat/essential'],
+
+  {
+    name: 'app/component-names',
+    rules: {
+      'vue/multi-word-component-names': ['error', { ignores: ['Providers', 'Placeholder'] }],
+    },
+  },
+
   vueTsConfigs.recommended,
 
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),

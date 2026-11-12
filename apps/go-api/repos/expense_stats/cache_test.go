@@ -166,11 +166,11 @@ func TestCachedMonthlyTotalRepository_List_DefensiveCopy(t *testing.T) {
 
 	first, err := repo.List(ctx, 10, "user-1", nil, nil)
 	assert.NoError(t, err)
-	first = append(first, newTestMonthlyTotal(10, 7, 2024, 1))
+	first[0] = newTestMonthlyTotal(10, 7, 2024, 1)
 
 	second, err := repo.List(ctx, 10, "user-1", nil, nil)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(second), "mutating a returned slice must not corrupt the cached entry")
+	assert.NotEqual(t, first[0], second[0], "mutating a returned slice must not corrupt the cached entry")
 }
 
 func TestCachedMonthlyTotalRepository_List_DBErrorNotCached(t *testing.T) {

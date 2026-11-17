@@ -51,13 +51,14 @@ jobs:
           cache: true
           cache-dependency-path: apps/go-api/go.sum
 
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "apps/python-*/uv.lock"
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: pip
-          cache-dependency-path: |
-            apps/python-agent/requirements.txt
-            apps/python-torrent-bot/requirements.txt
 
       - run: npm ci --prefer-offline --no-audit --no-fund
 

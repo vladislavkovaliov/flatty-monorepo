@@ -7,7 +7,7 @@
     "setup": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+        "command": "uv venv --clear && uv sync",
         "cwd": "apps/python-agent"
       }
     },
@@ -16,26 +16,31 @@
       "options": {
         "command": ".venv/bin/python -m app.mcp_server",
         "cwd": "apps/python-agent"
-      }
+      },
+      "dependsOn": ["setup"]
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
         "command": ".venv/bin/python -m app.main",
         "cwd": "apps/python-agent"
-      }
+      },
+      "dependsOn": ["setup"]
     },
     "test": {
       "executor": "nx:run-commands",
-      "options": { "command": ".venv/bin/pytest", "cwd": "apps/python-agent" }
+      "options": { "command": ".venv/bin/pytest", "cwd": "apps/python-agent" },
+      "dependsOn": ["setup"]
     },
     "lint": {
       "executor": "nx:run-commands",
-      "options": { "command": ".venv/bin/ruff check .", "cwd": "apps/python-agent" }
+      "options": { "command": ".venv/bin/ruff check .", "cwd": "apps/python-agent" },
+      "dependsOn": ["setup"]
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": ".venv/bin/mypy app", "cwd": "apps/python-agent" }
+      "options": { "command": ".venv/bin/mypy app", "cwd": "apps/python-agent" },
+      "dependsOn": ["setup"]
     }
   },
   "tags": ["scope:backend", "type:agent"]

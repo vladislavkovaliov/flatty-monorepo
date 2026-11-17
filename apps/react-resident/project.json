@@ -7,7 +7,7 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "webpack --mode production",
+        "command": "webpack --mode production --config ./webpack.apps.config.mjs",
         "cwd": "apps/react-resident"
       },
       "outputs": ["{projectRoot}/dist"]

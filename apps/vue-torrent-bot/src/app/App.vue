@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { IAppConfig } from '@flatty-budget/mfe-host'
+import type { IAppConfig } from '@flatty-budget/mfe-host/contracts'
 import { Box, Flex, Paper } from '@mantine-vue/core'
 import HelpPage from '@/pages/help/ui/HelpPage.vue'
 import SettingsPage from '@/pages/settings/ui/SettingsPage.vue'

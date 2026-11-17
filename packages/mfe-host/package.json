@@ -9,6 +9,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./contracts": {
+      "types": "./src/contracts/app-config.type.ts",
+      "default": "./src/contracts/app-config.type.ts"
     }
   },
   "scripts": {
@@ -24,7 +28,7 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.0.0",
     "jsdom": "^29.1.1",
-    "typescript": "^6.0.0",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   }
 }

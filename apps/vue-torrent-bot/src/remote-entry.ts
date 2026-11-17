@@ -4,7 +4,7 @@ import '@mantine-vue/core/styles.css';
 import Root from './app/App.vue';
 import Providers from './app/providers/Providers.vue';
 import { queryClient } from './app/providers/query';
-import type { IAppComponent, IAppConfig } from '@flatty-budget/mfe-host';
+import type { IAppComponent, IAppConfig } from '@flatty-budget/mfe-host/contracts';
 
 let app: App | null = null;
 

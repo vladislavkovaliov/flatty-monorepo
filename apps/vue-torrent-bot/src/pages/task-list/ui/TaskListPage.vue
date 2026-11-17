@@ -14,7 +14,7 @@ const { data: downloadingCount, isPending: isDownloadingCountPending } = useDown
 
 <template>
   <section v-show="!isDownloadingCountPending">
-    <HeroCard type="download" :text="downloadingCount">
+    <HeroCard type="download" :text="downloadingCount?.toString()">
       <template #header>
         <Text c="black">Active</Text>
       </template>

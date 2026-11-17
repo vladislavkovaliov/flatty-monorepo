@@ -4,7 +4,7 @@ import '@mantine-vue/core/styles.css'
 import App from './app/App.vue'
 import Providers from './app/providers/Providers.vue'
 import { queryClient } from './app/providers/query'
-import type { IAppConfig } from '@flatty-budget/mfe-host'
+import type { IAppConfig } from '@flatty-budget/mfe-host/contracts'
 
 // Standalone-режим (`npm run dev`); в MFE используется remote-entry.ts.
 const standaloneConfig: IAppConfig = {

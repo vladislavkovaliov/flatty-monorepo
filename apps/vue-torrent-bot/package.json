@@ -14,7 +14,7 @@
     "type-check": "vue-tsc --build",
     "lint": "run-s \"lint:*\"",
     "lint:oxlint": "oxlint . --fix",
-    "lint:eslint": "node --require ../../scripts/eslint-compat.cjs ./node_modules/.bin/eslint . --fix --cache",
+    "lint:eslint": "./node_modules/.bin/eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
@@ -45,7 +45,7 @@
     "oxlint": "~1.82.0",
     "prettier": "3.9.6",
     "storybook": "^10.6.2",
-    "typescript": "~6.0.0",
+    "typescript": "^5.9.3",
     "vite": "^8.2.2",
     "vite-plugin-css-injected-by-js": "^5.0.2",
     "vite-plugin-vue-devtools": "^8.2.1",

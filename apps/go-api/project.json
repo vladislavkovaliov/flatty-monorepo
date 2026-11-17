@@ -15,14 +15,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "$HOME/go/bin/air",
-        "cwd": "apps/go-api"
-      }
-    },
-    "hot": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "PATH=\"$HOME/go/bin:$PATH\" air",
+        "command": "go run github.com/air-verse/air",
         "cwd": "apps/go-api"
       }
     },
@@ -36,7 +29,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "PATH=\"$HOME/go/bin:$PATH\" staticcheck ./...",
+        "command": "go run honnef.co/go/tools/cmd/staticcheck ./...",
         "cwd": "apps/go-api"
       }
     }

@@ -96,9 +96,8 @@ pytest --cov=app --cov-report=term-missing
    ```
 3. Установите зависимости и запустите бота:
    ```bash
-   python3 -m venv .venv && source .venv/bin/activate
-   pip install -r requirements.txt
-   python -m app.main
+   nx setup python-torrent-bot
+   nx serve python-torrent-bot
    ```
 4. В терминале появится `bot started (TEST_MODE=True, db=postgresql://user:***@...)` —
    пароль в логе замаскирован, оставьте процесс запущенным.

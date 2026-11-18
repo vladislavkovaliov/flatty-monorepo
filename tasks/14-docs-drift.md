@@ -17,113 +17,62 @@
 диаграмму с `react-wrapper` (порт 5174, «full shell with nav»), которого нет в
 `apps/`. Мгновенный вывод — «автор не следит за собственным репо».
 
-Сейчас подтверждённый дрейф:
+---
 
-- `apps/` содержит: `go-api`, `nest-graphql`, `nginx-proxy`, `python-agent`,
-  `python-torrent-bot`, `react-entrypoint`, `react-launcher`, `react-resident`,
-  `react-settings`, `vue-torrent-bot` — **`react-wrapper` отсутствует**;
-- но `README.md` и `AGENTS.md` на него ссылаются;
-- `apps/react-entrypoint/src/applications/` **пуст** (dead-код удалён), но
-  `dinamic-app.md` всё ещё описывает его как актуальную проблему.
+## Уже сделано
 
-## Контекст проекта
+- **`README.md`** — `react-wrapper` вычищен из ASCII-диаграммы и из таблицы
+  «Project Structure»; диаграмма осталась цельной (рамки и стрелки `Script injection`
+  сходятся на `react-launcher` / `react-entrypoint`).
+- **`AGENTS.md`** — `react-wrapper` убран из «Shared Frontend Conventions»;
+  описание `dev:frontend` приведено к фактическому составу скрипта
+  (`launcher + settings + resident + entrypoint + vue-torrent-bot`);
+  shells в разделе «Micro-frontends» → `react-launcher`, `react-entrypoint`.
+- **`dinamic-app.md`** — добавлен статус-блок «что реализовано / что намеренно не
+  делалось»; §4 переписан в «`react-launcher` — no changes (by design)»; из Benefits,
+  описания хука и Verification убраны утверждения, что launcher ещё предстоит мигрировать.
+- **`apps/react-launcher/src/applications/*.ts` и ключ `localStorage`
+  `react-applications`** — сознательно оставлены: launcher это демо-шелл с одним MFE,
+  поход в `/api/applications` ему не нужен. Централизованный реестр
+  (`GET/POST/PUT/DELETE /api/applications`, миграции `006`/`008`, htmx `/admin/applications`,
+  `useApplications()` в `@flatty-budget/mfe-host`) использует только `react-entrypoint`.
 
-Точные места, которые надо поправить:
-
-**`README.md`:**
-- строка ~165 — ASCII-диаграмма «Shell Hosts»: колонка `react-wrapper` (порт 5174,
-  «Full shell with nav») — убрать блок;
-- строка ~220 — таблица «Project Structure»: строка
-  `| apps/react-wrapper | 5174 | Vite | Shell — full app with nav... |` — удалить.
-
-**`AGENTS.md`:**
-- строка 27 — «Shared Frontend Conventions»: «Apply to all React apps
-  (react-launcher, **react-wrapper**, react-entrypoint, react-settings,
-  react-resident)» — убрать `react-wrapper`;
-- строка 88 — таблица «Commands»: `npm run dev:frontend` = «Frontend only
-  (launcher + settings + **wrapper**)» — заменить на реальный состав
-  (launcher + settings + resident + entrypoint + vue-torrent-bot, см. `package.json`);
-- строка 96 — «Micro-frontends»: «Shells (react-launcher, **react-wrapper**) load
-  them...» — shells теперь `react-launcher` и `react-entrypoint`.
-
-**`dinamic-app.md` (корень репозитория):**
-- описывает `apps/react-entrypoint/src/applications/*.ts` как существующий dead-код
-  и тройное дублирование реестра приложений. Проблема уже частично решена (dead-код
-  удалён, реестр переведён на БД — миграция `006_add_applications.sql` существует).
-  Документ читается как «план, который ещё предстоит сделать», а не как «сделано».
+**Проверка:** `grep -rn "react-wrapper" README.md AGENTS.md` → пусто.
+Ссылки в `thoughts/shared/designs/`, `thoughts/shared/plans/` и старых
+`thoughts/ledgers/` — исторический архив, их не трогаем. В `tasks/11-git-hygiene.md`
+упоминание осталось как пример commit-message.
 
 ---
 
-## Шаг 1. Убрать react-wrapper из README
+## Добито по ходу (остаточный дрейф)
 
-**Диаграмма (строка ~165):** это ASCII-блок, поэтому «просто удалить строку» нельзя —
-надо убрать всю колонку и выровнять оставшиеся рамки. Аккуратно перерисуй блок
-«Shell Hosts», оставив только `react-launcher` (порт 9000) и, при необходимости,
-уточнив, что вторым shell-хостом является `react-entrypoint` (он описан ниже в
-диаграмме отдельным блоком). Не оставляй «оборванных» рамок — проверь, что стрелки
-`Script injection` по-прежнему соединяют корректные блоки.
+Дрейф был не про `react-wrapper`, а про состав/порты приложений. Проверено по
+`ls apps/` и конфигам dev-серверов:
 
-**Таблица (строка ~220):** удали строку `react-wrapper` целиком. Порядок строк не
-ломай — просто вынь одну.
+- `README.md` — таблица «Project Structure»: `react-resident` `8082` → **8083**
+  (в диаграмме было 8083, `webpack.apps.config.mjs` слушает 8083; `8082` — host-порт
+  из `docker-compose.yml`, `["8082:80"]`).
+- `AGENTS.md` — таблица Projects: добавлены `vue-torrent-bot` (Vite IIFE, 8084) и
+  `python-agent` (Python + MCP, без порта, ссылка на `README.md` — `AGENTS.md` у него нет);
+  `react-resident` → 8083; `react-entrypoint` — Stack `Nestjs` → **Next.js**.
+- `AGENTS.md` — раздел Micro-frontends: добавлен Vue-remote `vue-torrent-bot`
+  (IIFE, `window["ext-apps"]`, `IAppComponent` из `@flatty-budget/mfe-host`).
 
-После правки сверься с реальным списком `apps/` (выше) — в README не должно
-остаться ни одного упоминания приложения, которого нет в `apps/`.
-
-## Шаг 2. Убрать react-wrapper из AGENTS.md
-
-Три места (см. «Контекст»):
-
-- строка 27 — убрать `react-wrapper` из перечисления React-приложений;
-- строка 88 — исправить описание `dev:frontend`. Сверься с фактическим скриптом в
-  `package.json` (он уже корректен: `react-launcher,react-settings,react-resident,
-  react-entrypoint,vue-torrent-bot`) и приведи описание к этому составу;
-- строка 96 — заменить shells на `react-launcher` и `react-entrypoint`.
-
-## Шаг 3. Разобраться с dinamic-app.md
-
-Это документ-решение (ADR-стиль), описывающий переход реестра приложений на БД. Он
-**исторически ценный**, но статус устарел: часть плана уже выполнена.
-
-Варианты (выбери один):
-
-- **(A) Пометить как выполненный/устаревший** — добавить в шапку документа пометку
-  «статус: реализовано (dead-код удалён, реестр на БД, миграция 006)» со ссылкой на
-  текущее состояние. Сам текст оставить как историю решения.
-- **(B) Перенести в архив** — если `dinamic-app.md` больше не нужен для навигации,
-  убрать его из корня в, например, `thoughts/shared/designs/` к остальным историческим
-  документам (там уже лежат похожие design-документы от 2026-07).
-
-Минимально достаточно (A): актуализировать статус, чтобы читатель не решил, будто
-dead-код ещё существует. Текст про «три копии реестра» — оставь, но добавь, что
-`react-entrypoint/src/applications/` уже удалён.
-
-## Шаг 4. Проверить, что больше нигде не осталось мёртвых ссылок
-
-```bash
-grep -rn "react-wrapper" --include="*.md" . | grep -v node_modules | grep -v graphify-out
-```
-
-После правок этот grep должен возвращать пусто **в корневых доках** (README.md,
-AGENTS.md). Обрати внимание: ссылки в `thoughts/shared/designs/` и `plans/` — это
-исторические документы от июля 2026; их можно не трогать (это архив решений), но
-будь готов объяснить на собеседовании, что они исторические.
+---
 
 ## Критерии готовности
 
-- [ ] `grep -rn "react-wrapper" README.md AGENTS.md` — пусто.
-- [ ] ASCII-диаграмма в README целостная (нет оборванных рамок/стрелок).
-- [ ] Таблица проектов в README соответствует реальному `apps/`.
-- [ ] Описание `dev:frontend` в AGENTS.md совпадает со скриптом в `package.json`.
-- [ ] `dinamic-app.md` помечен как реализованный/перенесён в архив.
+- [x] `grep -rn "react-wrapper" README.md AGENTS.md` — пусто.
+- [x] ASCII-диаграмма в README целостная (нет оборванных рамок/стрелок).
+- [x] Таблица проектов в README соответствует реальному `apps/` по портам.
+- [x] Таблица Projects в `AGENTS.md` покрывает все десять каталогов `apps/`.
+- [x] `dinamic-app.md` помечен как реализованный.
 
 ## Подсказки и грабли
 
-- **ASCII-диаграммы ломаются легко.** После перерисовки открой README в рендере
-  (или `nx graph` / markdown-preview) и убедись, что рамки ровные. Кривая диаграмма —
-  это заметно сразу.
 - **Не «подчищай» исторические design-документы под ноль.** Они фиксируют, как было
   принято решение. Достаточно актуализировать статус, а не переписывать текст.
-- **Сверяйся с `apps/`, а не с памятью.** Единственный источник правды — реальный
-  список директорий. Перед финальным коммитом ещё раз `ls apps/`.
-- **Проверь оба AGENTS.md** (корневой и приложений), если ссылки дублируются где-то
-  ещё — заодно прогни тот же grep по всем `AGENTS.md`.
+- **Сверяйся с `apps/` и конфигами, а не с памятью.** Порты живут в
+  `webpack.apps.config.mjs` / `vite.config.ts`, а не в доках.
+- **ASCII-диаграммы ломаются легко.** После правок открой README в markdown-preview:
+  кривая рамка заметна сразу.

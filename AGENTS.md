@@ -8,12 +8,14 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 |-----|------|-------|------|----------|
 | react-launcher | Shell host (Vite) | React, Mantine v9 | 9000 | [→](apps/react-launcher/AGENTS.md) |
 | react-settings | Remote MF (Webpack) | React | 8081 | [→](apps/react-settings/AGENTS.md) |
-| react-resident | Remote MF (Webpack) | React, Mantine v8 | 8082 | [→](apps/react-resident/AGENTS.md) |
+| react-resident | Remote MF (Webpack) | React, Mantine v8 | 8083 | [→](apps/react-resident/AGENTS.md) |
+| vue-torrent-bot | Remote MF (Vite IIFE) | Vue | 8084 | [→](apps/vue-torrent-bot/AGENTS.md) |
 | go-api | REST API | Go + Gin | 8080 | [→](apps/go-api/AGENTS.md) |
 | nest-graphql | GraphQL API | NestJS | 3000 | [→](apps/nest-graphql/AGENTS.md) |
 | nginx-proxy | Reverse proxy | Nginx | 80 | [→](apps/nginx-proxy/AGENTS.md) |
-| react-entrypoint | Shell host (Vite) | Nestjs | 3000 (3001) | [→](apps/react-entrypoint/AGENTS.md) |
+| react-entrypoint | Shell host (Next.js) | Next.js | 3000 (3001) | [→](apps/react-entrypoint/AGENTS.md) |
 | python-torrent-bot | Telegram-бот торрент-загрузок | Python, aiogram, FastAPI | 8090 | [→](apps/python-torrent-bot/AGENTS.md) |
+| python-agent | MCP-сервер агрегатов расходов | Python, MCP, Ollama | — | [→](apps/python-agent/README.md) |
 
 ## Tools
 
@@ -24,7 +26,7 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 
 ## Shared Frontend Conventions
 
-Apply to all React apps (react-launcher, react-wrapper, react-entrypoint, react-settings, react-resident).
+Apply to all React apps (react-launcher, react-entrypoint, react-settings, react-resident).
 
 Use:
 - React
@@ -85,7 +87,7 @@ docs/tanstack.txt
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Run everything in parallel |
-| `npm run dev:frontend` | Frontend only (launcher + settings + wrapper) |
+| `npm run dev:frontend` | Frontend only (launcher + settings + resident + entrypoint + vue-torrent-bot) |
 | `npm run dev:backend` | Backend only (go-api + nest-graphql) |
 | `npm run build` | Build everything |
 | `npm run graph` | Visualize dependency graph |
@@ -93,8 +95,9 @@ docs/tanstack.txt
 ## Micro-frontends (custom script-injection)
 
 - Remotes (react-settings, react-resident) are built as UMD: `window.ext-apps.settings`, `window.ext-apps.resident`
-- Shells (react-launcher, react-wrapper) load them via `<script>` at runtime
-- Types: `IAppConfig`, `IAppComponent` — in `@flatty-budget/shared`
+- Vue remote (vue-torrent-bot) is built as IIFE: `window["ext-apps"]`, implements `IAppComponent` from `@flatty-budget/mfe-host`
+- Shells (react-launcher, react-entrypoint) load them via `<script>` at runtime
+- Types: `IAppConfig`, `IAppComponent` — in `@flatty-budget/mfe-host`
 
 ## Infrastructure
 

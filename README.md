@@ -161,13 +161,13 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        Shell Hosts                                  │
-│  ┌───────────────────┐          ┌──────────────────────────────┐    │
-│  │  react-launcher   │          │  react-wrapper               │    │
-│  │  (port 9000)      │          │  (port 5174)                 │    │
-│  │  Single MFE demo  │          │  Full shell with nav         │    │
-│  └───────┬───────────┘          └────────┬─────────────────────┘    │
-│          │   Script injection            │ Script injection         │
-│          ▼                               ▼                          │
+│  ┌───────────────────┐                                              │
+│  │  react-launcher   │                                              │
+│  │  (port 9000)      │                                              │
+│  │  Single MFE demo  │                                              │
+│  └───────┬───────────┘                                              │
+│          │   Script injection                                       │
+│          ▼                                                          │
 │  ┌──────────────────────────────────────────────────────────────┐   │
 │  │          Micro-Frontends (Webpack UMD + Vite IIFE)           │   │
 │  │  ┌───────────────────┐     ┌────────────────────────────┐    │   │
@@ -183,9 +183,9 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 │  │  react-entrypoint (Next.js, ports 3000 / 3001)                  ││
 │  │  Main shell — expenses, budgets, PDF upload & parsing           ││
 │  └──────────────────────────────────┬──────────────────────────────┘│
-│                                     │ rewrites: /api → go-api,       │
-│                                     │ /graphql → nest-graphql        │
-│                                     ▼                                │
+│                                     │ rewrites: /api → go-api,      │
+│                                     │ /graphql → nest-graphql       │
+│                                     ▼                               │
 ├─────────────────────────────────────────────────────────────────────┤
 │                          Backend APIs                               │
 │  ┌───────────────────┐          ┌────────────────────────────┐      │
@@ -217,9 +217,8 @@ Generates `packages/sdk/src/types/graphql.ts` from the NestJS GraphQL schema.
 | App | Port | Tool | Role |
 |-----|:----:|:----:|------|
 | `apps/react-launcher` | 9000 | Vite | Shell — loads a single remote MF via script injection |
-| `apps/react-wrapper` | 5174 | Vite | Shell — full app with nav, integrates remotes as pages |
 | `apps/react-settings` | 8081 | Webpack | Remote — user settings page |
-| `apps/react-resident` | 8082 | Webpack | Remote — resident management CRUD |
+| `apps/react-resident` | 8083 | Webpack | Remote — resident management CRUD |
 | `apps/vue-torrent-bot` | 8084 | Vite | Remote — Vue torrent-bot UI (IIFE) |
 | `apps/react-entrypoint` | 3000 (3001) | Next.js | Main shell — expenses, budgets, PDF upload & parsing |
 | `apps/go-api` | 8080 | Go + Gin | REST API (PostgreSQL, pgx) |

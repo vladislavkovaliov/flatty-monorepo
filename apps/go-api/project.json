@@ -32,6 +32,13 @@
         "command": "go run honnef.co/go/tools/cmd/staticcheck ./...",
         "cwd": "apps/go-api"
       }
+    },
+    "migrate-db": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go run ./cmd/migrate",
+        "cwd": "apps/go-api"
+      }
     }
   },
   "tags": ["scope:backend", "type:api"]

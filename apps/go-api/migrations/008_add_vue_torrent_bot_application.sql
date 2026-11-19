@@ -3,6 +3,7 @@
 -- registry so react-entrypoint proxies /external-vue-torrent-bot/* to it.
 -- Idempotent: safe to re-run.
 
+-- +goose Up
 -- Drop the pre-rename row that may have been registered manually (admin UI), so the
 -- registry keeps a single canonical entry. Without this, the host would keep proxying
 -- /external-vue-remote/* and the new /external-vue-torrent-bot/* would 404.
@@ -12,3 +13,6 @@ INSERT INTO applications (name, env, bundle_js, style_url, remote_origin, proxy_
 VALUES
     ('vue-torrent-bot', 'development', 'vue-torrent-bot', 'styles', 'http://localhost:8084', '/external-vue-torrent-bot', '/')
 ON CONFLICT (name, env) DO NOTHING;
+
+-- +goose Down
+DELETE FROM applications WHERE name = 'vue-torrent-bot';

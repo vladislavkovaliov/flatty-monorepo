@@ -43,29 +43,24 @@ services:
     volumes:
       - ./db.sql:/db.sql:ro
       - ./scripts/init-db.sh:/init-db.sh:ro
-      - ./apps/go-api/migrations:/migrations:ro
     command: sh /init-db.sh
     restart: "no"
 
-  # Runs after nest-graphql has created the better-auth schema (the "user" table).
-  init-db-auth:
-    image: postgres:16
+  # goose migrations. 006/007 need the better-auth "user" table, so this waits
+  # for nest-graphql's healthcheck, not just for the base schema.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/go-api/Dockerfile
     network_mode: host
+    command: ["/migrate"]
+    environment:
+      DATABASE_URL: postgres://postgres:password@localhost:55000/flatty?sslmode=disable
     depends_on:
-      postgres:
-        condition: service_healthy
+      init-db:
+        condition: service_completed_successfully
       nest-graphql:
         condition: service_healthy
-    environment:
-      POSTGRES_HOST: localhost
-      PGPORT: "55000"
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: ${POSTGRES_DB:-flatty}
-    volumes:
-      - ./scripts/init-db-auth.sh:/init-db-auth.sh:ro
-      - ./apps/go-api/migrations:/migrations:ro
-    command: sh /init-db-auth.sh
     restart: "no"
 
   redpanda:
@@ -107,9 +102,14 @@ services:
       AUTH_SERVICE_URL: http://localhost:3000
       OTEL_SDK_DISABLED: "true"
     depends_on:
-      - postgres
-      - redpanda
-      - rabbitmq
+      postgres:
+        condition: service_started
+      redpanda:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
     deploy:
       resources:

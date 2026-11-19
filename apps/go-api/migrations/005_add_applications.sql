@@ -1,8 +1,10 @@
--- 006_add_applications.sql
+-- 005_add_applications.sql
 -- Self-contained: ensures the shared updated_at trigger function exists, then
 -- creates the applications registry table + development seed rows.
 -- Idempotent: safe to re-run.
 
+-- +goose Up
+-- +goose StatementBegin
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -10,6 +12,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- +goose StatementEnd
 
 CREATE TABLE IF NOT EXISTS applications (
     id              BIGSERIAL PRIMARY KEY,
@@ -37,3 +40,7 @@ VALUES
     ('settings', 'development', 'settings', 'styles', 'http://localhost:8081', '/external-settings', '/'),
     ('resident', 'development', 'resident', 'styles', 'http://localhost:8082', '/external-resident', '/')
 ON CONFLICT (name, env) DO NOTHING;
+
+-- +goose Down
+-- update_updated_at_column() is left in place: db.sql and 007 depend on it.
+DROP TABLE IF EXISTS applications;

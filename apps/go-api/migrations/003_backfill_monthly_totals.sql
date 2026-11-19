@@ -3,6 +3,7 @@
 -- current stats table schema.
 -- Idempotent: safe to re-run.
 
+-- +goose Up
 ALTER TABLE expense_monthly_totals
   ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
@@ -20,3 +21,6 @@ ON CONFLICT (resident_location_id, month, year) DO UPDATE SET
     total_spent = EXCLUDED.total_spent,
     updated_at  = CURRENT_TIMESTAMP,
     created_at  = LEAST(expense_monthly_totals.created_at, EXCLUDED.created_at);
+
+-- +goose Down
+ALTER TABLE expense_monthly_totals DROP COLUMN IF EXISTS created_at;

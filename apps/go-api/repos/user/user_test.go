@@ -10,6 +10,7 @@ import (
 	userdomain "flatty-budget/go-api/domains/user"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -91,6 +92,8 @@ func (m *mockRows) Values() ([]any, error) { return nil, nil }
 func (m *mockRows) RawValues() [][]byte { return nil }
 
 func (m *mockRows) Conn() *pgx.Conn { return nil }
+
+func (m *mockRows) TypeMap() *pgtype.Map { return nil }
 
 // ---------------------------------------------------------------------------
 // Helpers

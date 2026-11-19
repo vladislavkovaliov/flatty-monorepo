@@ -2,51 +2,72 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"database/sql"
+	"flag"
 	"log"
-	"os"
 	"time"
 
 	"flatty-budget/go-api/internal/config"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pressly/goose/v3"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+
+	"flatty-budget/go-api/migrations"
 )
 
-// 005 must run before 002/003: it brings the stats tables to the current
-// (resident_location_id, month, year) key, which the backfills rely on.
-var migrations = []string{
-	"migrations/005_add_resident_location_to_expense_stats.sql",
-	"migrations/002_backfill_monthly_totals.sql",
-	"migrations/003_backfill_monthly_averages.sql",
-	"migrations/006_add_applications.sql",
-	"migrations/007_add_user_id_to_expenses.sql",
-	"migrations/004_add_user_settings.sql",
-	"migrations/008_add_vue_torrent_bot_application.sql",
-}
-
 func main() {
+	status := flag.Bool("status", false, "show migration status and exit")
+	down := flag.Bool("down", false, "roll back the most recent migration")
+
+	flag.Parse()
+
 	cfg := config.LoadConfig()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	pool, err := pgxpool.New(ctx, cfg.DatabaseUrl)
+	db, err := sql.Open("pgx", cfg.DatabaseUrl)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
-	defer pool.Close()
 
-	for _, path := range migrations {
-		migrationSQL, err := os.ReadFile(path)
-		if err != nil {
-			log.Fatalf("failed to read migration file %s: %v", path, err)
-		}
+	defer db.Close()
 
-		_, err = pool.Exec(ctx, string(migrationSQL))
-		if err != nil {
-			log.Fatalf("migration %s failed: %v", path, err)
-		}
+	pingCtx, cancelPing := context.WithTimeout(context.Background(), 10*time.Second)
 
-		fmt.Printf("Migration %s completed successfully\n", path)
+	err = db.PingContext(pingCtx)
+
+	cancelPing()
+
+	if err != nil {
+		log.Fatalf("failed to ping database: %v", err)
 	}
+
+	ctx := context.Background()
+
+	goose.SetBaseFS(migrations.FS)
+	if err := goose.SetDialect("postgres"); err != nil {
+		log.Fatalf("failed to set dialect: %v", err)
+	}
+
+	switch {
+	case *status && *down:
+		log.Fatal("-status and -down are mutually exclusive")
+	case *status:
+		if err := goose.StatusContext(ctx, db, "."); err != nil {
+			log.Fatalf("status failed: %v", err)
+		}
+	case *down:
+		if err := goose.DownContext(ctx, db, "."); err != nil {
+			log.Fatalf("down failed: %v", err)
+		}
+	default:
+		if err := goose.UpContext(ctx, db, "."); err != nil {
+			log.Fatalf("up failed: %v", err)
+		}
+	}
+
+	version, err := goose.GetDBVersion(db)
+	if err != nil {
+		log.Fatalf("failed to get db version: %v", err)
+	}
+	log.Printf("current migration version: %d", version)
 }

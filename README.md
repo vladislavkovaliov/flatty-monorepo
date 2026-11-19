@@ -14,7 +14,7 @@ Nx monorepo with micro-frontends (React) + backends (Go/NestJS).
 ## Quick Start
 
 ```bash
-# 1. Start infrastructure and initialize the database
+# 1. Start infrastructure and initialize the base schema
 #    (PostgreSQL, Redpanda, RabbitMQ, Jaeger)
 podman-compose -f docker-compose.yml --env-file .env.dev \
   up -d postgres init-db redpanda rabbitmq jaeger
@@ -22,9 +22,19 @@ podman-compose -f docker-compose.yml --env-file .env.dev \
 # 2. Install dependencies
 npm install
 
-# 3. Run everything on the host
+# 3. Apply DB migrations (goose)
+nx migrate-db go-api
+
+# 4. Run everything on the host
 npm run dev
 ```
+
+Migrations `006`/`007` reference the better-auth `"user"` table, which `nest-graphql`
+creates on its first boot. Either start it once (`nx serve nest-graphql`) and re-run
+`nx migrate-db go-api`, or let compose do the whole chain:
+`podman-compose -f docker-compose.yml --env-file .env.dev up -d migrate` (it waits for
+the `nest-graphql` healthcheck). Re-running is safe — goose tracks versions in
+`goose_db_version`.
 
 **Compose environments:**
 

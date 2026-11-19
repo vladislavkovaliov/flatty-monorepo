@@ -1,6 +1,7 @@
 -- Add user_id to expenses, backfill from the owning resident_location, enforce NOT NULL.
 -- Idempotent: safe to re-run.
 
+-- +goose Up
 -- Step 1: add column as nullable (existing rows have no user_id)
 ALTER TABLE expenses
   ADD COLUMN IF NOT EXISTS user_id TEXT REFERENCES "user"(id) ON DELETE CASCADE;
@@ -13,6 +14,7 @@ WHERE rl.id = e.resident_location_id
   AND e.user_id IS NULL;
 
 -- Step 3: fail loudly if any expense could not be backfilled
+-- +goose StatementBegin
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM expenses WHERE user_id IS NULL) THEN
@@ -20,9 +22,14 @@ BEGIN
             (SELECT COUNT(*) FROM expenses WHERE user_id IS NULL);
     END IF;
 END $$;
+-- +goose StatementEnd
 
 -- Step 4: enforce NOT NULL now that all rows have a value
 ALTER TABLE expenses ALTER COLUMN user_id SET NOT NULL;
 
 -- Step 5: index for ownership lookups
 CREATE INDEX IF NOT EXISTS expenses_user_id_idx ON expenses (user_id);
+
+-- +goose Down
+DROP INDEX IF EXISTS expenses_user_id_idx;
+ALTER TABLE expenses DROP COLUMN IF EXISTS user_id;

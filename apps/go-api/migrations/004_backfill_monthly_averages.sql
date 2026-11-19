@@ -3,6 +3,7 @@
 -- current stats table schema.
 -- Idempotent: safe to re-run.
 
+-- +goose Up
 ALTER TABLE expense_monthly_averages
   ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
@@ -22,3 +23,6 @@ ON CONFLICT (resident_location_id, month, year) DO UPDATE SET
     expense_count  = EXCLUDED.expense_count,
     updated_at     = CURRENT_TIMESTAMP,
     created_at     = LEAST(expense_monthly_averages.created_at, EXCLUDED.created_at);
+
+-- +goose Down
+ALTER TABLE expense_monthly_averages DROP COLUMN IF EXISTS created_at;

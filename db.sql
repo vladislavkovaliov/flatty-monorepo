@@ -549,7 +549,7 @@ FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
 -- populate expense stats from the seeded expenses
--- (equivalent to migrations/002 + migrations/003 + migrations/005)
+-- (equivalent to migrations/002 + migrations/003 + migrations/004)
 
 INSERT INTO expense_monthly_totals (resident_location_id, month, year, total_spent)
 SELECT

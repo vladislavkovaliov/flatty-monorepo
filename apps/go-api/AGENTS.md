@@ -15,6 +15,24 @@ REST API built with Go + Gin.
 | `nx test go-api` | Run all tests (`go test ./...`) |
 | `nx lint go-api` | Lint (`staticcheck ./...`) |
 | `nx hot go-api` | Hot reload (`air`) |
+| `nx migrate-db go-api` | Apply DB migrations (goose) |
+
+## Database
+
+Schema has exactly one owner: **goose**. `db.sql` is the base schema (tables + seed
+data), loaded once by the compose `init-db` service. Everything on top of it lives in
+`migrations/*.sql`, embedded into the binary via `//go:embed` (`migrations/embed.go`)
+and applied by `cmd/migrate`.
+
+```bash
+nx migrate-db go-api              # up to latest
+go run ./cmd/migrate -status      # list, with version
+go run ./cmd/migrate -down        # roll back one
+```
+
+Re-running is safe: goose records applied versions in `goose_db_version`. Migrations
+`006`/`007` reference the better-auth `"user"` table, so they need `nest-graphql`
+running (or the compose `migrate` service, which waits for its healthcheck).
 
 ## Testing
 

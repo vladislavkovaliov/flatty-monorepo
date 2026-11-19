@@ -2,7 +2,10 @@
 -- Previously both tables were keyed only by (month, year), aggregating expenses
 -- across every resident_location (and therefore every owning user) into one row.
 -- Idempotent: safe to re-run.
+-- Order is set by the filename number (goose applies strictly ascending), so this
+-- TRUNCATE runs before the backfills in 003/004.
 
+-- +goose Up
 ALTER TABLE expense_monthly_totals
   ADD COLUMN IF NOT EXISTS resident_location_id BIGINT REFERENCES resident_locations(id) ON DELETE CASCADE;
 
@@ -52,3 +55,7 @@ ALTER TABLE expense_monthly_totals
 
 ALTER TABLE expense_monthly_averages
   ADD PRIMARY KEY (resident_location_id, month, year);
+
+-- +goose Down
+-- Irreversible on purpose: the previous global rows were truncated and cannot be
+-- reconstructed per resident_location. Roll forward instead.

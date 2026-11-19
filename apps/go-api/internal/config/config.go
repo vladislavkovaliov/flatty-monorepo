@@ -21,7 +21,7 @@ func LoadConfig() *Config {
 
 	return &Config{
 		Port:          getEnv("PORT", "8080"),
-		DatabaseUrl:   getEnv("DATABASE_URL", "postgres://postgres:password@localhost:55000/flatty?sslmode=disable"),
+		DatabaseUrl:   getEnv("DATABASE_URL", "postgres://postgres:password@192.168.1.35:55000/flatty?sslmode=disable"),
 		KafkaBrockers: getEnv("KAFKA_BROKERS", "localhost:9092"),
 		KafkaTopic:    getEnv("KAFKA_TOPIC", "expense-events"),
 		KafkaGroupID:  getEnv("KAFKA_GROUP_ID", "go-api-stats"),

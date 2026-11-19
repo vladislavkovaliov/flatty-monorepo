@@ -25,3 +25,7 @@ thoughts
 tools/load-test/reports/
 .omo/
 graphify-out/
+
+# go-api built binaries (nx build / go build)
+apps/go-api/api
+apps/go-api/migrate

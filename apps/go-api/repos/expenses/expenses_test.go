@@ -12,6 +12,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -91,6 +92,8 @@ func (m *mockRows) Values() ([]any, error) { return nil, nil }
 func (m *mockRows) RawValues() [][]byte { return nil }
 
 func (m *mockRows) Conn() *pgx.Conn { return nil }
+
+func (m *mockRows) TypeMap() *pgtype.Map { return nil }
 
 // mockRow implements pgx.Row for testing.
 type mockRow struct {
